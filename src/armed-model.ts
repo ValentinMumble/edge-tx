@@ -41,14 +41,9 @@ function update(widget: Widget, options: Options) {
 
 const sizes = [0, BOLD, TINSIZE, SMLSIZE, MIDSIZE, DBLSIZE, XXLSIZE];
 
-function draw(
-  widget: Widget,
-  x: number,
-  y: number,
-  w: number,
-  h: number
-): void {
+function draw(widget: Widget, x: number, y: number, w: number, h: number): void {
   const modelInfo = model.getInfo();
+
   if (widget.filename != modelInfo.bitmap) {
     widget.filename = modelInfo.bitmap;
     widget.bitmap = Bitmap.open(`/IMAGES/${modelInfo.bitmap}`);
@@ -68,10 +63,7 @@ function draw(
   }
 
   const fontSize = sizes[widget.options.Size];
-  const fontColor =
-    widget.options.UseThemeColor == 0
-      ? widget.options.Color
-      : COLOR_THEME_SECONDARY1;
+  const fontColor = widget.options.UseThemeColor == 0 ? widget.options.Color : COLOR_THEME_SECONDARY1;
 
   if (widget.options.FillBackground != 0) {
     lcd.drawFilledRectangle(0, 0, w, h, widget.options.BgColor);
@@ -84,9 +76,8 @@ function draw(
     }
 
     lcd.drawText(x + 5, y + 5, modelInfo.name!, fontSize | fontColor);
-  }
-  // smaller space to draw
-  else {
+  } else {
+    // smaller space to draw
     if (widget.bitmap != null) {
       lcd.drawBitmap(widget.bitmap, 0, 0);
     } else {
@@ -115,4 +106,4 @@ function translate(text: String, lang: String): String {
   return v == null ? v : text;
 }
 
-export { refresh, name, create, update, options, translate };
+export {refresh, name, create, update, options, translate};
