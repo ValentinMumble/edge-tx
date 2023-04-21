@@ -92,6 +92,7 @@ function refresh(widget: Widget, event: any, touch: any) {
   } else {
     draw(widget, widget.zone.x, widget.zone.y, widget.zone.w, widget.zone.h);
   }
+  drawQuadcopter(0, 0);
 }
 
 function translate(text: String, lang: String): String {
@@ -105,5 +106,72 @@ function translate(text: String, lang: String): String {
   const v = tr.get(text);
   return v == null ? v : text;
 }
+
+////
+
+let animTick = 0;
+let armed = false;
+
+function drawPropellor(_x: number, _y: number, invert: boolean): void {
+  let inc = animTick;
+  if (invert == true) {
+    inc = (inc - 3) * -1;
+    inc = inc + 3;
+    if (inc > 3) {
+      inc = inc - 4;
+    }
+  }
+
+  lcd.drawRectangle(_x + 4, _y + 4, 3, 3, SOLID);
+
+  // Animated Quadcopter propellors
+  if ((!armed && !invert) || (armed && inc == 0)) {
+    lcd.drawLine(_x + 1, _y + 9, _x + 9, _y + 1, SOLID, FORCE);
+    lcd.drawLine(_x + 1, _y + 10, _x + 8, _y + 1, SOLID, FORCE);
+  } else if (armed && inc == 1) {
+    lcd.drawLine(_x, _y + 5, _x + 9, _y + 5, SOLID, FORCE);
+    lcd.drawLine(_x, _y + 4, _x + 9, _y + 6, SOLID, FORCE);
+  } else if ((!armed && invert) || (armed && inc == 2)) {
+    lcd.drawLine(_x + 1, _y + 1, _x + 9, _y + 9, SOLID, FORCE);
+    lcd.drawLine(_x + 1, _y + 2, _x + 10, _y + 9, SOLID, FORCE);
+  } else if (armed && inc == 3) {
+    lcd.drawLine(_x + 5, _y, _x + 5, _y + 10, SOLID, FORCE);
+    lcd.drawLine(_x + 6, _y, _x + 4, _y + 10, SOLID, FORCE);
+  }
+}
+
+function drawQuadcopter(_x: number, _y: number): void {
+  // Top left to bottom right
+  lcd.drawLine(_x + 5, _y + 5, _x + 23, _y + 23, SOLID, FORCE);
+  lcd.drawLine(_x + 5, _y + 6, _x + 22, _y + 23, SOLID, FORCE);
+  lcd.drawLine(_x + 6, _y + 5, _x + 23, _y + 22, SOLID, FORCE);
+
+  // Bottom left to top right
+  lcd.drawLine(_x + 5, _y + 23, _x + 23, _y + 5, SOLID, FORCE);
+  lcd.drawLine(_x + 5, _y + 22, _x + 22, _y + 5, SOLID, FORCE);
+  lcd.drawLine(_x + 6, _y + 23, _x + 23, _y + 6, SOLID, FORCE);
+
+  // Middle of Quad
+  lcd.drawFilledRectangle(_x + 12, _y + 7, 5, 15, SOLID);
+  lcd.drawFilledRectangle(_x + 11, _y + 11, 7, 7, SOLID);
+  lcd.drawPoint(_x + 13, _y + 10);
+  lcd.drawPoint(_x + 13, _y + 18);
+  lcd.drawPoint(_x + 15, _y + 10);
+  lcd.drawPoint(_x + 15, _y + 18);
+
+  if (armed) {
+    lcd.drawText(_x + 2, _y + 11, 'armed', SMLSIZE + BLINK);
+  }
+
+  // Top-left
+  drawPropellor(_x, _y, false);
+  // Bottom-Right
+  drawPropellor(_x + 18, _y + 18, false);
+  // Top-Right
+  drawPropellor(_x + 18, _y, true);
+  // Bottom-left
+  drawPropellor(_x, _y + 18, true);
+}
+////
 
 export {refresh, name, create, update, options, translate};
