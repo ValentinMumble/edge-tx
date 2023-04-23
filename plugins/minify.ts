@@ -1,6 +1,5 @@
 import ts from 'typescript';
 import * as tstl from 'typescript-to-lua';
-const luamin = require('luamin');
 
 const Settings = {
   RenameVariables: true,
@@ -16,7 +15,7 @@ const plugin: tstl.Plugin = {
     result: tstl.ProcessedFile[]
   ) {
     for (const file of result) {
-      file.code = luamin.minify(file.code);
+      // TODO copy to TX folder?
     }
   },
 };

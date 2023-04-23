@@ -1,18 +1,17 @@
 const name = 'Armed Model';
+const MIN_VALUE = -1024;
 
 const options: any[] = [
-  ['Color', COLOR, COLOR_THEME_SECONDARY1],
-  ['Size', 5, 0],
-  ['FillBackground', BOOL, 0],
-  ['BgColor', COLOR, COLOR_THEME_SECONDARY3],
+  ['ArmedSource', SOURCE, 1],
+  ['ArmedColor', COLOR, COLOR_THEME_SECONDARY3],
+  ['ThrottleCutSource', SOURCE, 1],
   ['UseThemeColor', BOOL, 1],
 ];
 
 interface Options {
-  Color: number;
-  Size: number;
-  FillBackground: number;
-  BgColor: number;
+  ArmedSource: number;
+  ThrottleCutSource: number;
+  ArmedColor: number;
   UseThemeColor: number;
 }
 
@@ -27,11 +26,12 @@ interface Widget {
 
 function create(zone: Zone, options: Options) {
   const widget: Widget = {
-    zone: zone,
-    options: options,
+    zone,
+    options,
   };
 
   update(widget, options);
+
   return widget;
 }
 
@@ -39,18 +39,18 @@ function update(widget: Widget, options: Options) {
   widget.options = options;
 }
 
-const sizes = [0, BOLD, TINSIZE, SMLSIZE, MIDSIZE, DBLSIZE, XXLSIZE];
-
 function draw(widget: Widget, x: number, y: number, w: number, h: number): void {
   const modelInfo = model.getInfo();
 
   if (widget.filename != modelInfo.bitmap) {
     widget.filename = modelInfo.bitmap;
     widget.bitmap = Bitmap.open(`/IMAGES/${modelInfo.bitmap}`);
+
     if (widget.bitmap != null) {
       const [width, height] = Bitmap.getSize(widget.bitmap);
       const nh = h >= 96 && w >= 120 ? h - 38 : h;
       const r = Bitmap.resize(widget.bitmap, w, nh);
+
       if (r != null) {
         widget.bitmap = r;
         widget.bitmapWidth = w;
@@ -62,11 +62,15 @@ function draw(widget: Widget, x: number, y: number, w: number, h: number): void 
     }
   }
 
-  const fontSize = sizes[widget.options.Size];
-  const fontColor = widget.options.UseThemeColor == 0 ? widget.options.Color : COLOR_THEME_SECONDARY1;
+  const isArmed = getValue(widget.options.ArmedSource) === MIN_VALUE;
+  const isThrottleActive = getValue(widget.options.ThrottleCutSource) === MIN_VALUE;
 
-  if (widget.options.FillBackground != 0) {
-    lcd.drawFilledRectangle(0, 0, w, h, widget.options.BgColor);
+  if (isArmed) {
+    lcd.drawFilledRectangle(0, 0, w, h, widget.options.ArmedColor);
+  }
+
+  if (isArmed && isThrottleActive) {
+    drawQuadcopter(5, 5);
   }
 
   // big space to draw
@@ -75,13 +79,13 @@ function draw(widget: Widget, x: number, y: number, w: number, h: number): void 
       lcd.drawBitmap(widget.bitmap, 0, 38);
     }
 
-    lcd.drawText(x + 5, y + 5, modelInfo.name!, fontSize | fontColor);
+    lcd.drawText(x + 5, y + 5, modelInfo.name!);
   } else {
     // smaller space to draw
     if (widget.bitmap != null) {
       lcd.drawBitmap(widget.bitmap, 0, 0);
     } else {
-      lcd.drawText(x + 5, y + 5, modelInfo.name!, fontSize | fontColor);
+      lcd.drawText(x + 5, y + 5, modelInfo.name!);
     }
   }
 }
@@ -92,18 +96,19 @@ function refresh(widget: Widget, event: any, touch: any) {
   } else {
     draw(widget, widget.zone.x, widget.zone.y, widget.zone.w, widget.zone.h);
   }
-  drawQuadcopter(0, 0);
 }
 
 function translate(text: String, lang: String): String {
   const tr = {
     // ModelBmp: "Models",
-    FillBackground: 'Fill Background',
-    BgColor: 'Bg Color',
+    ArmedColor: 'Armed Color',
+    ArmedSource: 'Armed Source',
+    ThrottleCutSource: 'Throttle Cut Source',
     UseThemeColor: 'Use Theme Color',
   } as unknown as LuaTable<String, String>;
 
   const v = tr.get(text);
+
   return v == null ? v : text;
 }
 

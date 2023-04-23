@@ -1,1 +1,281 @@
-local a={}local b,c,d,e,f;function b(g,h)g.options=h end;function c(i,j,k)local l=e;if k==true then l=(l-3)*-1;l=l+3;if l>3 then l=l-4 end end;lcd.drawRectangle(i+4,j+4,3,3,SOLID)if not f and not k or f and l==0 then lcd.drawLine(i+1,j+9,i+9,j+1,SOLID,FORCE)lcd.drawLine(i+1,j+10,i+8,j+1,SOLID,FORCE)elseif f and l==1 then lcd.drawLine(i,j+5,i+9,j+5,SOLID,FORCE)lcd.drawLine(i,j+4,i+9,j+6,SOLID,FORCE)elseif not f and k or f and l==2 then lcd.drawLine(i+1,j+1,i+9,j+9,SOLID,FORCE)lcd.drawLine(i+1,j+2,i+10,j+9,SOLID,FORCE)elseif f and l==3 then lcd.drawLine(i+5,j,i+5,j+10,SOLID,FORCE)lcd.drawLine(i+6,j,i+4,j+10,SOLID,FORCE)end end;function d(i,j)lcd.drawLine(i+5,j+5,i+23,j+23,SOLID,FORCE)lcd.drawLine(i+5,j+6,i+22,j+23,SOLID,FORCE)lcd.drawLine(i+6,j+5,i+23,j+22,SOLID,FORCE)lcd.drawLine(i+5,j+23,i+23,j+5,SOLID,FORCE)lcd.drawLine(i+5,j+22,i+22,j+5,SOLID,FORCE)lcd.drawLine(i+6,j+23,i+23,j+6,SOLID,FORCE)lcd.drawFilledRectangle(i+12,j+7,5,15,SOLID)lcd.drawFilledRectangle(i+11,j+11,7,7,SOLID)lcd.drawPoint(i+13,j+10)lcd.drawPoint(i+13,j+18)lcd.drawPoint(i+15,j+10)lcd.drawPoint(i+15,j+18)if f then lcd.drawText(i+2,j+11,"armed",SMLSIZE+BLINK)end;c(i,j,false)c(i+18,j+18,false)c(i+18,j,true)c(i,j+18,true)end;local m="Armed Model"local h={{"Color",COLOR,COLOR_THEME_SECONDARY1},{"Size",5,0},{"FillBackground",BOOL,0},{"BgColor",COLOR,COLOR_THEME_SECONDARY3},{"UseThemeColor",BOOL,1}}local function n(o,h)local g={zone=o,options=h}b(g,h)return g end;local p={0,BOLD,TINSIZE,SMLSIZE,MIDSIZE,DBLSIZE,XXLSIZE}local function q(g,r,s,t,u)local v=model.getInfo()if g.filename~=v.bitmap then g.filename=v.bitmap;g.bitmap=Bitmap.open("/IMAGES/"..tostring(v.bitmap))if g.bitmap~=nil then local w,x=Bitmap.getSize(g.bitmap)local y=u>=96 and t>=120 and u-38 or u;local z=Bitmap.resize(g.bitmap,t,y)if z~=nil then g.bitmap=z;g.bitmapWidth=t;g.bitmapHeight=y else g.bitmapWidth=w;g.bitmapHeight=x end end end;local A=p[g.options.Size+1]local B=g.options.UseThemeColor==0 and g.options.Color or COLOR_THEME_SECONDARY1;if g.options.FillBackground~=0 then lcd.drawFilledRectangle(0,0,t,u,g.options.BgColor)end;if u>=96 and t>=120 then if g.bitmap~=nil then lcd.drawBitmap(g.bitmap,0,38)end;lcd.drawText(r+5,s+5,v.name,bit32.bor(A,B))else if g.bitmap~=nil then lcd.drawBitmap(g.bitmap,0,0)else lcd.drawText(r+5,s+5,v.name,bit32.bor(A,B))end end end;local function C(g,D,E)if D~=nil then q(g,0,0,LCD_W,LCD_H)else q(g,g.zone.x,g.zone.y,g.zone.w,g.zone.h)end;d(0,0)end;local function F(G,H)local I={FillBackground="Fill Background",BgColor="Bg Color",UseThemeColor="Use Theme Color"}local J=I[G]local K;if J==nil then K=J else K=G end;return K end;e=0;f=false;a.refresh=C;a.name=m;a.create=n;a.update=b;a.options=h;a.translate=F;return a
+local ____exports = {}
+local update, drawPropellor, drawQuadcopter, animTick, armed
+function update(widget, options)
+    widget.options = options
+end
+function drawPropellor(_x, _y, invert)
+    local inc = animTick
+    if invert == true then
+        inc = (inc - 3) * -1
+        inc = inc + 3
+        if inc > 3 then
+            inc = inc - 4
+        end
+    end
+    lcd.drawRectangle(
+        _x + 4,
+        _y + 4,
+        3,
+        3,
+        SOLID
+    )
+    if not armed and not invert or armed and inc == 0 then
+        lcd.drawLine(
+            _x + 1,
+            _y + 9,
+            _x + 9,
+            _y + 1,
+            SOLID,
+            FORCE
+        )
+        lcd.drawLine(
+            _x + 1,
+            _y + 10,
+            _x + 8,
+            _y + 1,
+            SOLID,
+            FORCE
+        )
+    elseif armed and inc == 1 then
+        lcd.drawLine(
+            _x,
+            _y + 5,
+            _x + 9,
+            _y + 5,
+            SOLID,
+            FORCE
+        )
+        lcd.drawLine(
+            _x,
+            _y + 4,
+            _x + 9,
+            _y + 6,
+            SOLID,
+            FORCE
+        )
+    elseif not armed and invert or armed and inc == 2 then
+        lcd.drawLine(
+            _x + 1,
+            _y + 1,
+            _x + 9,
+            _y + 9,
+            SOLID,
+            FORCE
+        )
+        lcd.drawLine(
+            _x + 1,
+            _y + 2,
+            _x + 10,
+            _y + 9,
+            SOLID,
+            FORCE
+        )
+    elseif armed and inc == 3 then
+        lcd.drawLine(
+            _x + 5,
+            _y,
+            _x + 5,
+            _y + 10,
+            SOLID,
+            FORCE
+        )
+        lcd.drawLine(
+            _x + 6,
+            _y,
+            _x + 4,
+            _y + 10,
+            SOLID,
+            FORCE
+        )
+    end
+end
+function drawQuadcopter(_x, _y)
+    lcd.drawLine(
+        _x + 5,
+        _y + 5,
+        _x + 23,
+        _y + 23,
+        SOLID,
+        FORCE
+    )
+    lcd.drawLine(
+        _x + 5,
+        _y + 6,
+        _x + 22,
+        _y + 23,
+        SOLID,
+        FORCE
+    )
+    lcd.drawLine(
+        _x + 6,
+        _y + 5,
+        _x + 23,
+        _y + 22,
+        SOLID,
+        FORCE
+    )
+    lcd.drawLine(
+        _x + 5,
+        _y + 23,
+        _x + 23,
+        _y + 5,
+        SOLID,
+        FORCE
+    )
+    lcd.drawLine(
+        _x + 5,
+        _y + 22,
+        _x + 22,
+        _y + 5,
+        SOLID,
+        FORCE
+    )
+    lcd.drawLine(
+        _x + 6,
+        _y + 23,
+        _x + 23,
+        _y + 6,
+        SOLID,
+        FORCE
+    )
+    lcd.drawFilledRectangle(
+        _x + 12,
+        _y + 7,
+        5,
+        15,
+        SOLID
+    )
+    lcd.drawFilledRectangle(
+        _x + 11,
+        _y + 11,
+        7,
+        7,
+        SOLID
+    )
+    lcd.drawPoint(_x + 13, _y + 10)
+    lcd.drawPoint(_x + 13, _y + 18)
+    lcd.drawPoint(_x + 15, _y + 10)
+    lcd.drawPoint(_x + 15, _y + 18)
+    if armed then
+        lcd.drawText(_x + 2, _y + 11, "armed", SMLSIZE + BLINK)
+    end
+    drawPropellor(_x, _y, false)
+    drawPropellor(_x + 18, _y + 18, false)
+    drawPropellor(_x + 18, _y, true)
+    drawPropellor(_x, _y + 18, true)
+end
+local name = "Armed Model"
+local MIN_VALUE = -1024
+local options = {
+    {"Color", COLOR, COLOR_THEME_SECONDARY1},
+    {"Size", 5, 0},
+    {"ArmedSource", SOURCE, 1},
+    {"ArmedColor", COLOR, COLOR_THEME_SECONDARY3},
+    {"ThrottleCutSource", SOURCE, 1},
+    {"UseThemeColor", BOOL, 1}
+}
+local function create(zone, options)
+    local widget = {zone = zone, options = options}
+    update(widget, options)
+    return widget
+end
+local sizes = {
+    0,
+    BOLD,
+    TINSIZE,
+    SMLSIZE,
+    MIDSIZE,
+    DBLSIZE,
+    XXLSIZE
+}
+local function draw(widget, x, y, w, h)
+    local modelInfo = model.getInfo()
+    if widget.filename ~= modelInfo.bitmap then
+        widget.filename = modelInfo.bitmap
+        widget.bitmap = Bitmap.open("/IMAGES/" .. tostring(modelInfo.bitmap))
+        if widget.bitmap ~= nil then
+            local width, height = Bitmap.getSize(widget.bitmap)
+            local nh = h >= 96 and w >= 120 and h - 38 or h
+            local r = Bitmap.resize(widget.bitmap, w, nh)
+            if r ~= nil then
+                widget.bitmap = r
+                widget.bitmapWidth = w
+                widget.bitmapHeight = nh
+            else
+                widget.bitmapWidth = width
+                widget.bitmapHeight = height
+            end
+        end
+    end
+    local isArmed = getValue(widget.options.ArmedSource) == MIN_VALUE
+    local isThrottleActive = getValue(widget.options.ThrottleCutSource) == MIN_VALUE
+    if isArmed then
+        lcd.drawFilledRectangle(
+            0,
+            0,
+            w,
+            h,
+            widget.options.ArmedColor
+        )
+    end
+    if isArmed and isThrottleActive then
+        drawQuadcopter(5, 5)
+    end
+    if h >= 96 and w >= 120 then
+        if widget.bitmap ~= nil then
+            lcd.drawBitmap(widget.bitmap, 0, 38)
+        end
+        lcd.drawText(x + 5, y + 5, modelInfo.name)
+    else
+        if widget.bitmap ~= nil then
+            lcd.drawBitmap(widget.bitmap, 0, 0)
+        else
+            lcd.drawText(x + 5, y + 5, modelInfo.name)
+        end
+    end
+end
+local function refresh(widget, event, touch)
+    if event ~= nil then
+        draw(
+            widget,
+            0,
+            0,
+            LCD_W,
+            LCD_H
+        )
+    else
+        draw(
+            widget,
+            widget.zone.x,
+            widget.zone.y,
+            widget.zone.w,
+            widget.zone.h
+        )
+    end
+end
+local function translate(text, lang)
+    local tr = {
+        FillBackground = "Fill Background",
+        ArmedColor = "Armed Color",
+        ArmedSource = "Armed Source",
+        ThrottleCutSource = "Throttle Cut Source",
+        UseThemeColor = "Use Theme Color"
+    }
+    local v = tr[text]
+    local ____temp_0
+    if v == nil then
+        ____temp_0 = v
+    else
+        ____temp_0 = text
+    end
+    return ____temp_0
+end
+animTick = 0
+armed = false
+____exports.refresh = refresh
+____exports.name = name
+____exports.create = create
+____exports.update = update
+____exports.options = options
+____exports.translate = translate
+return ____exports
