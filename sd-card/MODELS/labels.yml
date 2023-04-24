@@ -4,157 +4,164 @@ Labels:
 Sort: 3
 Models:
   model1.yml:
-    hash: "2e1c0000385680a2"
+    hash: "2e1c0000385680aa"
     name: "Aero"
     mod0type: 6
-    mod0rf: 2
+    mod0rf: 14
     labels: ""
     bitmap: "Flug62.jpg"
     lastopen: 0
   model2.yml:
-    hash: "c9180000385681a2"
+    hash: "c9180000385681aa"
     name: "Eachine P-51D"
     mod0type: 6
-    mod0rf: 45
+    mod0rf: 47
     labels: ""
     bitmap: "P51D.png"
     lastopen: 0
   model3.yml:
-    hash: "93180000385681a2"
+    hash: "93180000385681aa"
     name: "Eachine T-28"
     mod0type: 6
-    mod0rf: 45
+    mod0rf: 47
     labels: ""
     bitmap: "t28.png"
     lastopen: 0
   model4.yml:
-    hash: "92180000385681a2"
+    hash: "92180000385681aa"
     name: "Eachine F4U"
     mod0type: 6
-    mod0rf: 45
+    mod0rf: 47
     labels: ""
     bitmap: "F4U.png"
     lastopen: 0
   model5.yml:
-    hash: "71150000385681a2"
+    hash: "71150000385681aa"
     name: "Eachine F22"
     mod0type: 6
-    mod0rf: 45
+    mod0rf: 47
     labels: ""
     bitmap: "F22.png"
     lastopen: 0
   model6.yml:
-    hash: "71150000385681a2"
+    hash: "71150000385681aa"
     name: "Eachine F16"
     mod0type: 6
-    mod0rf: 45
+    mod0rf: 47
     labels: ""
     bitmap: "F16.png"
     lastopen: 0
   model7.yml:
-    hash: "6f3f00006f564285"
+    hash: "794a000098564e5f"
     name: "M2 EVO"
-    mod0id: 4
     mod0type: 6
-    mod0rf: 19
+    mod0rf: 63
     labels: "Favorites"
     bitmap: "M2_EVO_o.png"
-    lastopen: 1678899749
+    lastopen: 1682337561
   model16.yml:
-    hash: "5b250000385682a2"
+    hash: "5b250000385682aa"
     name: "Eachine E180"
     mod0type: 6
-    mod0rf: 19
+    mod0rf: 20
     labels: ""
     bitmap: "E180.png"
     lastopen: 0
   model9.yml:
-    hash: "4f3700006d56c098"
+    hash: "4f3700006d56c0a0"
     name: "XK K123"
     mod0id: 2
     mod0type: 6
-    mod0rf: 19
+    mod0rf: 20
     labels: ""
     bitmap: "XK_K123.Png"
     lastopen: 0
   model11.yml:
-    hash: "6d3f00006d5699a0"
+    hash: "6d3f00006d5699a8"
     name: "AccuRC"
     mod0id: 4
     mod0type: 6
-    mod0rf: 19
+    mod0rf: 20
     labels: "Favorites"
     bitmap: "AccuRC.png"
     lastopen: 0
   model12.yml:
-    hash: "dd230000385681a2"
+    hash: "dd230000385681aa"
     name: "OMPHOBBY M2"
     mod0type: 6
-    mod0rf: 19
+    mod0rf: 20
     labels: ""
     bitmap: "OH-M2-1.jpg"
     lastopen: 0
   model13.yml:
-    hash: "231c0000385682a2"
+    hash: "231c0000385682aa"
     name: "QUAD"
     mod0type: 6
-    mod0rf: 2
+    mod0rf: 14
     labels: ""
     bitmap: "v250.png"
     lastopen: 0
   model17.yml:
-    hash: "990c000038563cab"
+    hash: "990c000038563cb3"
     name: "MODEL08"
     labels: ""
     bitmap: ""
     lastopen: 0
   model14.yml:
-    hash: "1c220000385682a2"
+    hash: "1c220000385682aa"
     name: "HELI"
     mod0type: 6
-    mod0rf: 19
+    mod0rf: 20
     labels: ""
     bitmap: "Hubi57.jpg"
     lastopen: 0
   model15.yml:
-    hash: "5b250000385682a2"
+    hash: "5b250000385682aa"
     name: "Eachine E160"
     mod0type: 6
-    mod0rf: 19
+    mod0rf: 20
     labels: ""
     bitmap: "E160.png"
     lastopen: 0
   model10.yml:
-    hash: "11190000385681a2"
+    hash: "11190000385681aa"
     name: "DELTA"
     mod0type: 6
-    mod0rf: 2
+    mod0rf: 14
     labels: ""
     bitmap: "Delta1.jpg"
     lastopen: 0
   model18.yml:
-    hash: "5e250000385682a2"
+    hash: "5e250000385682aa"
     name: "XK K123"
     mod0type: 6
-    mod0rf: 19
+    mod0rf: 20
     labels: ""
     bitmap: "E160.png"
     lastopen: 0
   model8.yml:
-    hash: "433d00006d56dc9e"
+    hash: "433d00006d56dca6"
     name: "M1"
     mod0id: 7
     mod0type: 6
-    mod0rf: 19
+    mod0rf: 20
     labels: "Favorites"
     bitmap: "M1_p.png"
-    lastopen: 1678893238
+    lastopen: 0
   model19.yml:
-    hash: "f22400006f567175"
+    hash: "f22400006f56717d"
     name: "Bf 109"
     mod0type: 6
-    mod0rf: 45
+    mod0rf: 47
     labels: ""
     bitmap: "Bf-109.png"
+    lastopen: 0
+  model20.yml:
+    hash: "5b4a00009456a9b3"
+    name: "M2"
+    mod0type: 6
+    mod0rf: 20
+    labels: "Favorites"
+    bitmap: "M2_p.png"
     lastopen: 0
 

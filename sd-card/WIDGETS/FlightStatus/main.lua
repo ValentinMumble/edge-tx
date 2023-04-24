@@ -6,7 +6,7 @@ end
 local name = "Flight Status"
 local MIN_VALUE = -1024
 local MAX_VALUE = 1024
-local options = {{"FlightModeSource", SOURCE, 1}, {"GyroSource", SOURCE, 1}, {"GyroColor", COLOR, COLOR_THEME_SECONDARY3}}
+local options = {{"FlightModeSource", SOURCE, 1}, {"GyroSource", SOURCE, 1}}
 local function create(zone, options)
     local widget = {zone = zone, options = options}
     update(widget, options)
@@ -20,7 +20,7 @@ local function draw(widget, x, y, w, h)
             0,
             w,
             h,
-            widget.options.GyroColor
+            COLOR_THEME_ACTIVE
         )
     end
     local flightModeValue = getValue(widget.options.FlightModeSource)
@@ -28,7 +28,8 @@ local function draw(widget, x, y, w, h)
     lcd.drawText(
         x,
         y,
-        "Idle up " .. tostring(flightMode)
+        "IU " .. tostring(flightMode),
+        bit32.bor(DBLSIZE, COLOR_THEME_EDIT)
     )
 end
 local function refresh(widget, event, touch)

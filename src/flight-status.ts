@@ -5,13 +5,11 @@ const MAX_VALUE = 1024;
 const options: any[] = [
   ['FlightModeSource', SOURCE, 1],
   ['GyroSource', SOURCE, 1],
-  ['GyroColor', COLOR, COLOR_THEME_SECONDARY3],
 ];
 
 interface Options {
   FlightModeSource: number;
   GyroSource: number;
-  GyroColor: number;
 }
 
 interface Widget {
@@ -42,13 +40,13 @@ function draw(widget: Widget, x: number, y: number, w: number, h: number): void 
   const isGyroOn = getValue(widget.options.GyroSource) === MAX_VALUE;
 
   if (isGyroOn) {
-    lcd.drawFilledRectangle(0, 0, w, h, widget.options.GyroColor);
+    lcd.drawFilledRectangle(0, 0, w, h, COLOR_THEME_ACTIVE);
   }
 
   const flightModeValue = getValue(widget.options.FlightModeSource);
   const flightMode = MIN_VALUE === flightModeValue ? 1 : 0 === flightModeValue ? 2 : 3;
 
-  lcd.drawText(x, y, `Idle up ${flightMode}`);
+  lcd.drawText(x, y, `IU ${flightMode}`, DBLSIZE | COLOR_THEME_EDIT);
 }
 
 function refresh(widget: Widget, event: any, touch: any) {

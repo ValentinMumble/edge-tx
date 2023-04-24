@@ -1,9 +1,6 @@
-semver: 2.8.0
+semver: 2.8.3
 header: 
    name: "M2 EVO"
-   modelId: 
-      0:
-         val: 4
    bitmap: "M2_EVO_o.png"
    labels: "Favorites"
 timers: 
@@ -395,7 +392,7 @@ mixData:
    speedDown: 0
    name: "Resq3"
 limitData: 
-   0:
+   1:
       min: 0
       max: 0
       ppmCenter: 0
@@ -404,7 +401,7 @@ limitData:
       revert: 1
       curve: 0
       name: ""
-   3:
+   2:
       min: 0
       max: 0
       ppmCenter: 0
@@ -413,7 +410,7 @@ limitData:
       revert: 1
       curve: 0
       name: ""
-   4:
+   5:
       min: 0
       max: 0
       ppmCenter: 0
@@ -426,8 +423,8 @@ expoData:
  -
    mode: 3
    scale: 0
+   trimSource: 0
    srcRaw: Ail
-   carryTrim: 0
    chn: 0
    swtch: "NONE"
    flightModes: 000000000
@@ -440,8 +437,8 @@ expoData:
  -
    mode: 3
    scale: 0
+   trimSource: 0
    srcRaw: Ele
-   carryTrim: 0
    chn: 1
    swtch: "NONE"
    flightModes: 000000000
@@ -454,8 +451,8 @@ expoData:
  -
    mode: 3
    scale: 0
+   trimSource: 0
    srcRaw: Thr
-   carryTrim: 0
    chn: 2
    swtch: "NONE"
    flightModes: 000000000
@@ -465,8 +462,8 @@ expoData:
  -
    mode: 3
    scale: 0
+   trimSource: 0
    srcRaw: Rud
-   carryTrim: 0
    chn: 3
    swtch: "NONE"
    flightModes: 000000000
@@ -479,8 +476,8 @@ expoData:
  -
    mode: 3
    scale: 0
+   trimSource: 0
    srcRaw: ls(6)
-   carryTrim: 0
    chn: 4
    swtch: "NONE"
    flightModes: 000000000
@@ -493,8 +490,8 @@ expoData:
  -
    mode: 3
    scale: 0
+   trimSource: 0
    srcRaw: Thr
-   carryTrim: 0
    chn: 5
    swtch: "NONE"
    flightModes: 000000000
@@ -748,10 +745,10 @@ jitterFilter: GLOBAL
 moduleData: 
    0:
       type: TYPE_MULTIMODULE
-      subType: 21,0
+      subType: 64,2
       channelsStart: 0
       channelsCount: 16
-      failsafeMode: NOPULSES
+      failsafeMode: NOT_SET
       mod: 
          multi: 
             disableTelemetry: 0
@@ -782,6 +779,139 @@ inputNames:
    5:
       val: "Coll"
 potsWarnEnabled: 0
+telemetrySensors: 
+   0:
+      id1: 
+         id: 61697
+      id2: 
+         instance: 248
+      label: "RSSI"
+      subId: 0
+      type: TYPE_CUSTOM
+      unit: 17
+      prec: 0
+      autoOffset: 0
+      filter: 0
+      logs: 1
+      persistent: 0
+      onlyPositive: 0
+      cfg: 
+         custom: 
+            ratio: 0
+            offset: 0
+   1:
+      id1: 
+         id: 65534
+      id2: 
+         instance: 248
+      label: "TRSS"
+      subId: 0
+      type: TYPE_CUSTOM
+      unit: 17
+      prec: 0
+      autoOffset: 0
+      filter: 0
+      logs: 1
+      persistent: 0
+      onlyPositive: 0
+      cfg: 
+         custom: 
+            ratio: 0
+            offset: 0
+   2:
+      id1: 
+         id: 65533
+      id2: 
+         instance: 248
+      label: "TQly"
+      subId: 0
+      type: TYPE_CUSTOM
+      unit: 0
+      prec: 0
+      autoOffset: 0
+      filter: 0
+      logs: 1
+      persistent: 0
+      onlyPositive: 0
+      cfg: 
+         custom: 
+            ratio: 0
+            offset: 0
+   3:
+      id1: 
+         id: 61700
+      id2: 
+         instance: 248
+      label: "RxBt"
+      subId: 0
+      type: TYPE_CUSTOM
+      unit: 1
+      prec: 1
+      autoOffset: 0
+      filter: 1
+      logs: 1
+      persistent: 0
+      onlyPositive: 0
+      cfg: 
+         custom: 
+            ratio: 132
+            offset: 0
+   4:
+      id1: 
+         id: 512
+      id2: 
+         instance: 226
+      label: "Curr"
+      subId: 0
+      type: TYPE_CUSTOM
+      unit: 2
+      prec: 1
+      autoOffset: 0
+      filter: 0
+      logs: 1
+      persistent: 0
+      onlyPositive: 1
+      cfg: 
+         custom: 
+            ratio: 0
+            offset: 0
+   5:
+      id1: 
+         id: 528
+      id2: 
+         instance: 226
+      label: "VFAS"
+      subId: 0
+      type: TYPE_CUSTOM
+      unit: 1
+      prec: 2
+      autoOffset: 0
+      filter: 0
+      logs: 1
+      persistent: 0
+      onlyPositive: 0
+      cfg: 
+         custom: 
+            ratio: 0
+            offset: 0
+   6:
+      id1: 
+         id: 0
+      id2: 
+         formula: FORMULA_CONSUMPTION
+      label: "mAh"
+      subId: 0
+      type: TYPE_CALCULATED
+      unit: 14
+      prec: 0
+      autoOffset: 0
+      filter: 0
+      logs: 0
+      persistent: 0
+      onlyPositive: 0
+      cfg: 
+         consumption: 
+            source: 5
 screenData: 
    0:
       LayoutId: "Layout2P1"
@@ -812,27 +942,41 @@ screenData:
                         value: 
                            color: 0x105C98
             1:
-               widgetName: "Timer"
-            2:
-               widgetName: "ModelBmp"
+               widgetName: "Armed Model"
                widgetData: 
                   options: 
                      0:
-                        type: Color
+                        type: Source
                         value: 
-                           color: 0x105C98
+                           source: SA
+                     1:
+                        type: Source
+                        value: 
+                           source: SF
+            2:
+               widgetName: "mahRe2"
+               widgetData: 
+                  options: 
+                     0:
+                        type: Source
+                        value: 
+                           source: tele(6)
+                     1:
+                        type: Source
+                        value: 
+                           source: tele(5)
                      2:
-                        type: Bool
+                        type: Source
                         value: 
-                           boolValue: 0
+                           source: tele(4)
                      3:
                         type: Color
                         value: 
-                           color: 0xE0ECF0
+                           color: 0x606060
                      4:
                         type: Bool
                         value: 
-                           boolValue: 1
+                           boolValue: 0
          options: 
             0:
                type: Bool
@@ -857,51 +1001,23 @@ screenData:
 topbarData: 
    zones: 
       0:
-         widgetName: "Model Name"
+         widgetName: "Timer2"
          widgetData: 
             options: 
                0:
-                  type: Unsigned
-                  value: 
-                     unsignedValue: 5
-               1:
                   type: Color
                   value: 
-                     color: 0xF8FCF8
+                     color: 0xF8F8F8
+               1:
+                  type: Signed
+                  value: 
+                     signedValue: 1
                2:
                   type: Bool
                   value: 
                      boolValue: 0
-               3:
-                  type: Signed
-                  value: 
-                     signedValue: 1
-               4:
-                  type: Signed
-                  value: 
-                     signedValue: 1
       1:
-         widgetName: "Text"
-         widgetData: 
-            options: 
-               0:
-                  type: String
-                  value: 
-                     stringValue: "VO"
-               1:
-                  type: Color
-                  value: 
-                     color: 0xF8FCF8
-               2:
-                  type: Unsigned
-                  value: 
-                     unsignedValue: 5
-               3:
-                  type: Bool
-                  value: 
-                     boolValue: 0
-      2:
-         widgetName: "Value"
+         widgetName: "Flight Statu"
          widgetData: 
             options: 
                0:
@@ -909,13 +1025,25 @@ topbarData:
                   value: 
                      source: SE
                1:
+                  type: Source
+                  value: 
+                     source: ch(4)
+      2:
+         widgetName: "Flight Statu"
+         widgetData: 
+            options: 
+               0:
+                  type: Source
+                  value: 
+                     source: SE
+               1:
+                  type: Source
+                  value: 
+                     source: ch(4)
+               2:
                   type: Color
                   value: 
-                     color: 0x000000
-               2:
-                  type: Bool
-                  value: 
-                     boolValue: 0
+                     color: 0x303030
       3:
          widgetName: "BattAnalog"
          widgetData: 
