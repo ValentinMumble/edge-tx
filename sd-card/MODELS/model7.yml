@@ -13,7 +13,7 @@ timers:
       minuteBeep: 1
       persistent: 0
       countdownStart: 0
-      showElapsed: 0
+      showElapsed: 1
       name: ""
 telemetryProtocol: 0
 thrTrim: 0
@@ -22,7 +22,7 @@ displayTrims: 0
 ignoreSensorIds: 0
 trimInc: 1
 disableThrottleWarning: 1
-displayChecklist: 0
+displayChecklist: 1
 extendedLimits: 1
 extendedTrims: 0
 throttleReversed: 0
