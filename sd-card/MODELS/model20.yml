@@ -1,6 +1,9 @@
 semver: 2.8.3
 header: 
    name: "M2"
+   modelId: 
+      0:
+         val: 1
    bitmap: "M2_p.png"
    labels: "Favorites"
 timers: 
@@ -748,7 +751,7 @@ moduleData:
       subType: 21,0
       channelsStart: 0
       channelsCount: 16
-      failsafeMode: NOT_SET
+      failsafeMode: HOLD
       mod: 
          multi: 
             disableTelemetry: 0

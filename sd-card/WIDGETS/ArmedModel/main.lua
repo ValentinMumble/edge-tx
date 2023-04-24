@@ -3,7 +3,7 @@ local update
 function update(widget, options)
     widget.options = options
 end
-local name = "Armed Model"
+local name = "ArmedModel"
 local MIN_VALUE = -1024
 local options = {{"ArmedSwitch", SOURCE, 1}, {"ThrottleCutSwitch", SOURCE, 1}}
 local function create(zone, options)

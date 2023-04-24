@@ -1,4 +1,4 @@
-const name = 'FlightStatus';
+const name = 'FMStatus';
 const MIN_VALUE = -1024;
 const MAX_VALUE = 1024;
 

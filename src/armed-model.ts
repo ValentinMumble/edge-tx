@@ -1,4 +1,4 @@
-const name = 'Armed Model';
+const name = 'ArmedModel';
 const MIN_VALUE = -1024;
 
 const options: any[] = [

@@ -3,7 +3,7 @@ local update
 function update(widget, options)
     widget.options = options
 end
-local name = "FlightStatus"
+local name = "FMStatus"
 local MIN_VALUE = -1024
 local MAX_VALUE = 1024
 local options = {{"FlightModeSource", SOURCE, 1}, {"GyroSource", SOURCE, 1}}

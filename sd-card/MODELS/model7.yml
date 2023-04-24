@@ -748,7 +748,7 @@ moduleData:
       subType: 64,2
       channelsStart: 0
       channelsCount: 16
-      failsafeMode: NOT_SET
+      failsafeMode: HOLD
       mod: 
          multi: 
             disableTelemetry: 0
@@ -942,7 +942,7 @@ screenData:
                         value: 
                            color: 0x105C98
             1:
-               widgetName: "Armed Model"
+               widgetName: "ArmedModel"
                widgetData: 
                   options: 
                      0:
@@ -1017,7 +1017,7 @@ topbarData:
                   value: 
                      boolValue: 0
       1:
-         widgetName: "Flight Statu"
+         widgetName: "FMStatus"
          widgetData: 
             options: 
                0:
@@ -1028,22 +1028,6 @@ topbarData:
                   type: Source
                   value: 
                      source: ch(4)
-      2:
-         widgetName: "Flight Statu"
-         widgetData: 
-            options: 
-               0:
-                  type: Source
-                  value: 
-                     source: SE
-               1:
-                  type: Source
-                  value: 
-                     source: ch(4)
-               2:
-                  type: Color
-                  value: 
-                     color: 0x303030
       3:
          widgetName: "BattAnalog"
          widgetData: 
