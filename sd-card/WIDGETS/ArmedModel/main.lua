@@ -1,7 +1,103 @@
 local ____exports = {}
-local update
+local update, drawRotor
 function update(widget, options)
     widget.options = options
+end
+function drawRotor(isActive, x, y, hubSize, propSize, propColor)
+    if hubSize == nil then
+        hubSize = 8
+    end
+    if propSize == nil then
+        propSize = 12
+    end
+    if propColor == nil then
+        propColor = LIGHTGREY
+    end
+    local animTick = math.fmod(
+        getTime() / 100,
+        2
+    )
+    local phase = math.fmod(
+        math.ceil(animTick * 8),
+        4
+    )
+    local rotorSize = propSize * 2 + hubSize
+    if not isActive or phase == 0 then
+        lcd.drawLine(
+            x,
+            y + rotorSize / 2,
+            x + rotorSize,
+            y - rotorSize / 2,
+            SOLID,
+            propColor
+        )
+        lcd.drawLine(
+            x,
+            y + 1 + rotorSize / 2,
+            x - 1 + rotorSize,
+            y - rotorSize / 2,
+            SOLID,
+            propColor
+        )
+    elseif phase == 1 then
+        lcd.drawLine(
+            x,
+            y,
+            x + rotorSize,
+            y,
+            SOLID,
+            propColor
+        )
+        lcd.drawLine(
+            x,
+            y - 1,
+            x + rotorSize,
+            y + 1,
+            SOLID,
+            propColor
+        )
+    elseif phase == 2 then
+        lcd.drawLine(
+            x,
+            y - rotorSize / 2,
+            x + rotorSize,
+            y + rotorSize / 2,
+            SOLID,
+            propColor
+        )
+        lcd.drawLine(
+            x,
+            y + 1 - rotorSize / 2,
+            x + 1 + rotorSize,
+            y + rotorSize / 2,
+            SOLID,
+            propColor
+        )
+    elseif phase == 3 then
+        lcd.drawLine(
+            x + rotorSize / 2,
+            y - rotorSize / 2,
+            x + rotorSize / 2,
+            y + rotorSize / 2,
+            SOLID,
+            propColor
+        )
+        lcd.drawLine(
+            x - 1 + rotorSize / 2,
+            y - rotorSize / 2,
+            x + 1 + rotorSize / 2,
+            y + rotorSize / 2,
+            SOLID,
+            propColor
+        )
+    end
+    lcd.drawFilledCircle(x + rotorSize / 2, y, hubSize / 2, SOLID)
+    lcd.drawFilledCircle(
+        x + rotorSize / 2,
+        y,
+        hubSize / 4,
+        bit32.bor(SOLID, GREY)
+    )
 end
 local name = "ArmedModel"
 local MIN_VALUE = -1024
@@ -31,6 +127,7 @@ local function draw(widget, x, y, w, h)
         end
     end
     local isArmed = getValue(widget.options.ArmedSwitch) == MIN_VALUE
+    local isThrottleActive = getValue(widget.options.ThrottleCutSwitch) == MIN_VALUE
     if isArmed then
         lcd.drawFilledRectangle(
             0,
@@ -40,6 +137,7 @@ local function draw(widget, x, y, w, h)
             COLOR_THEME_WARNING
         )
     end
+    drawRotor(isArmed and isThrottleActive, 5, 60)
     if h >= 96 and w >= 120 then
         if widget.bitmap ~= nil then
             lcd.drawBitmap(widget.bitmap, 0, 38)
@@ -57,8 +155,8 @@ local function draw(widget, x, y, w, h)
         )
     end
 end
-local function refresh(widget, event, touch)
-    if event ~= nil then
+local function refresh(widget, event)
+    if nil ~= event then
         draw(
             widget,
             0,

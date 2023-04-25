@@ -20,7 +20,7 @@ interface Widget {
   options: Options;
 }
 
-function create(zone: Zone, options: Options) {
+function create(zone: Zone, options: Options): Widget {
   const widget: Widget = {
     zone,
     options,
@@ -31,7 +31,7 @@ function create(zone: Zone, options: Options) {
   return widget;
 }
 
-function update(widget: Widget, options: Options) {
+function update(widget: Widget, options: Options): void {
   widget.options = options;
 }
 
@@ -59,11 +59,13 @@ function draw(widget: Widget, x: number, y: number, w: number, h: number): void 
   }
 
   const isArmed = getValue(widget.options.ArmedSwitch) === MIN_VALUE;
-  // const isThrottleActive = getValue(widget.options.ThrottleCutSwitch) === MIN_VALUE;
+  const isThrottleActive = getValue(widget.options.ThrottleCutSwitch) === MIN_VALUE;
 
   if (isArmed) {
     lcd.drawFilledRectangle(0, 0, w, h, COLOR_THEME_WARNING);
   }
+
+  drawRotor(isArmed && isThrottleActive, 5, 60);
 
   // big space to draw
   if (h >= 96 && w >= 120) {
@@ -82,8 +84,44 @@ function draw(widget: Widget, x: number, y: number, w: number, h: number): void 
   }
 }
 
-function refresh(widget: Widget, event: any, touch: any) {
-  if (event != null) {
+function drawRotor(
+  isActive: boolean,
+  x: number,
+  y: number,
+  hubSize: number = 8,
+  propSize: number = 12,
+  propColor: number = LIGHTGREY
+): void {
+  const animTick = math.fmod(getTime() / 100, 2);
+  const phase = math.fmod(math.ceil(animTick * 8), 4);
+  const rotorSize = propSize * 2 + hubSize;
+
+  // Blades
+  if (!isActive || phase === 0) {
+    // /
+    lcd.drawLine(x, y + rotorSize / 2, x + rotorSize, y - rotorSize / 2, SOLID, propColor);
+    lcd.drawLine(x, y + 1 + rotorSize / 2, x - 1 + rotorSize, y - rotorSize / 2, SOLID, propColor);
+  } else if (phase === 1) {
+    // -
+    lcd.drawLine(x, y, x + rotorSize, y, SOLID, propColor);
+    lcd.drawLine(x, y - 1, x + rotorSize, y + 1, SOLID, propColor);
+  } else if (phase === 2) {
+    // \
+    lcd.drawLine(x, y - rotorSize / 2, x + rotorSize, y + rotorSize / 2, SOLID, propColor);
+    lcd.drawLine(x, y + 1 - rotorSize / 2, x + 1 + rotorSize, y + rotorSize / 2, SOLID, propColor);
+  } else if (phase === 3) {
+    // |
+    lcd.drawLine(x + rotorSize / 2, y - rotorSize / 2, x + rotorSize / 2, y + rotorSize / 2, SOLID, propColor);
+    lcd.drawLine(x - 1 + rotorSize / 2, y - rotorSize / 2, x + 1 + rotorSize / 2, y + rotorSize / 2, SOLID, propColor);
+  }
+
+  // Hub
+  lcd.drawFilledCircle(x + rotorSize / 2, y, hubSize / 2, SOLID);
+  lcd.drawFilledCircle(x + rotorSize / 2, y, hubSize / 4, SOLID | GREY);
+}
+
+function refresh(widget: Widget, event: null | unknown): void {
+  if (null !== event) {
     draw(widget, 0, 0, LCD_W, LCD_H);
   } else {
     draw(widget, widget.zone.x, widget.zone.y, widget.zone.w, widget.zone.h);

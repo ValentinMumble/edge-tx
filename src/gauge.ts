@@ -30,28 +30,23 @@ function create(zone: Zone, options: Options) {
   };
 
   update(widget, options);
+
   return widget;
 }
 
 function divRoundClosest(n: number, d: number): number {
-  if (d == 0) return 0;
-  else
-    return n < 0 !== d < 0
-      ? Math.ceil((n - d / 2) / d)
-      : Math.floor((n + d / 2) / d);
+  if (d == 0) {
+    return 0;
+  } else {
+    return n < 0 !== d < 0 ? Math.ceil((n - d / 2) / d) : Math.floor((n + d / 2) / d);
+  }
 }
 
 function clamp(num: number, min: number, max: number): number {
   return Math.min(Math.max(num, min), max);
 }
 
-function draw(
-  widget: Widget,
-  x: number,
-  y: number,
-  width: number,
-  height: number
-) {
+function draw(widget: Widget, x: number, y: number, width: number, height: number) {
   const index = widget.options.Source;
   let min = widget.options.Min;
   let max = widget.options.Max;
@@ -76,12 +71,7 @@ function draw(
   // Gauge
   lcd.setColor(CUSTOM_COLOR, color);
   lcd.drawFilledRectangle(0, 16, width, 16, COLOR_THEME_PRIMARY2);
-  lcd.drawText(
-    0 + width / 2,
-    14,
-    `${percent}%`,
-    SMLSIZE | CUSTOM_COLOR | CENTER
-  );
+  lcd.drawText(0 + width / 2, 14, `${percent}%`, SMLSIZE | CUSTOM_COLOR | CENTER);
   lcd.invertRect(w, 16, width - w, 16, CUSTOM_COLOR);
 }
 
@@ -93,11 +83,4 @@ function refresh(widget: Widget, event: any, touch: any) {
   }
 }
 
-function translate(text: String, lang: String): String {
-  const tr = {} as unknown as LuaTable<String, String>;
-
-  const v = tr.get(text);
-  return v == null ? v : text;
-}
-
-export { refresh, name, create, update, options, translate };
+export {refresh, name, create, update, options};
