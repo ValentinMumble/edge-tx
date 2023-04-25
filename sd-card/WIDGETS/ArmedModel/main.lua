@@ -142,18 +142,12 @@ local function draw(widget, x, y, w, h)
         if widget.bitmap ~= nil then
             lcd.drawBitmap(widget.bitmap, 0, 38)
         end
-        lcd.drawText(x + 5, y + 5, modelInfo.name)
     else
         if widget.bitmap ~= nil then
             lcd.drawBitmap(widget.bitmap, 30, 0)
         end
-        lcd.drawText(
-            x + 5,
-            y + 5,
-            modelInfo.name,
-            bit32.bor(MIDSIZE, COLOR_THEME_EDIT)
-        )
     end
+    lcd.drawText(x + 5, y + 5, modelInfo.name, COLOR_THEME_EDIT)
 end
 local function refresh(widget, event)
     if nil ~= event then

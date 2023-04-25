@@ -72,16 +72,15 @@ function draw(widget: Widget, x: number, y: number, w: number, h: number): void 
     if (widget.bitmap != null) {
       lcd.drawBitmap(widget.bitmap, 0, 38);
     }
-
-    lcd.drawText(x + 5, y + 5, modelInfo.name!);
   } else {
     // smaller space to draw
     if (widget.bitmap != null) {
       lcd.drawBitmap(widget.bitmap, 30, 0);
     }
-
-    lcd.drawText(x + 5, y + 5, modelInfo.name!, MIDSIZE | COLOR_THEME_EDIT);
   }
+
+  // Model name
+  lcd.drawText(x + 5, y + 5, modelInfo.name!, COLOR_THEME_EDIT);
 }
 
 function drawRotor(
