@@ -13,7 +13,7 @@ timers:
       minuteBeep: 1
       persistent: 0
       countdownStart: 0
-      showElapsed: 1
+      showElapsed: 0
       name: ""
 telemetryProtocol: 0
 thrTrim: 0
@@ -520,9 +520,9 @@ curves:
       points: -3
       name: "FM3"
    4:
-      type: 0
+      type: 1
       smooth: 0
-      points: -3
+      points: 0
       name: "CP1"
    5:
       type: 1
@@ -584,44 +584,52 @@ points:
    8:
       val: -100
    9:
-      val: 100
-   10:
-      val: -95
+      val: -42
    11:
-      val: 95
+      val: 42
    12:
-      val: -90
-   13:
-      val: 90
-   16:
-      val: 85
-   17:
-      val: 85
-   18:
-      val: 60
-   19:
-      val: 60
-   20:
-      val: 50
-   21:
-      val: 50
-   22:
-      val: -100
-   23:
-      val: -8
-   26:
-      val: 8
-   27:
       val: 100
+   13:
+      val: -50
+   15:
+      val: 50
+   16:
+      val: -95
+   17:
+      val: 95
+   18:
+      val: -90
+   19:
+      val: 90
+   22:
+      val: 85
+   23:
+      val: 85
+   24:
+      val: 60
+   25:
+      val: 60
+   26:
+      val: 50
+   27:
+      val: 50
    28:
-      val: -1
+      val: -100
    29:
-      val: -1
-   30:
-      val: 1
-   31:
-      val: 1
+      val: -8
+   32:
+      val: 8
+   33:
+      val: 100
    34:
+      val: -1
+   35:
+      val: -1
+   36:
+      val: 1
+   37:
+      val: 1
+   40:
       val: 100
 logicalSw: 
    0:
@@ -953,30 +961,6 @@ screenData:
                         type: Source
                         value: 
                            source: SF
-            2:
-               widgetName: "mahRe2"
-               widgetData: 
-                  options: 
-                     0:
-                        type: Source
-                        value: 
-                           source: tele(6)
-                     1:
-                        type: Source
-                        value: 
-                           source: tele(5)
-                     2:
-                        type: Source
-                        value: 
-                           source: tele(4)
-                     3:
-                        type: Color
-                        value: 
-                           color: 0x606060
-                     4:
-                        type: Bool
-                        value: 
-                           boolValue: 0
          options: 
             0:
                type: Bool
