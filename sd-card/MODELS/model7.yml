@@ -706,7 +706,7 @@ logicalSw:
       duration: 0
 customFn: 
    0:
-      swtch: "L14"
+      swtch: "!TELEMETRY_STREAMING"
       func: RESET
       def: "Tmr1,1"
    1:
@@ -948,7 +948,7 @@ screenData:
                      4:
                         type: Color
                         value: 
-                           color: 0xF65000
+                           color: 0xF05000
             1:
                widgetName: "ArmedModel"
                widgetData: 

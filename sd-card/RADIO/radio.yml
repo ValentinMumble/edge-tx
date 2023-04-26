@@ -1,4 +1,4 @@
-checksum: 48704
+checksum: 25098
 manuallyEdited: 0
 semver: 2.8.3
 board: tx16s
@@ -89,7 +89,7 @@ speakerVolume: 1
 vBatMin: 70
 vBatMax: 84
 backlightBright: 0
-globalTimer: 298174
+globalTimer: 299252
 bluetoothBaudrate: 0
 bluetoothMode: OFF
 countryCode: 2
