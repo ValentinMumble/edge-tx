@@ -948,7 +948,7 @@ screenData:
                      4:
                         type: Color
                         value: 
-                           color: 0xF05000
+                           color: 0xF6712D
             1:
                widgetName: "ArmedModel"
                widgetData: 

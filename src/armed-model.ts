@@ -101,49 +101,45 @@ function drawBlades(x: number, y: number, rotorSize: number, propColor: number, 
   const centerX = x + rotorSize / 2;
   const centerY = y;
 
-  let [xx1, yy1] = rotatePoint(x1 + 2, y1 - 0, centerX, centerY, degrees);
-  let [xx2, yy2] = rotatePoint(x2 - 2, y2 + 0, centerX, centerY, degrees);
-  lcd.drawLine(xx1, yy1, xx2, yy2, SOLID, propColor);
+  const steps = 6;
+  for (let i = 0; i < steps; i++) {
+    const xOffset = i < steps / 2 ? steps / 2 - i : i - steps / 2;
 
-  [xx1, yy1] = rotatePoint(x1 + 1, y1 - 1, centerX, centerY, degrees);
-  [xx2, yy2] = rotatePoint(x2 - 1, y2 + 1, centerX, centerY, degrees);
-  lcd.drawLine(xx1, yy1, xx2, yy2, SOLID, propColor);
+    const [fromX, fromY] = rotatePoint(x1 + xOffset, y1 - i, centerX, centerY, degrees);
+    const [toX, toY] = rotatePoint(x2 - xOffset, y2 + i, centerX, centerY, degrees);
+    lcd.drawLine(fromX, fromY, toX, toY, SOLID, propColor);
+  }
 
-  [xx1, yy1] = rotatePoint(x1 + 0, y1 - 2, centerX, centerY, degrees);
-  [xx2, yy2] = rotatePoint(x2 - 0, y2 + 2, centerX, centerY, degrees);
-  lcd.drawLine(xx1, yy1, xx2, yy2, SOLID, propColor);
+  // Blade tips
+  const degreesOffset = 6 + degrees;
+  const tipColor = lcd.RGB(0xfebe00);
 
-  [xx1, yy1] = rotatePoint(x1 + 0, y1 - 3, centerX, centerY, degrees);
-  [xx2, yy2] = rotatePoint(x2 - 0, y2 + 3, centerX, centerY, degrees);
-  lcd.drawLine(xx1, yy1, xx2, yy2, SOLID, propColor);
+  let [fromX, fromY] = rotatePoint(x + 2, y - 2, centerX, centerY, degrees);
+  lcd.drawPie(fromX, fromY, 3, -180 + degreesOffset, 0 + degreesOffset, tipColor);
 
-  [xx1, yy1] = rotatePoint(x1 + 1, y1 - 4, centerX, centerY, degrees);
-  [xx2, yy2] = rotatePoint(x2 - 1, y2 + 4, centerX, centerY, degrees);
-  lcd.drawLine(xx1, yy1, xx2, yy2, SOLID, propColor);
-
-  [xx1, yy1] = rotatePoint(x1 + 2, y1 - 5, centerX, centerY, degrees);
-  [xx2, yy2] = rotatePoint(x2 - 2, y2 + 5, centerX, centerY, degrees);
-  lcd.drawLine(xx1, yy1, xx2, yy2, SOLID, propColor);
+  [fromX, fromY] = rotatePoint(x + rotorSize - 2, y + 2, centerX, centerY, degrees);
+  lcd.drawPie(fromX, fromY, 3, 0 + degreesOffset, 180 + degreesOffset, tipColor);
 }
 
 function drawRotor(
   isActive: boolean,
   x: number,
   y: number,
-  hubSize = 8,
+  hubSize = 9,
   propSize = 16,
   propColor = LIGHTGREY,
-  phaseCount = 10
+  phaseCount = 32,
+  tickDuration = 60
 ): void {
-  const animTick = math.fmod(getTime() / 100, 2);
+  const animTick = math.fmod(getTime() / tickDuration, 2);
   const phase = math.fmod(math.ceil(animTick * phaseCount * 2), phaseCount);
   const rotorSize = propSize * 2 + hubSize;
 
   drawBlades(x, y, rotorSize, propColor, isActive ? (180 / phaseCount) * phase : 0);
 
   // Hub
-  lcd.drawFilledCircle(x + rotorSize / 2, y, hubSize / 2, SOLID);
-  lcd.drawFilledCircle(x + rotorSize / 2, y, hubSize / 4, SOLID | GREY);
+  lcd.drawFilledCircle(x + rotorSize / 2, y, hubSize / 2, SOLID | GREY);
+  lcd.drawFilledCircle(x + rotorSize / 2, y, hubSize / 4, SOLID);
 }
 
 function refresh(widget: Widget, event: null | unknown): void {

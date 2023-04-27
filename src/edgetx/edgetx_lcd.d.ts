@@ -29,12 +29,13 @@ declare module lcd {
   function setColor(colorIndex: number, color: number): void;
   function getColor(): void;
   function RGB(r: number, g: number, b: number): number;
+  function RGB(rbgHexa: number): number;
   function drawCircle(x: number, y: number, radius: number, flags?: number): void;
   function drawFilledCircle(x: number, y: number, radius: number, flags?: number): void;
   function drawTriangle(): void;
   function drawFilledTriangle(): void;
   function drawArc(): void;
-  function drawPie(): void;
+  function drawPie(x: number, y: number, radius: number, arcStart: number, arcEnd: number, flags?: number): void;
   function drawAnnulus(): void;
   function drawLineWithClipping(): void;
   function drawHudRectangle(): void;

@@ -15,142 +15,72 @@ function drawBlades(x, y, rotorSize, propColor, degrees)
     local y2 = y
     local centerX = x + rotorSize / 2
     local centerY = y
-    local xx1, yy1 = table.unpack(rotatePoint(
-        x1 + 2,
-        y1 - 0,
+    local steps = 6
+    do
+        local i = 0
+        while i < steps do
+            local xOffset = i < steps / 2 and steps / 2 - i or i - steps / 2
+            local fromX, fromY = table.unpack(rotatePoint(
+                x1 + xOffset,
+                y1 - i,
+                centerX,
+                centerY,
+                degrees
+            ))
+            local toX, toY = table.unpack(rotatePoint(
+                x2 - xOffset,
+                y2 + i,
+                centerX,
+                centerY,
+                degrees
+            ))
+            lcd.drawLine(
+                fromX,
+                fromY,
+                toX,
+                toY,
+                SOLID,
+                propColor
+            )
+            i = i + 1
+        end
+    end
+    local degreesOffset = 6 + degrees
+    local tipColor = lcd.RGB(16694784)
+    local fromX, fromY = table.unpack(rotatePoint(
+        x + 2,
+        y - 2,
         centerX,
         centerY,
         degrees
     ))
-    local xx2, yy2 = table.unpack(rotatePoint(
-        x2 - 2,
-        y2 + 0,
-        centerX,
-        centerY,
-        degrees
-    ))
-    lcd.drawLine(
-        xx1,
-        yy1,
-        xx2,
-        yy2,
-        SOLID,
-        propColor
+    lcd.drawPie(
+        fromX,
+        fromY,
+        3,
+        -180 + degreesOffset,
+        0 + degreesOffset,
+        tipColor
     )
-    xx1, yy1 = table.unpack(rotatePoint(
-        x1 + 1,
-        y1 - 1,
+    fromX, fromY = table.unpack(rotatePoint(
+        x + rotorSize - 2,
+        y + 2,
         centerX,
         centerY,
         degrees
     ))
-    xx2, yy2 = table.unpack(rotatePoint(
-        x2 - 1,
-        y2 + 1,
-        centerX,
-        centerY,
-        degrees
-    ))
-    lcd.drawLine(
-        xx1,
-        yy1,
-        xx2,
-        yy2,
-        SOLID,
-        propColor
-    )
-    xx1, yy1 = table.unpack(rotatePoint(
-        x1 + 0,
-        y1 - 2,
-        centerX,
-        centerY,
-        degrees
-    ))
-    xx2, yy2 = table.unpack(rotatePoint(
-        x2 - 0,
-        y2 + 2,
-        centerX,
-        centerY,
-        degrees
-    ))
-    lcd.drawLine(
-        xx1,
-        yy1,
-        xx2,
-        yy2,
-        SOLID,
-        propColor
-    )
-    xx1, yy1 = table.unpack(rotatePoint(
-        x1 + 0,
-        y1 - 3,
-        centerX,
-        centerY,
-        degrees
-    ))
-    xx2, yy2 = table.unpack(rotatePoint(
-        x2 - 0,
-        y2 + 3,
-        centerX,
-        centerY,
-        degrees
-    ))
-    lcd.drawLine(
-        xx1,
-        yy1,
-        xx2,
-        yy2,
-        SOLID,
-        propColor
-    )
-    xx1, yy1 = table.unpack(rotatePoint(
-        x1 + 1,
-        y1 - 4,
-        centerX,
-        centerY,
-        degrees
-    ))
-    xx2, yy2 = table.unpack(rotatePoint(
-        x2 - 1,
-        y2 + 4,
-        centerX,
-        centerY,
-        degrees
-    ))
-    lcd.drawLine(
-        xx1,
-        yy1,
-        xx2,
-        yy2,
-        SOLID,
-        propColor
-    )
-    xx1, yy1 = table.unpack(rotatePoint(
-        x1 + 2,
-        y1 - 5,
-        centerX,
-        centerY,
-        degrees
-    ))
-    xx2, yy2 = table.unpack(rotatePoint(
-        x2 - 2,
-        y2 + 5,
-        centerX,
-        centerY,
-        degrees
-    ))
-    lcd.drawLine(
-        xx1,
-        yy1,
-        xx2,
-        yy2,
-        SOLID,
-        propColor
+    lcd.drawPie(
+        fromX,
+        fromY,
+        3,
+        0 + degreesOffset,
+        180 + degreesOffset,
+        tipColor
     )
 end
-function drawRotor(isActive, x, y, hubSize, propSize, propColor, phaseCount)
+function drawRotor(isActive, x, y, hubSize, propSize, propColor, phaseCount, tickDuration)
     if hubSize == nil then
-        hubSize = 8
+        hubSize = 9
     end
     if propSize == nil then
         propSize = 16
@@ -159,10 +89,13 @@ function drawRotor(isActive, x, y, hubSize, propSize, propColor, phaseCount)
         propColor = LIGHTGREY
     end
     if phaseCount == nil then
-        phaseCount = 10
+        phaseCount = 32
+    end
+    if tickDuration == nil then
+        tickDuration = 60
     end
     local animTick = math.fmod(
-        getTime() / 100,
+        getTime() / tickDuration,
         2
     )
     local phase = math.fmod(
@@ -177,13 +110,13 @@ function drawRotor(isActive, x, y, hubSize, propSize, propColor, phaseCount)
         propColor,
         isActive and 180 / phaseCount * phase or 0
     )
-    lcd.drawFilledCircle(x + rotorSize / 2, y, hubSize / 2, SOLID)
     lcd.drawFilledCircle(
         x + rotorSize / 2,
         y,
-        hubSize / 4,
+        hubSize / 2,
         bit32.bor(SOLID, GREY)
     )
+    lcd.drawFilledCircle(x + rotorSize / 2, y, hubSize / 4, SOLID)
 end
 local name = "ArmedModel"
 local MIN_VALUE = -1024
