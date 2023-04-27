@@ -1,6 +1,9 @@
 semver: 2.8.3
 header: 
    name: "M2 EVO"
+   modelId: 
+      0:
+         val: 1
    bitmap: "M2_EVO_o.png"
    labels: "Favorites"
 timers: 
@@ -948,7 +951,7 @@ screenData:
                      4:
                         type: Color
                         value: 
-                           color: 0xF6712D
+                           color: 0xF07028
             1:
                widgetName: "ArmedModel"
                widgetData: 

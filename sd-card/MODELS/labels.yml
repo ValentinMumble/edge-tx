@@ -52,13 +52,14 @@ Models:
     bitmap: "F16.png"
     lastopen: 0
   model7.yml:
-    hash: "f845000099561693"
+    hash: "094600009b56489b"
     name: "M2 EVO"
+    mod0id: 1
     mod0type: 6
     mod0rf: 63
     labels: "Favorites"
     bitmap: "M2_EVO_o.png"
-    lastopen: 1682501179
+    lastopen: 1682623974
   model16.yml:
     hash: "5b250000385682aa"
     name: "Eachine E180"
@@ -147,7 +148,7 @@ Models:
     mod0rf: 20
     labels: "Favorites"
     bitmap: "M1_p.png"
-    lastopen: 0
+    lastopen: 1682623992
   model19.yml:
     hash: "f22400006f56717d"
     name: "Bf 109"
@@ -157,12 +158,12 @@ Models:
     bitmap: "Bf-109.png"
     lastopen: 0
   model20.yml:
-    hash: "814a00009856d78d"
+    hash: "784a00009b56479b"
     name: "M2"
     mod0id: 1
     mod0type: 6
     mod0rf: 20
-    labels: "Favorites"
+    labels: ""
     bitmap: "M2_p.png"
     lastopen: 0
 

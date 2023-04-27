@@ -1,4 +1,4 @@
-semver: 2.8.0
+semver: 2.8.3
 header: 
    name: "M1"
    modelId: 
@@ -8,7 +8,7 @@ header:
    labels: "Favorites"
 timers: 
    0:
-      start: 240
+      start: 220
       swtch: "!L10"
       value: 0
       mode: ON
@@ -426,8 +426,8 @@ expoData:
  -
    mode: 3
    scale: 0
+   trimSource: 0
    srcRaw: Ail
-   carryTrim: 0
    chn: 0
    swtch: "NONE"
    flightModes: 000000000
@@ -440,8 +440,8 @@ expoData:
  -
    mode: 3
    scale: 0
+   trimSource: 0
    srcRaw: Ele
-   carryTrim: 0
    chn: 1
    swtch: "NONE"
    flightModes: 000000000
@@ -454,8 +454,8 @@ expoData:
  -
    mode: 3
    scale: 0
+   trimSource: 0
    srcRaw: Thr
-   carryTrim: 0
    chn: 2
    swtch: "NONE"
    flightModes: 000000000
@@ -465,8 +465,8 @@ expoData:
  -
    mode: 3
    scale: 0
+   trimSource: 0
    srcRaw: Rud
-   carryTrim: 0
    chn: 3
    swtch: "NONE"
    flightModes: 000000000
@@ -479,8 +479,8 @@ expoData:
  -
    mode: 3
    scale: 0
+   trimSource: 0
    srcRaw: ls(6)
-   carryTrim: 0
    chn: 4
    swtch: "NONE"
    flightModes: 000000000
@@ -493,8 +493,8 @@ expoData:
  -
    mode: 3
    scale: 0
+   trimSource: 0
    srcRaw: Thr
-   carryTrim: 0
    chn: 5
    swtch: "NONE"
    flightModes: 000000000
@@ -812,27 +812,33 @@ screenData:
                         value: 
                            color: 0x105C98
             1:
-               widgetName: "Timer"
+               widgetName: "ArmedModel"
+               widgetData: 
+                  options: 
+                     0:
+                        type: Source
+                        value: 
+                           source: SA
+                     1:
+                        type: Source
+                        value: 
+                           source: SF
             2:
-               widgetName: "ModelBmp"
+               widgetName: "Timer2"
                widgetData: 
                   options: 
                      0:
                         type: Color
                         value: 
-                           color: 0x105C98
+                           color: 0xF8F8F8
+                     1:
+                        type: Signed
+                        value: 
+                           signedValue: 1
                      2:
                         type: Bool
                         value: 
                            boolValue: 0
-                     3:
-                        type: Color
-                        value: 
-                           color: 0xE0ECF0
-                     4:
-                        type: Bool
-                        value: 
-                           boolValue: 1
          options: 
             0:
                type: Bool
@@ -857,29 +863,33 @@ screenData:
 topbarData: 
    zones: 
       0:
-         widgetName: "Model Name"
+         widgetName: "Timer2"
          widgetData: 
             options: 
                0:
-                  type: Unsigned
-                  value: 
-                     unsignedValue: 5
-               1:
                   type: Color
                   value: 
-                     color: 0xF8FCF8
+                     color: 0xF8F8F8
+               1:
+                  type: Signed
+                  value: 
+                     signedValue: 1
                2:
                   type: Bool
                   value: 
                      boolValue: 0
-               3:
-                  type: Signed
+      1:
+         widgetName: "FMStatus"
+         widgetData: 
+            options: 
+               0:
+                  type: Source
                   value: 
-                     signedValue: 1
-               4:
-                  type: Signed
+                     source: SE
+               1:
+                  type: Source
                   value: 
-                     signedValue: 1
+                     source: ch(4)
       3:
          widgetName: "BattAnalog"
          widgetData: 
