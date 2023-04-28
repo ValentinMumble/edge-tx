@@ -1,4 +1,4 @@
-checksum: 37083
+checksum: 31867
 manuallyEdited: 0
 semver: 2.8.3
 board: tx16s
@@ -77,7 +77,7 @@ inactivityTimer: 0
 internalModuleBaudrate: 0
 hapticMode: mode_nokeys
 switchesDelay: 0
-lightAutoOff: 2
+lightAutoOff: 4
 templateSetup: 21
 PPM_Multiplier: 0
 hapticLength: 0
@@ -89,7 +89,7 @@ speakerVolume: 1
 vBatMin: 70
 vBatMax: 84
 backlightBright: 0
-globalTimer: 303113
+globalTimer: 305793
 bluetoothBaudrate: 0
 bluetoothMode: OFF
 countryCode: 2
