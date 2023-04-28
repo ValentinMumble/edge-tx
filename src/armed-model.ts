@@ -6,19 +6,19 @@ const options: any[] = [
   ['ThrottleCutSwitch', SOURCE, 1],
 ];
 
-interface Options {
+type Options = {
   ArmedSwitch: number;
   ThrottleCutSwitch: number;
-}
+};
 
-interface Widget {
+type Widget = {
+  zone: Zone;
+  options: Options;
   filename?: string;
   bitmap?: Bitmap;
   bitmapWidth?: number;
   bitmapHeight?: number;
-  zone: Zone;
-  options: Options;
-}
+};
 
 function create(zone: Zone, options: Options): Widget {
   const widget: Widget = {

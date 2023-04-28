@@ -3,7 +3,7 @@ header:
    name: "M2 EVO"
    modelId: 
       0:
-         val: 1
+         val: 3
    bitmap: "M2_EVO_o.png"
    labels: "Favorites"
 timers: 
@@ -744,6 +744,10 @@ customFn:
       swtch: "SH2"
       func: PLAY_TRACK
       def: "lq,1x"
+   10:
+      swtch: "SD2"
+      func: LOGS
+      def: "10"
 thrTraceSrc: Thr
 switchWarningState: AdEuFd
 rssiSource: none
@@ -964,6 +968,30 @@ screenData:
                         type: Source
                         value: 
                            source: SF
+            2:
+               widgetName: "Battery"
+               widgetData: 
+                  options: 
+                     0:
+                        type: Source
+                        value: 
+                           source: tele(5)
+                     1:
+                        type: Signed
+                        value: 
+                           signedValue: 3
+                     2:
+                        type: Signed
+                        value: 
+                           signedValue: 420
+                     3:
+                        type: Signed
+                        value: 
+                           signedValue: 360
+                     4:
+                        type: Bool
+                        value: 
+                           boolValue: 1
          options: 
             0:
                type: Bool

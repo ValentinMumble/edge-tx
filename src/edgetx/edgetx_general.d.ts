@@ -297,7 +297,7 @@ declare function playDuration(): void;
 declare function playFile(): void;
 declare function playHaptic(): void;
 declare function playNumber(): void;
-declare function playTone(): void;
+declare function playTone(frequency: number, duration: number, pause: number, flags: number, freqIncr: number): void;
 declare function popupConfirmation(): void;
 declare function popupInput(): void;
 declare function popupWarning(): void;
