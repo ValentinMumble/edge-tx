@@ -1,5 +1,38 @@
 local ____exports = {}
-local name = "Battery"
+local drawVoltage
+function drawVoltage(widget)
+    if widget.zone.h == 169 then
+        lcd.drawText(
+            widget.zone.w * 0.7,
+            widget.zone.h * 0.68,
+            string.format("%.2fv", widget.voltage / widget.options.Cells),
+            CENTER + VCENTER + 0 + WHITE
+        )
+        lcd.drawText(
+            widget.zone.w * 0.7,
+            widget.zone.h * 0.82,
+            string.format("%.2fv", widget.voltage),
+            CENTER + VCENTER + DBLSIZE + WHITE
+        )
+    else
+        lcd.drawText(
+            widget.zone.w / 2,
+            widget.zone.h * 0.28,
+            string.format("%.2fv", widget.voltage / widget.options.Cells),
+            CENTER + VCENTER + 0 + WHITE
+        )
+        lcd.drawText(
+            widget.zone.w / 2,
+            widget.zone.h * 0.62,
+            string.format("%.2fv", widget.voltage),
+            CENTER + VCENTER + MIDSIZE + WHITE
+        )
+    end
+end
+local NAME = "Battery"
+local COLOR_LOW = {red = 188, green = 71, blue = 54}
+local COLOR_MED = {red = 234, green = 196, blue = 69}
+local COLOR_HIGH = {red = 79, green = 121, blue = 66}
 local options = {
     {"BattSensor", SOURCE, 1},
     {
@@ -26,7 +59,7 @@ local options = {
     {"Alarm", BOOL, 1}
 }
 local function batteryWarning(widget)
-    if widget.options.Alarm == 1 and widget.bt < widget.CellVMin or widget.bt > widget.CellVMax then
+    if widget.options.Alarm == 1 and widget.voltage < widget.CellVMin or widget.voltage > widget.CellVMax then
         if getTime() >= widget.waitTime then
             widget.waitTime = getTime() + 200
             playTone(
@@ -51,7 +84,7 @@ local function create(zone, options)
         zone = zone,
         options = options,
         waitTime = getTime(),
-        bt = 0,
+        voltage = 0,
         CellVMax = 0,
         CellVMin = 0,
         pixSizeX = 0,
@@ -71,117 +104,88 @@ local function update(widget, options)
     widget.CellVMin = widget.options.CellVMin / 100 * widget.options.Cells
 end
 local function background(widget)
-    widget.bt = getValue(widget.options.BattSensor)
-    if widget.bt ~= 0 then
+    widget.voltage = getValue(widget.options.BattSensor)
+    if widget.voltage ~= 0 then
         batteryWarning(widget)
     end
 end
-local function refresh(widget)
-    widget.bt = getValue(widget.options.BattSensor)
-    if widget.pixSizeX == 0 or widget.zone.w == 392 then
-        lcd.drawText(widget.zone.w / 2, widget.zone.h / 2, "X", CENTER + VCENTER + DBLSIZE + RED + SHADOWED + BLINK)
-    elseif widget.bt ~= 0 then
-        local steps = 0
-        if widget.zone.h == 169 then
-            steps = math.floor(144 / 100 * ((widget.bt - widget.CellVMin) / ((widget.CellVMax - widget.CellVMin) / 100)))
-        else
-            steps = math.floor(167 / 100 * ((widget.bt - widget.CellVMin) / ((widget.CellVMax - widget.CellVMin) / 100)))
-        end
-        if steps >= 0 and steps <= 167 and widget.zone.h == 42 then
-            lcd.drawFilledRectangle(
-                11,
-                3,
-                steps,
-                36,
-                GREEN
-            )
-        elseif steps >= 0 and steps <= 167 and widget.zone.h == 56 then
-            lcd.drawFilledRectangle(
-                11,
-                3,
-                steps,
-                50,
-                GREEN
-            )
-        elseif steps >= 0 and steps <= 167 and widget.zone.h == 84 then
-            lcd.drawFilledRectangle(
-                11,
-                3,
-                steps,
-                78,
-                GREEN
-            )
-        elseif steps >= 0 and steps <= 144 and widget.zone.h == 169 then
-            lcd.drawFilledRectangle(
-                3,
-                144 - steps + 16,
-                78,
-                steps,
-                GREEN
-            )
-        else
-            batteryWarning(widget)
-        end
-        lcd.drawBitmap(widget.picture, 0, 0)
-        if widget.zone.h == 169 then
-            lcd.drawText(
-                widget.zone.w * 0.7,
-                widget.zone.h * 0.68,
-                string.format("%.2fv", widget.bt / widget.options.Cells),
-                CENTER + VCENTER + 0 + GREEN + SHADOWED
-            )
-            lcd.drawText(
-                widget.zone.w * 0.7,
-                widget.zone.h * 0.82,
-                string.format("%.2fv", widget.bt),
-                CENTER + VCENTER + DBLSIZE + GREEN + SHADOWED
-            )
-        else
-            lcd.drawText(
-                widget.zone.w / 2,
-                widget.zone.h * 0.28,
-                string.format("%.2fv", widget.bt / widget.options.Cells),
-                CENTER + VCENTER + 0 + GREEN + SHADOWED
-            )
-            lcd.drawText(
-                widget.zone.w / 2,
-                widget.zone.h * 0.62,
-                string.format("%.2fv", widget.bt),
-                CENTER + VCENTER + MIDSIZE + GREEN + SHADOWED
-            )
-        end
-    else
-        lcd.drawBitmap(widget.picture, 0, 0)
-        if widget.zone.h == 169 then
-            lcd.drawText(
-                widget.zone.w * 0.7,
-                widget.zone.h * 0.68,
-                string.format("%.2fv", widget.bt / widget.options.Cells),
-                CENTER + VCENTER + 0 + COLOR_THEME_DISABLED + SHADOWED + BLINK
-            )
-            lcd.drawText(
-                widget.zone.w * 0.7,
-                widget.zone.h * 0.82,
-                string.format("%.2fv", widget.bt),
-                CENTER + VCENTER + MIDSIZE + COLOR_THEME_DISABLED + SHADOWED + BLINK
-            )
-        else
-            lcd.drawText(
-                widget.zone.w / 2,
-                widget.zone.h * 0.28,
-                string.format("%.2fv", widget.bt / widget.options.Cells),
-                CENTER + VCENTER + 0 + COLOR_THEME_DISABLED + SHADOWED + BLINK
-            )
-            lcd.drawText(
-                widget.zone.w / 2,
-                widget.zone.h * 0.62,
-                string.format("%.2fv", widget.bt),
-                CENTER + VCENTER + MIDSIZE + COLOR_THEME_DISABLED + SHADOWED + BLINK
-            )
+local function colorGradient(fadeFraction, rgbColor1, rgbColor2, rgbColor3)
+    local color1 = rgbColor1
+    local color2 = rgbColor2
+    local fade = fadeFraction
+    if rgbColor3 then
+        fade = fade * 2
+        if fade >= 1 then
+            fade = fade - 1
+            color1 = rgbColor2
+            color2 = rgbColor3
         end
     end
+    local diffRed = color2.red - color1.red
+    local diffGreen = color2.green - color1.green
+    local diffBlue = color2.blue - color1.blue
+    return {
+        red = math.floor(color1.red + diffRed * fade),
+        green = math.floor(color1.green + diffGreen * fade),
+        blue = math.floor(color1.blue + diffBlue * fade)
+    }
 end
-____exports.name = name
+local function refresh(widget)
+    widget.voltage = getValue(widget.options.BattSensor)
+    if 0 == widget.pixSizeX or 392 == widget.zone.w or 0 == widget.voltage then
+        lcd.drawText(widget.zone.w / 2, widget.zone.h / 2, "No telemetry", CENTER + VCENTER)
+        return
+    end
+    local steps = 0
+    if widget.zone.h == 169 then
+        steps = math.floor(144 / 100 * ((widget.voltage - widget.CellVMin) / ((widget.CellVMax - widget.CellVMin) / 100)))
+    else
+        steps = math.floor(167 / 100 * ((widget.voltage - widget.CellVMin) / ((widget.CellVMax - widget.CellVMin) / 100)))
+    end
+    local ____colorGradient_result_0 = colorGradient(steps / 167, COLOR_LOW, COLOR_MED, COLOR_HIGH)
+    local red = ____colorGradient_result_0.red
+    local green = ____colorGradient_result_0.green
+    local blue = ____colorGradient_result_0.blue
+    local color = lcd.RGB(red, green, blue)
+    if steps >= 0 and steps <= 167 and widget.zone.h == 42 then
+        lcd.drawFilledRectangle(
+            11,
+            3,
+            steps,
+            36,
+            color
+        )
+    elseif steps >= 0 and steps <= 167 and widget.zone.h == 56 then
+        lcd.drawFilledRectangle(
+            11,
+            3,
+            steps,
+            50,
+            color
+        )
+    elseif steps >= 0 and steps <= 167 and widget.zone.h == 84 then
+        lcd.drawFilledRectangle(
+            11,
+            3,
+            steps,
+            78,
+            color
+        )
+    elseif steps >= 0 and steps <= 144 and widget.zone.h == 169 then
+        lcd.drawFilledRectangle(
+            3,
+            144 - steps + 16,
+            78,
+            steps,
+            color
+        )
+    else
+        batteryWarning(widget)
+    end
+    lcd.drawBitmap(widget.picture, 0, 0)
+    drawVoltage(widget)
+end
+____exports.name = NAME
 ____exports.options = options
 ____exports.create = create
 ____exports.update = update

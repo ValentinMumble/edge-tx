@@ -749,7 +749,7 @@ customFn:
       func: LOGS
       def: "10"
 thrTraceSrc: Thr
-switchWarningState: AdEuFd
+switchWarningState: AdCuDuEuFd
 rssiSource: none
 rfAlarms: 
    warning: 45
