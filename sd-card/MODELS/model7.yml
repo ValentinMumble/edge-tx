@@ -8,7 +8,7 @@ header:
    labels: "Favorites"
 timers: 
    0:
-      start: 300
+      start: 280
       swtch: "!L10"
       value: 0
       mode: ON
@@ -921,7 +921,7 @@ telemetrySensors:
       prec: 0
       autoOffset: 0
       filter: 0
-      logs: 0
+      logs: 1
       persistent: 0
       onlyPositive: 0
       cfg: 
