@@ -1,2 +1,2 @@
 
-EdgeTX backup and Widget tooling to translipe TypeScript to lua.
+EdgeTX backup and Widget tooling to transpile TypeScript to lua.
