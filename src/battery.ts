@@ -17,7 +17,7 @@ const COLOR_HIGH = {
 
 // TODO type for options
 const options: any[] = [
-  ['BattSensor', SOURCE, 1],
+  ['BattSensor', SOURCE, 276],
   ['Cells', VALUE, 3, 1, 12],
   ['CellVMax', VALUE, 420, 400, 435],
   ['CellVMin', VALUE, 370, 250, 390],

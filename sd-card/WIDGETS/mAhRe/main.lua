@@ -4,7 +4,7 @@
 
 -- File Locations On The Transmitter's SD Card
 --  This script file  /SCRIPTS/WIDGETS/
---  Sound files       /SCRIPTS/WIDGETS/mahRe2/sounds/
+--  Sound files       /SCRIPTS/WIDGETS/mahRe/sounds/
 
 -- Works On OpenTX Companion Version: 2.2
 -- Works With Sensor: FrSky FAS40S, FCS-150A, FAS100, FLVS Voltage Sensors
@@ -108,7 +108,7 @@ local CurrentSensor = "Curr"
 -- Reserve Capacity
 -- 	Remaining % Displayed = Calculated Remaining % - Reserve %
 -- Change as desired
-local CapacityReservePercent = 20 -- set to zero to disable
+local CapacityReservePercent = 0 -- set to zero to disable
 
 -- Switch used to reset the voltage checking features.
 --  typically set to the same switch used to reset timers
@@ -123,7 +123,7 @@ local CellFullVoltage = 4.0
 local VoltageDelta = .3
 
 -- Announcements
-local soundDirPath = "/WIDGETS/mahRe2/sounds/" -- where you put the sound files
+local soundDirPath = "/WIDGETS/mahRe/sounds/" -- where you put the sound files
 local AnnouncePercentRemaining = true -- true to turn on, false for off
 local SillyStuff = false  -- Play some silly/fun sounds
 
@@ -836,11 +836,11 @@ function refresh(Context)
 end
 
 local options = {
-  { "mAh", SOURCE, mAh }, -- Defines source Battery Current Sensor
-  { "Voltage", SOURCE, CEL1 }, -- Defines source Battery Voltage Sensor
-  { "Current", SOURCE, Curr },
+  { "mAh", SOURCE, 279 }, -- Defines source Battery Current Sensor
+  { "Voltage", SOURCE, 276 }, -- Defines source Battery Voltage Sensor
+  { "Current", SOURCE, 273 },
   { "Color", COLOR, GREY },
   { "FunStuff", BOOL, 0  }
 }
 
-return { name="mahRe2", options=options, create=create, update=update, refresh=refresh, background=background }
+return { name="mahRe", options=options, create=create, update=update, refresh=refresh, background=background }
