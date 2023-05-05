@@ -621,6 +621,14 @@ end
 
 -- ####################################################################
 local function drawBattery(xOrigin, yOrigin, wgt)
+  local voltageValue = getValue( VoltageSensor )
+
+  if 0 == voltageValue then
+    lcd.drawText(50, 20, "No telemetry")
+
+    return
+  end
+
     local myBatt = { ["x"] = xOrigin,
                      ["y"] = yOrigin,
                      ["w"] = 85,
@@ -656,6 +664,9 @@ local function drawBattery(xOrigin, yOrigin, wgt)
     -- draw values
   lcd.drawText(wgt.zone.x + myBatt.x, wgt.zone.y + myBatt.y + 35,
           string.format("%d mAh", BatRemainmAh), DBLSIZE + Color + BlinkWhenZero)
+
+  -- draw VFAS
+  lcd.drawText(wgt.zone.x + myBatt.x + myBatt.cath_w + myBatt.w + 40, wgt.zone.y, string.format("%d V", voltageValue), DBLSIZE)
 end
 
 -- ####################################################################
@@ -839,7 +850,7 @@ local options = {
   { "mAh", SOURCE, 279 }, -- Defines source Battery Current Sensor
   { "Voltage", SOURCE, 276 }, -- Defines source Battery Voltage Sensor
   { "Current", SOURCE, 273 },
-  { "Color", COLOR, GREY },
+  { "Color", COLOR, WHITE },
   { "FunStuff", BOOL, 0  }
 }
 

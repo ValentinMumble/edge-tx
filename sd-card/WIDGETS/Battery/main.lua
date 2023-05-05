@@ -34,7 +34,7 @@ local COLOR_LOW = {red = 188, green = 71, blue = 54}
 local COLOR_MED = {red = 234, green = 196, blue = 69}
 local COLOR_HIGH = {red = 79, green = 121, blue = 66}
 local options = {
-    {"BattSensor", SOURCE, 1},
+    {"BattSensor", SOURCE, 276},
     {
         "Cells",
         VALUE,

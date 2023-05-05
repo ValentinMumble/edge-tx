@@ -748,6 +748,31 @@ customFn:
       swtch: "SD2"
       func: LOGS
       def: "10"
+flightModeData: 
+   0:
+      name: ""
+      swtch: "NONE"
+      fadeIn: 0
+      fadeOut: 0
+      gvars: 
+         0:
+            val: 0
+         1:
+            val: 0
+         2:
+            val: 0
+         3:
+            val: 0
+         4:
+            val: 0
+         5:
+            val: 3
+         6:
+            val: 7
+         7:
+            val: 0
+         8:
+            val: 0
 thrTraceSrc: Thr
 switchWarningState: AdCuDuEuFd
 rssiSource: none
@@ -969,29 +994,29 @@ screenData:
                         value: 
                            source: SF
             2:
-               widgetName: "Battery"
+               widgetName: "mahRe"
                widgetData: 
                   options: 
                      0:
                         type: Source
                         value: 
-                           source: tele(5)
+                           source: tele(6)
                      1:
-                        type: Signed
+                        type: Source
                         value: 
-                           signedValue: 3
+                           source: tele(5)
                      2:
-                        type: Signed
+                        type: Source
                         value: 
-                           signedValue: 420
+                           source: tele(4)
                      3:
-                        type: Signed
+                        type: Color
                         value: 
-                           signedValue: 360
+                           color: 0xF8FCF8
                      4:
                         type: Bool
                         value: 
-                           boolValue: 1
+                           boolValue: 0
          options: 
             0:
                type: Bool
