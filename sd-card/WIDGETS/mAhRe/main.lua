@@ -101,7 +101,7 @@ local Title = "Flight Battery Monitor"
 --  If you need help setting up a consumption sensor visit
 --		http://rcdiy.ca/calculated-sensor-consumption/
 -- Change as desired
-local VoltageSensor = "Cels" -- optional set to "" to ignore
+local VoltageSensor = "VFAS" -- optional set to "" to ignore
 local mAhSensor = "mAh" -- optional set to "" to ignore
 local CurrentSensor = "Curr"
 
@@ -125,7 +125,6 @@ local VoltageDelta = .3
 -- Announcements
 local soundDirPath = "/WIDGETS/mahRe/sounds/" -- where you put the sound files
 local AnnouncePercentRemaining = true -- true to turn on, false for off
-local SillyStuff = false  -- Play some silly/fun sounds
 
 -- Do not change the next line
 local GV = {[1] = 0, [2] = 1, [3] = 2,[4] = 3,[5] = 4,[6] = 5, [7] = 6, [8] = 7, [9] = 8}
@@ -308,11 +307,6 @@ local function PlayPercentRemaining()
   if BatRemPer <= 0 and AtZeroPlayedCount < PlayAtZero and getRSSI() > 0 then
     print(BatRemPer,AtZeroPlayedCount)
     playFile(soundDirPath.."BatNo.wav")
-    if SillyStuff then
-      playFile(soundDirPath.."Scrash.wav")
-      playFile(soundDirPath.."Samblc.wav")
-      --playFile(soundDirPath.."WrnWzz.wav")
-    end
     AtZeroPlayedCount = AtZeroPlayedCount + 1
   elseif AtZeroPlayedCount == PlayAtZero and BatRemPer > 0 then
     AtZeroPlayedCount = 0
@@ -621,9 +615,9 @@ end
 
 -- ####################################################################
 local function drawBattery(xOrigin, yOrigin, wgt)
-  local voltageValue = getValue( VoltageSensor )
+  volts = getCellVoltage(VoltageSensor)
 
-  if 0 == voltageValue then
+  if 0 == volts then
     lcd.drawText(50, 20, "No telemetry")
 
     return
@@ -666,7 +660,7 @@ local function drawBattery(xOrigin, yOrigin, wgt)
           string.format("%d mAh", BatRemainmAh), DBLSIZE + Color + BlinkWhenZero)
 
   -- draw VFAS
-  lcd.drawText(wgt.zone.x + myBatt.x + myBatt.cath_w + myBatt.w + 40, wgt.zone.y, string.format("%d V", voltageValue), DBLSIZE)
+  lcd.drawText(wgt.zone.x + myBatt.x + myBatt.cath_w + myBatt.w + 15, wgt.zone.y, string.format("%.1f V", volts), DBLSIZE)
 end
 
 -- ####################################################################
@@ -833,7 +827,6 @@ function update(Context, options)
   Color = options.Color
   Context.options = options
   Context.back = nil
-  SillyStuff = options.FunStuff
 end
 
 -- ####################################################################
@@ -851,7 +844,6 @@ local options = {
   { "Voltage", SOURCE, 276 }, -- Defines source Battery Voltage Sensor
   { "Current", SOURCE, 273 },
   { "Color", COLOR, WHITE },
-  { "FunStuff", BOOL, 0  }
 }
 
 return { name="mahRe", options=options, create=create, update=update, refresh=refresh, background=background }
