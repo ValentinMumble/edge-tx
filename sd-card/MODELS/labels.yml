@@ -52,14 +52,14 @@ Models:
     bitmap: "F16.png"
     lastopen: 0
   model7.yml:
-    hash: "fc4a0000a556f373"
+    hash: "fc4a0000a856fc7d"
     name: "M2 EVO"
     mod0id: 3
     mod0type: 6
     mod0rf: 63
     labels: "Favorites"
     bitmap: "M2_EVO_o.png"
-    lastopen: 1683297075
+    lastopen: 1683724762
   model16.yml:
     hash: "5b250000385682aa"
     name: "Eachine E180"

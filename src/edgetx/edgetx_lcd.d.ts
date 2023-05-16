@@ -15,7 +15,15 @@ declare module lcd {
   function drawChannel(): void;
   function drawSwitch(): void;
   function drawSource(x: number, y: number, source: number, flags?: number): void;
-  function drawGauge(): void;
+  function drawGauge(
+    x: number,
+    y: number,
+    width: number,
+    number: number,
+    fill: number,
+    maxFill: number,
+    flags?: number
+  ): void;
   function drawBitmap(bitmap: Bitmap, x: number, y: number, scale?: number): void;
   function drawBitmapPattern(bitmap: string, x: number, y: number, flags?: number): void;
   function drawBitmapPatternPie(

@@ -28,8 +28,8 @@ declare module model {
   function setCurve(): void;
   function getOutput(index: number): ModelOutput;
   function setOutput(): void;
-  function getGlobalVariable(): void;
-  function setGlobalVariable(): void;
+  function getGlobalVariable(gv: number, fm: number): number;
+  function setGlobalVariable(gv: number, fm: number, value: number): void;
   function getSensor(): void;
   function resetSensor(): void;
 }

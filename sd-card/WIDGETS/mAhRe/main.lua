@@ -449,7 +449,7 @@ local function voltage_sensor_tests()
       check_cell_delta_voltage(cellResult)
 
     -- check condition 3: all cells present
-      check_for_missing_cells(cellResult)
+      -- check_for_missing_cells(cellResult)
   end
 end
 
