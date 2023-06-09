@@ -1,4 +1,4 @@
-checksum: 49782
+checksum: 58503
 manuallyEdited: 0
 semver: 2.8.3
 board: tx16s
@@ -89,7 +89,7 @@ speakerVolume: 1
 vBatMin: 70
 vBatMax: 84
 backlightBright: 0
-globalTimer: 315067
+globalTimer: 352565
 bluetoothBaudrate: 0
 bluetoothMode: OFF
 countryCode: 2
@@ -163,7 +163,7 @@ slidersConfig:
    RS:
       type: with_detent
       name: ""
-currModelFilename: "model7.yml"
+currModelFilename: "model21.yml"
 modelQuickSelect: 1
 blOffBright: 29
 bluetoothName: ""
