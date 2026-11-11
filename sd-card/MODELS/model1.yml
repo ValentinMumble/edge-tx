@@ -1,4 +1,4 @@
-semver: 2.8.0
+semver: 2.8.4
 header:
   name: Aero
   bitmap: Flug62.jpg
@@ -324,7 +324,7 @@ expoData:
     curve:
       type: 0
       value: 0
-    carryTrim: 0
+    trimSource: 0
     name: ""
   - srcRaw: Ele
     scale: 0
@@ -337,7 +337,7 @@ expoData:
     curve:
       type: 0
       value: 0
-    carryTrim: 0
+    trimSource: 0
     name: ""
   - srcRaw: Thr
     scale: 0
@@ -350,7 +350,7 @@ expoData:
     curve:
       type: 0
       value: 0
-    carryTrim: 0
+    trimSource: 0
     name: ""
   - srcRaw: Rud
     scale: 0
@@ -363,7 +363,7 @@ expoData:
     curve:
       type: 0
       value: 0
-    carryTrim: 0
+    trimSource: 0
     name: ""
 inputNames:
   0:

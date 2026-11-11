@@ -1,7 +1,11 @@
 # EdgeTX
 
-Backups of the RadioMaster TX16S's SD card, and its widgets written in TypeScript, turned into Lua with
-TypeScriptToLua: `npm run build` (or `npm run dev` to rebuild on every save) writes them to `output/`.
+The RadioMaster TX16S's SD card, and its widgets written in TypeScript, turned into Lua with TypeScriptToLua:
+`npm run build` (or `npm run dev` to rebuild on every save) writes them to `output/`.
+
+`sd-card/` is the card as of 10 November 2026, after the update to EdgeTX 2.12.5 (its 2.12.3 SD pack, the M2 EVO's
+model and the radio settings rewritten by it); its widgets built from `src/` and mAhRe are this repo's versions, the
+others the card's. Full card copies taken around an update stay out of git (`backups/`, `update-2.12.5/`).
 
 - **ArmedModel:** the arming state at a glance: SAFE (grey-green), ARMED (amber, throttle cut) or LIVE (red, the border
   blinking), the SA and SF switches as two lights, the model's picture, and its main rotor seen from above in the

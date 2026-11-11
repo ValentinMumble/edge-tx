@@ -1,14 +1,14 @@
-semver: 2.8.3
+semver: 2.12.5
 header: 
-   name: "M2"
+   name: "M2 EVO"
    modelId: 
       0:
-         val: 1
-   bitmap: "M2_p.png"
-   labels: ""
+         val: 3
+   bitmap: "M2_EVO_o.png"
+   labels: "Favorites"
 timers: 
    0:
-      start: 300
+      start: 280
       swtch: "!L10"
       value: 0
       mode: ON
@@ -17,6 +17,7 @@ timers:
       persistent: 0
       countdownStart: 0
       showElapsed: 0
+      extraHaptic: 0
       name: ""
 telemetryProtocol: 0
 thrTrim: 0
@@ -31,19 +32,23 @@ extendedTrims: 0
 throttleReversed: 0
 enableCustomThrottleWarning: 0
 disableTelemetryWarning: 0
+showInstanceIds: 0
+checklistInteractive: 0
 customThrottleWarningPosition: 0
 beepANACenter: 0
 mixData: 
  -
-   weight: 100
    destCh: 0
-   srcRaw: I0
+   srcRaw: "I0"
    carryTrim: 0
    mixWarn: 0
    mltpx: ADD
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "NONE"
-   flightModes: 000000000
    curve: 
       type: 1
       value: 0
@@ -53,30 +58,34 @@ mixData:
    speedDown: 0
    name: "Ail"
  -
-   weight: 70
    destCh: 0
-   srcRaw: I0
+   srcRaw: "I0"
    carryTrim: 0
    mixWarn: 0
    mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 70
    offset: 0
    swtch: "L7"
-   flightModes: 000000000
    delayUp: 0
    delayDown: 0
    speedUp: 0
    speedDown: 0
    name: ""
  -
-   weight: 100
    destCh: 1
-   srcRaw: I1
+   srcRaw: "I1"
    carryTrim: 0
    mixWarn: 0
    mltpx: ADD
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "NONE"
-   flightModes: 000000000
    curve: 
       type: 1
       value: 0
@@ -86,30 +95,34 @@ mixData:
    speedDown: 0
    name: "Elev"
  -
-   weight: 70
    destCh: 1
-   srcRaw: I1
+   srcRaw: "I1"
    carryTrim: 0
    mixWarn: 0
    mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 70
    offset: 0
    swtch: "L7"
-   flightModes: 000000000
    delayUp: 0
    delayDown: 0
    speedUp: 0
    speedDown: 0
    name: ""
  -
-   weight: 100
    destCh: 2
-   srcRaw: I2
+   srcRaw: "I2"
    carryTrim: 0
    mixWarn: 0
    mltpx: ADD
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "L3"
-   flightModes: 000000000
    curve: 
       type: 3
       value: 4
@@ -119,15 +132,17 @@ mixData:
    speedDown: 0
    name: "Motor3"
  -
-   weight: 100
    destCh: 2
-   srcRaw: I2
+   srcRaw: "I2"
    carryTrim: 0
    mixWarn: 0
    mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "L2"
-   flightModes: 000000000
    curve: 
       type: 3
       value: 3
@@ -137,48 +152,54 @@ mixData:
    speedDown: 0
    name: "Motor2"
  -
-   weight: 100
    destCh: 2
-   srcRaw: I2
+   srcRaw: "I2"
    carryTrim: 0
    mixWarn: 0
    mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "L1"
-   flightModes: 000000000
    curve: 
       type: 3
-      value: 2
+      value: 14
    delayUp: 0
    delayDown: 0
    speedUp: 0
    speedDown: 0
    name: "Motor1"
  -
-   weight: -15
    destCh: 2
-   srcRaw: 6POS
+   srcRaw: "P2"
    carryTrim: 0
    mixWarn: 0
    mltpx: ADD
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: -15
    offset: -15
    swtch: "L1"
-   flightModes: 000000000
    delayUp: 0
    delayDown: 0
    speedUp: 0
    speedDown: 0
    name: "Lower"
  -
-   weight: 100
    destCh: 2
-   srcRaw: I2
+   srcRaw: "I2"
    carryTrim: 0
    mixWarn: 0
    mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "L10"
-   flightModes: 000000000
    curve: 
       type: 3
       value: 1
@@ -188,15 +209,17 @@ mixData:
    speedDown: 0
    name: "Motor0"
  -
-   weight: 100
    destCh: 3
-   srcRaw: I3
+   srcRaw: "I3"
    carryTrim: 0
    mixWarn: 0
    mltpx: ADD
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "NONE"
-   flightModes: 000000000
    curve: 
       type: 1
       value: 30
@@ -206,60 +229,68 @@ mixData:
    speedDown: 0
    name: "Rudder"
  -
-   weight: 65
    destCh: 3
-   srcRaw: I3
+   srcRaw: "I3"
    carryTrim: 0
    mixWarn: 0
    mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 65
    offset: 0
    swtch: "L7"
-   flightModes: 000000000
    delayUp: 0
    delayDown: 0
    speedUp: 0
    speedDown: 0
    name: ""
  -
-   weight: 100
    destCh: 4
-   srcRaw: I4
+   srcRaw: "I4"
    carryTrim: 0
    mixWarn: 0
    mltpx: ADD
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "NONE"
-   flightModes: 000000000
    delayUp: 0
    delayDown: 0
    speedUp: 0
    speedDown: 0
    name: "Rescue"
  -
-   weight: 100
    destCh: 4
-   srcRaw: ls(7)
+   srcRaw: "ls(7)"
    carryTrim: 0
    mixWarn: 0
    mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "L7"
-   flightModes: 000000000
    delayUp: 0
    delayDown: 0
    speedUp: 0
    speedDown: 0
    name: ""
  -
-   weight: 100
    destCh: 5
-   srcRaw: I5
+   srcRaw: "I5"
    carryTrim: 0
    mixWarn: 0
    mltpx: ADD
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "L1"
-   flightModes: 000000000
    curve: 
       type: 3
       value: 5
@@ -269,15 +300,17 @@ mixData:
    speedDown: 0
    name: "Coll1"
  -
-   weight: 100
    destCh: 5
-   srcRaw: I5
+   srcRaw: "I5"
    carryTrim: 0
    mixWarn: 0
    mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "L2"
-   flightModes: 000000000
    curve: 
       type: 3
       value: 6
@@ -287,15 +320,17 @@ mixData:
    speedDown: 0
    name: "Coll2"
  -
-   weight: 100
    destCh: 5
-   srcRaw: I5
+   srcRaw: "I5"
    carryTrim: 0
    mixWarn: 0
    mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "L3"
-   flightModes: 000000000
    curve: 
       type: 3
       value: 7
@@ -305,15 +340,17 @@ mixData:
    speedDown: 0
    name: "Coll3"
  -
-   weight: 100
    destCh: 5
-   srcRaw: I5
+   srcRaw: "I5"
    carryTrim: 0
    mixWarn: 0
    mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "L7"
-   flightModes: 000000000
    curve: 
       type: 3
       value: 13
@@ -323,15 +360,17 @@ mixData:
    speedDown: 0
    name: "Level"
  -
-   weight: 100
    destCh: 5
-   srcRaw: I5
+   srcRaw: "I5"
    carryTrim: 0
    mixWarn: 0
    mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "L6"
-   flightModes: 000000000
    curve: 
       type: 3
       value: 8
@@ -341,15 +380,17 @@ mixData:
    speedDown: 0
    name: "Flat"
  -
-   weight: 100
    destCh: 5
-   srcRaw: I2
+   srcRaw: "I2"
    carryTrim: 0
    mixWarn: 0
    mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "L11"
-   flightModes: 000000000
    curve: 
       type: 3
       value: 9
@@ -359,15 +400,17 @@ mixData:
    speedDown: 0
    name: "Resq1"
  -
-   weight: 100
    destCh: 5
-   srcRaw: I2
+   srcRaw: "I2"
    carryTrim: 0
    mixWarn: 0
    mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "L12"
-   flightModes: 000000000
    curve: 
       type: 3
       value: 10
@@ -377,15 +420,17 @@ mixData:
    speedDown: 0
    name: "Resq2"
  -
-   weight: 100
    destCh: 5
-   srcRaw: I2
+   srcRaw: "I2"
    carryTrim: 0
    mixWarn: 0
    mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
    offset: 0
    swtch: "L13"
-   flightModes: 000000000
    curve: 
       type: 3
       value: 11
@@ -395,7 +440,7 @@ mixData:
    speedDown: 0
    name: "Resq3"
 limitData: 
-   0:
+   1:
       min: 0
       max: 0
       ppmCenter: 0
@@ -404,7 +449,7 @@ limitData:
       revert: 1
       curve: 0
       name: ""
-   3:
+   2:
       min: 0
       max: 0
       ppmCenter: 0
@@ -413,7 +458,7 @@ limitData:
       revert: 1
       curve: 0
       name: ""
-   4:
+   5:
       min: 0
       max: 0
       ppmCenter: 0
@@ -427,91 +472,86 @@ expoData:
    mode: 3
    scale: 0
    trimSource: 0
-   srcRaw: Ail
+   srcRaw: "Ail"
+   weight: 100
+   offset: 0
+   swtch: "NONE"
+   curve: 
+      type: 3
+      value: 12
    chn: 0
-   swtch: "NONE"
    flightModes: 000000000
-   weight: 100
    name: ""
-   offset: 0
-   curve: 
-      type: 3
-      value: 12
  -
    mode: 3
    scale: 0
    trimSource: 0
-   srcRaw: Ele
+   srcRaw: "Ele"
+   weight: 100
+   offset: 0
+   swtch: "NONE"
+   curve: 
+      type: 3
+      value: 12
    chn: 1
-   swtch: "NONE"
    flightModes: 000000000
-   weight: 100
    name: ""
-   offset: 0
-   curve: 
-      type: 3
-      value: 12
  -
    mode: 3
    scale: 0
    trimSource: 0
-   srcRaw: Thr
+   srcRaw: "Thr"
+   weight: 100
+   offset: 0
+   swtch: "NONE"
    chn: 2
-   swtch: "NONE"
    flightModes: 000000000
-   weight: 100
    name: ""
-   offset: 0
  -
    mode: 3
    scale: 0
    trimSource: 0
-   srcRaw: Rud
+   srcRaw: "Rud"
+   weight: 100
+   offset: 0
+   swtch: "NONE"
+   curve: 
+      type: 1
+      value: 0
    chn: 3
-   swtch: "NONE"
    flightModes: 000000000
-   weight: 100
    name: ""
-   offset: 0
-   curve: 
-      type: 1
-      value: 0
  -
    mode: 3
    scale: 0
    trimSource: 0
-   srcRaw: ls(6)
+   srcRaw: "ls(6)"
+   weight: 100
+   offset: 0
+   swtch: "NONE"
+   curve: 
+      type: 1
+      value: 0
    chn: 4
-   swtch: "NONE"
    flightModes: 000000000
-   weight: 100
    name: ""
-   offset: 0
-   curve: 
-      type: 1
-      value: 0
  -
    mode: 3
    scale: 0
    trimSource: 0
-   srcRaw: Thr
-   chn: 5
-   swtch: "NONE"
-   flightModes: 000000000
+   srcRaw: "Thr"
    weight: 100
-   name: ""
    offset: 0
+   swtch: "NONE"
+   chn: 5
+   flightModes: 000000000
+   name: ""
 curves: 
    0:
       type: 0
       smooth: 0
       points: -3
       name: "HLD"
-   1:
-      type: 0
-      smooth: 0
-      points: -3
-      name: "FM1"
    2:
       type: 0
       smooth: 0
@@ -523,9 +563,9 @@ curves:
       points: -3
       name: "FM3"
    4:
-      type: 0
+      type: 1
       smooth: 0
-      points: -3
+      points: 0
       name: "CP1"
    5:
       type: 1
@@ -567,177 +607,272 @@ curves:
       smooth: 0
       points: -2
       name: "CPL"
+   13:
+      type: 0
+      smooth: 0
+      points: -3
+      name: "FM1"
+   15:
+      type: 0
+      smooth: 0
+      points: -3
+      name: "Low"
 points: 
    0:
       val: -100
    1:
       val: -100
-   2:
-      val: 7
-   3:
-      val: 7
    4:
       val: 15
    5:
       val: 15
    6:
-      val: 25
+      val: 50
    7:
-      val: 25
+      val: 15
    8:
-      val: -100
+      val: 15
    9:
-      val: 100
+      val: 50
    10:
-      val: -95
+      val: 50
    11:
-      val: 95
-   12:
-      val: -90
-   13:
-      val: 90
-   16:
-      val: 85
-   17:
-      val: 85
-   18:
-      val: 60
-   19:
-      val: 60
-   20:
-      val: 50
-   21:
-      val: 50
-   22:
       val: -100
-   23:
-      val: -8
+   12:
+      val: -40
+   14:
+      val: 40
+   15:
+      val: 100
+   16:
+      val: -50
+   18:
+      val: 50
+   19:
+      val: -95
+   20:
+      val: 95
+   21:
+      val: -90
+   22:
+      val: 90
+   25:
+      val: 85
    26:
-      val: 8
+      val: 85
    27:
-      val: 100
+      val: 60
    28:
-      val: -1
+      val: 60
    29:
-      val: -1
+      val: 50
    30:
-      val: 1
+      val: 50
    31:
-      val: 1
-   34:
+      val: -100
+   32:
+      val: -8
+   35:
+      val: 8
+   36:
       val: 100
+   37:
+      val: -1
+   38:
+      val: -1
+   39:
+      val: 1
+   40:
+      val: 1
+   43:
+      val: 100
+   44:
+      val: 8
+   45:
+      val: 8
+   51:
+      val: -76
+   52:
+      val: -76
 logicalSw: 
    0:
       func: FUNC_VNEG
       def: "SE,0"
       andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
       delay: 0
       duration: 0
    1:
       func: FUNC_VEQUAL
       def: "SE,0"
       andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
       delay: 0
       duration: 0
    2:
       func: FUNC_VPOS
       def: "SE,0"
       andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
       delay: 0
       duration: 0
    3:
       func: FUNC_VPOS
       def: "SF,0"
       andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
       delay: 0
       duration: 0
    4:
       func: FUNC_VPOS
       def: "SA,-1"
       andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
       delay: 0
       duration: 0
    5:
       func: FUNC_VPOS
       def: "SH,0"
       andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
       delay: 0
       duration: 0
    6:
       func: FUNC_VPOS
       def: "SC,0"
       andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
       delay: 0
       duration: 0
    9:
       func: FUNC_OR
       def: "L4,L5"
       andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
       delay: 0
       duration: 0
    10:
       func: FUNC_AND
       def: "L6,L1"
       andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
       delay: 0
       duration: 0
    11:
       func: FUNC_AND
       def: "L6,L2"
       andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
       delay: 0
       duration: 0
    12:
       func: FUNC_AND
       def: "L6,L3"
       andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
       delay: 0
       duration: 0
    13:
       func: FUNC_AND
       def: "L4,L5"
       andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
       delay: 0
       duration: 0
 customFn: 
    0:
-      swtch: "L14"
+      swtch: "!TELEMETRY_STREAMING"
+      func: RESET
+      def: "6,1"
+   1:
+      swtch: "!TELEMETRY_STREAMING"
       func: RESET
       def: "Tmr1,1"
-   1:
+   2:
       swtch: "SF0"
       func: PLAY_TRACK
-      def: "thract,1x"
-   2:
+      def: "thract,1,1x"
+   3:
       swtch: "SF2"
       func: PLAY_TRACK
-      def: "thrcut,1x"
-   3:
+      def: "thrcut,1,1x"
+   4:
       swtch: "SC0"
       func: PLAY_TRACK
-      def: "gyroff,1x"
-   4:
+      def: "gyroff,1,1x"
+   5:
       swtch: "SC2"
       func: PLAY_TRACK
-      def: "gyron,1x"
-   5:
+      def: "gyron,1,1x"
+   6:
       swtch: "SE0"
       func: PLAY_TRACK
-      def: "fm-id1,1x"
-   6:
+      def: "fm-id1,1,1x"
+   7:
       swtch: "SE1"
       func: PLAY_TRACK
-      def: "fm-id2,1x"
-   7:
+      def: "fm-id2,1,1x"
+   8:
       swtch: "SE2"
       func: PLAY_TRACK
-      def: "fm-pwr,1x"
-   8:
+      def: "fm-pwr,1,1x"
+   9:
       swtch: "SH2"
       func: PLAY_TRACK
-      def: "lq,1x"
+      def: "lq,1,1x"
+   11:
+      swtch: "TELEMETRY_STREAMING"
+      func: LOGS
+      def: "2,1"
+flightModeData: 
+   0:
+      name: ""
+      swtch: "NONE"
+      fadeIn: 0
+      fadeOut: 0
+      gvars: 
+         0:
+            val: 0
+         1:
+            val: 0
+         2:
+            val: 0
+         3:
+            val: 0
+         4:
+            val: 0
+         5:
+            val: 3
+         6:
+            val: 7
+         7:
+            val: 0
+         8:
+            val: 0
 thrTraceSrc: Thr
-switchWarningState: AdEuFd
+switchWarning: 
+   SA:
+      pos: down
+   SD:
+      pos: up
+   SG:
+      pos: up
+   SH:
+      pos: mid
+   SI:
+      pos: up
 rssiSource: none
 rfAlarms: 
    warning: 45
@@ -748,7 +883,8 @@ jitterFilter: GLOBAL
 moduleData: 
    0:
       type: TYPE_MULTIMODULE
-      subType: 21,0
+      antennaMode: MODE_PER_MODEL
+      subType: 64,2
       channelsStart: 0
       channelsCount: 16
       failsafeMode: HOLD
@@ -909,7 +1045,7 @@ telemetrySensors:
       prec: 0
       autoOffset: 0
       filter: 0
-      logs: 0
+      logs: 1
       persistent: 0
       onlyPositive: 0
       cfg: 
@@ -917,7 +1053,7 @@ telemetrySensors:
             source: 5
 screenData: 
    0:
-      LayoutId: "Layout2P1"
+      LayoutId: Layout2P1
       layoutData: 
          zones: 
             0:
@@ -943,29 +1079,39 @@ screenData:
                      4:
                         type: Color
                         value: 
-                           color: 0x105C98
+                           color: 0xF07028
             1:
-               widgetName: "Timer"
-            2:
-               widgetName: "ModelBmp"
+               widgetName: "ArmedModel"
                widgetData: 
                   options: 
                      0:
-                        type: Color
+                        type: Source
                         value: 
-                           color: 0x105C98
+                           source: SA
+                     1:
+                        type: Source
+                        value: 
+                           source: SF
+            2:
+               widgetName: "mahRe"
+               widgetData: 
+                  options: 
+                     0:
+                        type: Source
+                        value: 
+                           source: tele(6)
+                     1:
+                        type: Source
+                        value: 
+                           source: tele(5)
                      2:
-                        type: Bool
+                        type: Source
                         value: 
-                           boolValue: 0
+                           source: tele(4)
                      3:
                         type: Color
                         value: 
-                           color: 0xE0ECF0
-                     4:
-                        type: Bool
-                        value: 
-                           boolValue: 1
+                           color: 0xF8FCF8
          options: 
             0:
                type: Bool
@@ -990,51 +1136,23 @@ screenData:
 topbarData: 
    zones: 
       0:
-         widgetName: "Model Name"
+         widgetName: "Timer2"
          widgetData: 
             options: 
                0:
-                  type: Unsigned
-                  value: 
-                     unsignedValue: 5
-               1:
                   type: Color
                   value: 
-                     color: 0xF8FCF8
+                     color: 0xF8F8F8
+               1:
+                  type: Signed
+                  value: 
+                     signedValue: 1
                2:
                   type: Bool
                   value: 
                      boolValue: 0
-               3:
-                  type: Signed
-                  value: 
-                     signedValue: 1
-               4:
-                  type: Signed
-                  value: 
-                     signedValue: 1
       1:
-         widgetName: "Text"
-         widgetData: 
-            options: 
-               0:
-                  type: String
-                  value: 
-                     stringValue: ""
-               1:
-                  type: Color
-                  value: 
-                     color: 0xF8FCF8
-               2:
-                  type: Unsigned
-                  value: 
-                     unsignedValue: 5
-               3:
-                  type: Bool
-                  value: 
-                     boolValue: 0
-      2:
-         widgetName: "Value"
+         widgetName: "FMStatus"
          widgetData: 
             options: 
                0:
@@ -1042,13 +1160,9 @@ topbarData:
                   value: 
                      source: SE
                1:
-                  type: Color
+                  type: Source
                   value: 
-                     color: 0x000000
-               2:
-                  type: Bool
-                  value: 
-                     boolValue: 0
+                     source: ch(4)
       3:
          widgetName: "BattAnalog"
          widgetData: 
@@ -1058,12 +1172,75 @@ topbarData:
                   value: 
                      source: TX_VOLTAGE
                1:
+                  type: Unsigned
+                  value: 
+                     unsignedValue: 0
+               2:
+                  type: Unsigned
+                  value: 
+                     unsignedValue: 0
+               3:
+                  type: Unsigned
+                  value: 
+                     unsignedValue: 0
+               4:
                   type: Color
                   value: 
-                     color: 0xF8F8F8
-               2:
+                     color: COLIDX0
+               5:
                   type: Bool
                   value: 
-                     boolValue: 1
+                     boolValue: 0
+      4:
+         widgetName: "Radio Info"
+         widgetData: 
+            options: 
+               0:
+                  type: Color
+                  value: 
+                     color: 0xF04030
+               1:
+                  type: Color
+                  value: 
+                     color: 0xF8C000
+               2:
+                  type: Color
+                  value: 
+                     color: 0x48AC50
+      5:
+         widgetName: "Date Time"
+         widgetData: 
+            options: 
+               0:
+                  type: Color
+                  value: 
+                     color: COLIDX1
+topbarWidgetWidth: 
+   0:
+      val: 1
+   1:
+      val: 1
+   2:
+      val: 1
+   3:
+      val: 1
+   4:
+      val: 1
+   5:
+      val: 1
 view: 0
 modelRegistrationID: "624504Q-"
+usbJoystickExtMode: 0
+usbJoystickIfMode: JOYSTICK
+usbJoystickCircularCut: 0
+radioThemesDisabled: GLOBAL
+radioGFDisabled: GLOBAL
+radioTrainerDisabled: GLOBAL
+modelHeliDisabled: GLOBAL
+modelFMDisabled: GLOBAL
+modelCurvesDisabled: GLOBAL
+modelGVDisabled: GLOBAL
+modelLSDisabled: GLOBAL
+modelSFDisabled: GLOBAL
+modelCustomScriptsDisabled: GLOBAL
+modelTelemetryDisabled: GLOBAL

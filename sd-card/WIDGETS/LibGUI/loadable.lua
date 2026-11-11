@@ -41,15 +41,26 @@ local HEIGHT = 24
 -- The widget table will be returned to the main script
 local widget = { }
 
--- Load the GUI library by calling the global function declared in the main script.
--- As long as LibGUI is on the SD card, any widget can call loadGUI() because it is global.
-local libGUI = loadGUI()
+-- Load the GUI library.
+-- Note: for backward & forward compatibility, each script should come with it's own version of libgui.
+local libGUI = loadScript("/WIDGETS/LibGUI/libgui.lua")()
+
 
 -- Instantiate a new GUI object
 local gui = libGUI.newGUI()
 
 -- Make a minimize button from a custom element
 local custom = gui.custom({ }, LCD_W - 34, 6, 28, 28)
+
+local function getLastSwitchIndex()
+    local lastSwitch
+    for switchIndex, switchName in switches(1, SWSRC_LAST) do
+        if string.find(switchName, "^!?S[A-R][+-]?") then
+            lastSwitch = switchIndex
+        end
+    end
+    return lastSwitch
+end
 
 function custom.draw(focused)
   lcd.drawRectangle(LCD_W - 34, 6, 28, 28, libGUI.colors.primary2)
@@ -60,7 +71,7 @@ function custom.draw(focused)
 end
 
 function custom.onEvent(event, touchState)
-  if event == EVT_VIRTUAL_ENTER then
+  if (touchState and touchState.tapCount == 2) or (event and event == EVT_VIRTUAL_EXIT) then
     lcd.exitFullScreen()
   end
 end
@@ -84,18 +95,18 @@ local subGUI = gui.gui(COL2, TOP + ROW, COL4 + WIDTH - COL3, 2 * ROW + HEIGHT)
 
 -- A number that can be edited
 subGUI.label(0, 0, WIDTH, HEIGHT, "Number:")
-subGUI.number(COL2s, 0, WIDTH, HEIGHT, 0)
+subGUI.number(COL2s, 0, WIDTH, HEIGHT, 0, nil, nil, -10, 10)
 
 -- A drop-down with physical switches
 subGUI.label(0, ROW, WIDTH, HEIGHT, "Drop-down:")
-labelDropDown = subGUI.label(0, 2 * ROW, 2 * WIDTH, HEIGHT, "")
+local labelDropDown = subGUI.label(0, 2 * ROW, 2 * WIDTH, HEIGHT, "")
 
 local dropDownIndices = { }
 local dropDownItems = { }
-local lastSwitch = getSwitchIndex(CHAR_TRIM .. "Rl") - 1
+local lastSwitch = getLastSwitchIndex()
 
 for i, s in switches(-lastSwitch, lastSwitch) do
-  if i ~= 0 then 
+  if i ~= 0 then
     local j = #dropDownIndices + 1
     dropDownIndices[j] = i
     dropDownItems[j] = s
@@ -127,6 +138,9 @@ local menuItems = {
 }
 
 gui.menu(COL4, TOP + ROW, WIDTH, 5 * ROW, menuItems, function(menu) playNumber(menu.selected, 0) end)
+
+-- momentary button
+gui.momentaryButton(COL1, TOP + 5 * ROW, WIDTH, HEIGHT, "Momentary");
 
 -- Horizontal slider
 gui.label(COL1, TOP + 6 * ROW, WIDTH, HEIGHT, "Horizontal slider:", BOLD)
@@ -201,7 +215,7 @@ function gui.fullScreenRefresh()
   -- Draw header
   lcd.drawFilledRectangle(0, 0, LCD_W, HEADER, COLOR_THEME_SECONDARY1)
   lcd.drawText(COL1, HEADER / 2, "LibGUI   Demo", VCENTER + DBLSIZE + libGUI.colors.primary2)
-  
+
   -- Border
   if toggleButton.value then
     lcd.drawRectangle(0, HEADER, LCD_W, LCD_H - HEADER, libGUI.colors.edit, 5)
@@ -216,7 +230,16 @@ end
 
 -- This function is called from the refresh(...) function in the main script
 function widget.refresh(event, touchState)
-  gui.run(event, touchState)
+    if event == nil then
+        lcd.drawFilledRectangle(0, 0, LCD_W, HEADER, COLOR_THEME_SECONDARY1)
+        lcd.drawText(10, 40 / 2, "LibGUI  Demo", VCENTER + MIDSIZE + libGUI.colors.primary2)
+
+        lcd.drawFilledRectangle(0, 50-5, 480, 60, RED, 90)
+        lcd.drawText(10, 50, "change to full-screen")
+        lcd.drawText(10, 70, "to see the widget")
+        return
+    end
+    gui.run(event, touchState)
 end
 
 -- Return to the create(...) function in the main script

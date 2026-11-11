@@ -1,22 +1,33 @@
-semver: 2.8.0
+semver: 2.8.4
 header:
-  name: Eachine F22
-  bitmap: F22.png
+  name: OMPHOBBY M2
+  bitmap: OH-M2-1.jpg
   labels: ""
   modelId:
     0:
       val: 0
 timers:
   0:
-    swtch: SF2
-    mode: ON
+    swtch: NONE
+    mode: THR
     name: ""
-    minuteBeep: 0
+    minuteBeep: 1
     countdownBeep: 2
     start: 300
     persistent: 0
     countdownStart: -1
     value: 0
+    showElapsed: 0
+  2:
+    swtch: NONE
+    mode: OFF
+    name: ""
+    minuteBeep: 0
+    countdownBeep: 0
+    start: 0
+    persistent: 2
+    countdownStart: -1
+    value: 8981
     showElapsed: 0
 noGlobalFunctions: 0
 thrTrim: 0
@@ -27,10 +38,27 @@ disableThrottleWarning: 0
 enableCustomThrottleWarning: 0
 customThrottleWarningPosition: 0
 beepANACenter: 0
-extendedLimits: 0
+extendedLimits: 1
 extendedTrims: 0
 throttleReversed: 0
 mixData:
+  - destCh: 0
+    srcRaw: I0
+    weight: 100
+    swtch: NONE
+    curve:
+      type: 0
+      value: 0
+    delayUp: 0
+    delayDown: 0
+    speedUp: 0
+    speedDown: 0
+    carryTrim: 0
+    mltpx: ADD
+    mixWarn: 0
+    flightModes: 000000000
+    offset: 0
+    name: AilR
   - destCh: 1
     srcRaw: I1
     weight: 100
@@ -50,17 +78,51 @@ mixData:
     name: Elev
   - destCh: 2
     srcRaw: I2
-    weight: 103
-    swtch: NONE
+    weight: 100
+    swtch: SG0
     curve:
-      type: 0
-      value: 0
+      type: 3
+      value: 1
     delayUp: 0
     delayDown: 0
     speedUp: 0
     speedDown: 0
     carryTrim: 0
-    mltpx: ADD
+    mltpx: REPL
+    mixWarn: 0
+    flightModes: 000000000
+    offset: 0
+    name: Motor
+  - destCh: 2
+    srcRaw: I2
+    weight: 100
+    swtch: SG1
+    curve:
+      type: 3
+      value: 2
+    delayUp: 0
+    delayDown: 0
+    speedUp: 0
+    speedDown: 0
+    carryTrim: 0
+    mltpx: REPL
+    mixWarn: 0
+    flightModes: 000000000
+    offset: 0
+    name: Motor
+  - destCh: 2
+    srcRaw: I2
+    weight: 100
+    swtch: SG2
+    curve:
+      type: 3
+      value: 3
+    delayUp: 0
+    delayDown: 0
+    speedUp: 0
+    speedDown: 0
+    carryTrim: 0
+    mltpx: REPL
     mixWarn: 0
     flightModes: 000000000
     offset: 0
@@ -83,9 +145,9 @@ mixData:
     offset: 0
     name: Rudder
   - destCh: 4
-    srcRaw: SG
-    weight: 100
-    swtch: NONE
+    srcRaw: MAX
+    weight: -100
+    swtch: SE0
     curve:
       type: 0
       value: 0
@@ -94,54 +156,88 @@ mixData:
     speedUp: 0
     speedDown: 0
     carryTrim: 0
-    mltpx: ADD
+    mltpx: REPL
+    mixWarn: 0
+    flightModes: 000000000
+    offset: 0
+    name: ""
+  - destCh: 4
+    srcRaw: MAX
+    weight: 100
+    swtch: "!SE0"
+    curve:
+      type: 0
+      value: 0
+    delayUp: 0
+    delayDown: 0
+    speedUp: 0
+    speedDown: 0
+    carryTrim: 0
+    mltpx: REPL
     mixWarn: 0
     flightModes: 000000000
     offset: 0
     name: ""
   - destCh: 5
-    srcRaw: SH
+    srcRaw: I2
     weight: 100
-    swtch: NONE
+    swtch: SG0
     curve:
-      type: 0
-      value: 0
+      type: 3
+      value: 5
     delayUp: 0
     delayDown: 0
     speedUp: 0
     speedDown: 0
-    carryTrim: 0
-    mltpx: ADD
+    carryTrim: 1
+    mltpx: REPL
     mixWarn: 0
     flightModes: 000000000
     offset: 0
-    name: ""
-  - destCh: 15
-    srcRaw: SH
+    name: Pitch
+  - destCh: 5
+    srcRaw: I2
     weight: 100
-    swtch: L1
+    swtch: SG1
     curve:
-      type: 0
-      value: 0
+      type: 3
+      value: 6
     delayUp: 0
     delayDown: 0
     speedUp: 0
     speedDown: 0
-    carryTrim: 0
-    mltpx: ADD
+    carryTrim: 1
+    mltpx: REPL
     mixWarn: 0
     flightModes: 000000000
     offset: 0
-    name: BIND
+    name: Pitch
+  - destCh: 5
+    srcRaw: I2
+    weight: 100
+    swtch: SG2
+    curve:
+      type: 3
+      value: 7
+    delayUp: 0
+    delayDown: 0
+    speedUp: 0
+    speedDown: 0
+    carryTrim: 1
+    mltpx: REPL
+    mixWarn: 0
+    flightModes: 000000000
+    offset: 0
+    name: Pitch
 limitData:
   0:
     min: 0
     max: 0
-    revert: 0
+    revert: 1
     offset: 0
     ppmCenter: 0
     symetrical: 0
-    name: ""
+    name: Ail
     curve: 32
   1:
     min: 0
@@ -150,17 +246,134 @@ limitData:
     offset: 0
     ppmCenter: 0
     symetrical: 0
-    name: ""
+    name: Ele
     curve: 32
-  3:
+  2:
     min: 0
     max: 0
     revert: 0
     offset: 0
     ppmCenter: 0
     symetrical: 0
-    name: ""
+    name: Thr
+    curve: 0
+  3:
+    min: 0
+    max: 0
+    revert: 1
+    offset: 0
+    ppmCenter: 0
+    symetrical: 0
+    name: Rud
     curve: 32
+  4:
+    min: 0
+    max: 0
+    revert: 0
+    offset: 0
+    ppmCenter: 0
+    symetrical: 0
+    name: CH5
+    curve: 0
+  5:
+    min: 0
+    max: 0
+    revert: 0
+    offset: 0
+    ppmCenter: 0
+    symetrical: 0
+    name: CH6
+    curve: 0
+  6:
+    min: 0
+    max: 0
+    revert: 0
+    offset: 0
+    ppmCenter: 0
+    symetrical: 0
+    name: CH7
+    curve: 0
+  7:
+    min: 0
+    max: 0
+    revert: 0
+    offset: 0
+    ppmCenter: 0
+    symetrical: 0
+    name: CH8
+    curve: 0
+  8:
+    min: 0
+    max: 0
+    revert: 0
+    offset: 0
+    ppmCenter: 0
+    symetrical: 0
+    name: CH9
+    curve: 0
+  9:
+    min: 0
+    max: 0
+    revert: 0
+    offset: 0
+    ppmCenter: 0
+    symetrical: 0
+    name: CH10
+    curve: 0
+  10:
+    min: 0
+    max: 0
+    revert: 0
+    offset: 0
+    ppmCenter: 0
+    symetrical: 0
+    name: CH11
+    curve: 0
+  11:
+    min: 0
+    max: 0
+    revert: 0
+    offset: 0
+    ppmCenter: 0
+    symetrical: 0
+    name: CH12
+    curve: 0
+  12:
+    min: 0
+    max: 0
+    revert: 0
+    offset: 0
+    ppmCenter: 0
+    symetrical: 0
+    name: CH13
+    curve: 0
+  13:
+    min: 0
+    max: 0
+    revert: 0
+    offset: 0
+    ppmCenter: 0
+    symetrical: 0
+    name: CH14
+    curve: 0
+  14:
+    min: 0
+    max: 0
+    revert: 0
+    offset: 0
+    ppmCenter: 0
+    symetrical: 0
+    name: CH15
+    curve: 0
+  15:
+    min: 0
+    max: 0
+    revert: 0
+    offset: 0
+    ppmCenter: 0
+    symetrical: 0
+    name: CH16
+    curve: 0
 expoData:
   - srcRaw: Ail
     scale: 0
@@ -171,9 +384,9 @@ expoData:
     weight: 100
     offset: 0
     curve:
-      type: 0
-      value: 0
-    carryTrim: 0
+      type: 1
+      value: 50
+    trimSource: 0
     name: ""
   - srcRaw: Ele
     scale: 0
@@ -184,9 +397,9 @@ expoData:
     weight: 100
     offset: 0
     curve:
-      type: 0
-      value: 0
-    carryTrim: 0
+      type: 1
+      value: 50
+    trimSource: 0
     name: ""
   - srcRaw: Thr
     scale: 0
@@ -199,7 +412,7 @@ expoData:
     curve:
       type: 0
       value: 0
-    carryTrim: 0
+    trimSource: 0
     name: ""
   - srcRaw: Rud
     scale: 0
@@ -210,9 +423,9 @@ expoData:
     weight: 100
     offset: 0
     curve:
-      type: 0
-      value: 0
-    carryTrim: 0
+      type: 1
+      value: 50
+    trimSource: 0
     name: ""
 inputNames:
   0:
@@ -228,7 +441,37 @@ curves:
     type: 0
     smooth: 0
     points: 0
+    name: TH1
+  1:
+    type: 0
+    smooth: 0
+    points: 0
+    name: TH2
+  2:
+    type: 0
+    smooth: 0
+    points: 0
+    name: TH3
+  3:
+    type: 0
+    smooth: 0
+    points: 0
     name: ""
+  4:
+    type: 0
+    smooth: 0
+    points: 0
+    name: PT1
+  5:
+    type: 0
+    smooth: 0
+    points: 0
+    name: PT2
+  6:
+    type: 0
+    smooth: 0
+    points: 0
+    name: PT3
   31:
     type: 1
     smooth: 0
@@ -238,12 +481,72 @@ points:
   0:
     val: -100
   1:
-    val: -15
+    val: 15
   2:
-    val: 0
+    val: 15
   3:
     val: 15
   4:
+    val: 15
+  5:
+    val: 30
+  6:
+    val: 30
+  7:
+    val: 30
+  8:
+    val: 30
+  9:
+    val: 30
+  10:
+    val: 60
+  11:
+    val: 60
+  12:
+    val: 60
+  13:
+    val: 60
+  14:
+    val: 60
+  15:
+    val: -100
+  16:
+    val: -50
+  17:
+    val: 0
+  18:
+    val: 50
+  19:
+    val: 100
+  20:
+    val: -10
+  21:
+    val: -5
+  22:
+    val: 12
+  23:
+    val: 37
+  24:
+    val: 70
+  25:
+    val: -100
+  26:
+    val: -50
+  27:
+    val: 0
+  28:
+    val: 50
+  29:
+    val: 100
+  30:
+    val: -100
+  31:
+    val: -50
+  32:
+    val: 0
+  33:
+    val: 50
+  34:
     val: 100
   155:
     val: -100
@@ -257,34 +560,15 @@ points:
     val: -2
   160:
     val: 2
-logicalSw:
-  0:
-    func: FUNC_VNEG
-    def: Thr,0
-    delay: 0
-    duration: 0
-    andsw: NONE
 customFn:
   0:
     swtch: SF0
     func: OVERRIDE_CHANNEL
     def: 2,-100,1
   1:
-    swtch: SF0
+    swtch: SH2
     func: RESET
     def: Tmr1,1
-  2:
-    swtch: SF0
-    func: PLAY_TRACK
-    def: armed,1x
-  3:
-    swtch: SF2
-    func: PLAY_TRACK
-    def: disarm,1x
-  4:
-    swtch: SG2
-    func: PLAY_TRACK
-    def: fm-acr,1x
 swashR:
   type: TYPE_NONE
   value: 0
@@ -295,7 +579,7 @@ swashR:
   aileronWeight: 0
   elevatorWeight: 0
 thrTraceSrc: Thr
-switchWarningState: ""
+switchWarningState: AuBuCuDuEuFu
 thrTrimSw: 0
 potsWarnMode: WARN_OFF
 jitterFilter: GLOBAL
@@ -313,11 +597,11 @@ rssiSource: none
 rfAlarms:
   warning: 45
   critical: 42
-disableTelemetryWarning: 1
+disableTelemetryWarning: 0
 moduleData:
   0:
     type: TYPE_MULTIMODULE
-    subType: 48,1
+    subType: 21,0
     channelsStart: 0
     channelsCount: 16
     failsafeMode: NOPULSES
@@ -325,13 +609,13 @@ moduleData:
       multi:
         disableTelemetry: 0
         disableMapping: 0
-        autoBindMode: 1
+        autoBindMode: 0
         lowPowerMode: 0
         optionValue: 0
 trainerData:
-  mode: MASTER_TRAINER_JACK
+  mode: SLAVE
   channelsStart: 0
-  channelsCount: -8
+  channelsCount: 0
   frameLength: 0
   delay: 0
   pulsePol: 0

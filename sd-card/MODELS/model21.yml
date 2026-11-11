@@ -1,14 +1,14 @@
 semver: 2.8.3
 header: 
-   name: "M4"
+   name: "M1"
    modelId: 
       0:
-         val: 4
-   bitmap: "M4_y.png"
+         val: 7
+   bitmap: "M1_p.png"
    labels: "Favorites"
 timers: 
    0:
-      start: 280
+      start: 220
       swtch: "!L10"
       value: 0
       mode: ON
@@ -25,7 +25,7 @@ displayTrims: 0
 ignoreSensorIds: 0
 trimInc: 1
 disableThrottleWarning: 1
-displayChecklist: 1
+displayChecklist: 0
 extendedLimits: 1
 extendedTrims: 0
 throttleReversed: 0
@@ -197,6 +197,9 @@ mixData:
    offset: 0
    swtch: "NONE"
    flightModes: 000000000
+   curve: 
+      type: 1
+      value: 30
    delayUp: 0
    delayDown: 0
    speedUp: 0
@@ -401,7 +404,16 @@ limitData:
       revert: 1
       curve: 0
       name: ""
-   1:
+   3:
+      min: 0
+      max: 0
+      ppmCenter: 0
+      offset: 0
+      symetrical: 0
+      revert: 1
+      curve: 0
+      name: ""
+   4:
       min: 0
       max: 0
       ppmCenter: 0
@@ -499,7 +511,7 @@ curves:
       type: 0
       smooth: 0
       points: -3
-      name: "FM1"
+      name: "FML"
    2:
       type: 0
       smooth: 0
@@ -511,10 +523,10 @@ curves:
       points: -3
       name: "FM3"
    4:
-      type: 1
+      type: 0
       smooth: 0
-      points: -2
-      name: "CP1"
+      points: -3
+      name: "CPL"
    5:
       type: 1
       smooth: 0
@@ -560,55 +572,55 @@ points:
       val: -100
    1:
       val: -100
-   4:
-      val: 15
-   5:
-      val: 15
+   2:
+      val: -10
+   3:
+      val: -10
    6:
-      val: 25
+      val: 30
    7:
-      val: 25
+      val: 30
    8:
-      val: -100
+      val: -40
+   9:
+      val: 40
    10:
-      val: 100
-   12:
       val: -95
-   13:
+   11:
       val: 95
-   14:
+   12:
       val: -90
-   15:
+   13:
       val: 90
+   16:
+      val: 85
+   17:
+      val: 85
    18:
-      val: 85
+      val: 60
    19:
-      val: 85
+      val: 60
    20:
-      val: 60
+      val: 50
    21:
-      val: 60
+      val: 50
    22:
-      val: 50
-   23:
-      val: 50
-   24:
       val: -100
-   25:
+   23:
       val: -8
-   28:
+   26:
       val: 8
-   29:
+   27:
       val: 100
+   28:
+      val: -1
+   29:
+      val: -1
    30:
-      val: -1
+      val: 1
    31:
-      val: -1
-   32:
       val: 1
-   33:
-      val: 1
-   36:
+   34:
       val: 100
 logicalSw: 
    0:
@@ -685,76 +697,43 @@ logicalSw:
       duration: 0
 customFn: 
    0:
-      swtch: "!TELEMETRY_STREAMING"
-      func: RESET
-      def: "6,1"
-   1:
-      swtch: "!TELEMETRY_STREAMING"
+      swtch: "L14"
       func: RESET
       def: "Tmr1,1"
-   2:
+   1:
       swtch: "SF0"
       func: PLAY_TRACK
       def: "thract,1x"
-   3:
+   2:
       swtch: "SF2"
       func: PLAY_TRACK
       def: "thrcut,1x"
-   4:
+   3:
       swtch: "SC0"
       func: PLAY_TRACK
       def: "gyroff,1x"
-   5:
+   4:
       swtch: "SC2"
       func: PLAY_TRACK
       def: "gyron,1x"
-   6:
+   5:
       swtch: "SE0"
       func: PLAY_TRACK
       def: "fm-id1,1x"
-   7:
+   6:
       swtch: "SE1"
       func: PLAY_TRACK
       def: "fm-id2,1x"
-   8:
+   7:
       swtch: "SE2"
       func: PLAY_TRACK
       def: "fm-pwr,1x"
-   9:
+   8:
       swtch: "SH2"
       func: PLAY_TRACK
       def: "lq,1x"
-   11:
-      swtch: "SD2"
-      func: LOGS
-      def: "10"
-flightModeData: 
-   0:
-      name: ""
-      swtch: "NONE"
-      fadeIn: 0
-      fadeOut: 0
-      gvars: 
-         0:
-            val: 0
-         1:
-            val: 0
-         2:
-            val: 0
-         3:
-            val: 0
-         4:
-            val: 0
-         5:
-            val: 3
-         6:
-            val: 7
-         7:
-            val: 0
-         8:
-            val: 0
 thrTraceSrc: Thr
-switchWarningState: AdCuDuEuFd
+switchWarningState: AdFd
 rssiSource: none
 rfAlarms: 
    warning: 45
@@ -765,10 +744,10 @@ jitterFilter: GLOBAL
 moduleData: 
    0:
       type: TYPE_MULTIMODULE
-      subType: 64,2
+      subType: 21,0
       channelsStart: 0
       channelsCount: 16
-      failsafeMode: HOLD
+      failsafeMode: NOPULSES
       mod: 
          multi: 
             disableTelemetry: 0
@@ -799,177 +778,6 @@ inputNames:
    5:
       val: "Coll"
 potsWarnEnabled: 0
-telemetrySensors: 
-   0:
-      id1: 
-         id: 61697
-      id2: 
-         instance: 248
-      label: "RSSI"
-      subId: 0
-      type: TYPE_CUSTOM
-      unit: 17
-      prec: 0
-      autoOffset: 0
-      filter: 0
-      logs: 1
-      persistent: 0
-      onlyPositive: 0
-      cfg: 
-         custom: 
-            ratio: 0
-            offset: 0
-   1:
-      id1: 
-         id: 65534
-      id2: 
-         instance: 248
-      label: "TRSS"
-      subId: 0
-      type: TYPE_CUSTOM
-      unit: 17
-      prec: 0
-      autoOffset: 0
-      filter: 0
-      logs: 1
-      persistent: 0
-      onlyPositive: 0
-      cfg: 
-         custom: 
-            ratio: 0
-            offset: 0
-   2:
-      id1: 
-         id: 65533
-      id2: 
-         instance: 248
-      label: "TQly"
-      subId: 0
-      type: TYPE_CUSTOM
-      unit: 0
-      prec: 0
-      autoOffset: 0
-      filter: 0
-      logs: 1
-      persistent: 0
-      onlyPositive: 0
-      cfg: 
-         custom: 
-            ratio: 0
-            offset: 0
-   3:
-      id1: 
-         id: 61700
-      id2: 
-         instance: 248
-      label: "RxBt"
-      subId: 0
-      type: TYPE_CUSTOM
-      unit: 1
-      prec: 1
-      autoOffset: 0
-      filter: 1
-      logs: 1
-      persistent: 0
-      onlyPositive: 0
-      cfg: 
-         custom: 
-            ratio: 132
-            offset: 0
-   4:
-      id1: 
-         id: 512
-      id2: 
-         instance: 226
-      label: "Curr"
-      subId: 0
-      type: TYPE_CUSTOM
-      unit: 2
-      prec: 1
-      autoOffset: 0
-      filter: 0
-      logs: 1
-      persistent: 0
-      onlyPositive: 1
-      cfg: 
-         custom: 
-            ratio: 0
-            offset: 0
-   5:
-      id1: 
-         id: 528
-      id2: 
-         instance: 226
-      label: "VFAS"
-      subId: 0
-      type: TYPE_CUSTOM
-      unit: 1
-      prec: 2
-      autoOffset: 0
-      filter: 0
-      logs: 1
-      persistent: 0
-      onlyPositive: 0
-      cfg: 
-         custom: 
-            ratio: 0
-            offset: 0
-   6:
-      id1: 
-         id: 0
-      id2: 
-         formula: FORMULA_CONSUMPTION
-      label: "mAh"
-      subId: 0
-      type: TYPE_CALCULATED
-      unit: 14
-      prec: 0
-      autoOffset: 0
-      filter: 0
-      logs: 1
-      persistent: 0
-      onlyPositive: 0
-      cfg: 
-         consumption: 
-            source: 5
-   7:
-      id1: 
-         id: 1295
-      id2: 
-         instance: 224
-      label: "RPM"
-      subId: 0
-      type: TYPE_CUSTOM
-      unit: 18
-      prec: 0
-      autoOffset: 0
-      filter: 0
-      logs: 1
-      persistent: 0
-      onlyPositive: 0
-      cfg: 
-         custom: 
-            ratio: 1
-            offset: 1
-   8:
-      id1: 
-         id: 1551
-      id2: 
-         instance: 224
-      label: "Fuel"
-      subId: 0
-      type: TYPE_CUSTOM
-      unit: 13
-      prec: 0
-      autoOffset: 0
-      filter: 0
-      logs: 1
-      persistent: 0
-      onlyPositive: 0
-      cfg: 
-         custom: 
-            ratio: 0
-            offset: 0
 screenData: 
    0:
       LayoutId: "Layout2P1"
@@ -998,7 +806,7 @@ screenData:
                      4:
                         type: Color
                         value: 
-                           color: 0xE8D828
+                           color: 0x105C98
             1:
                widgetName: "ArmedModel"
                widgetData: 
@@ -1012,25 +820,21 @@ screenData:
                         value: 
                            source: SF
             2:
-               widgetName: "mahRe"
+               widgetName: "Timer2"
                widgetData: 
                   options: 
                      0:
-                        type: Source
-                        value: 
-                           source: tele(6)
-                     1:
-                        type: Source
-                        value: 
-                           source: tele(5)
-                     2:
-                        type: Source
-                        value: 
-                           source: tele(4)
-                     3:
                         type: Color
                         value: 
-                           color: 0xF8FCF8
+                           color: 0xF8F8F8
+                     1:
+                        type: Signed
+                        value: 
+                           signedValue: 1
+                     2:
+                        type: Bool
+                        value: 
+                           boolValue: 0
          options: 
             0:
                type: Bool
@@ -1082,22 +886,6 @@ topbarData:
                   type: Source
                   value: 
                      source: ch(4)
-      2:
-         widgetName: "Value"
-         widgetData: 
-            options: 
-               0:
-                  type: Source
-                  value: 
-                     source: tele(7)
-               1:
-                  type: Color
-                  value: 
-                     color: 0xF8FCF8
-               2:
-                  type: Bool
-                  value: 
-                     boolValue: 0
       3:
          widgetName: "BattAnalog"
          widgetData: 
@@ -1109,7 +897,7 @@ topbarData:
                1:
                   type: Color
                   value: 
-                     color: 0xF8F8F8
+                     color: 0xF8FC00
                2:
                   type: Bool
                   value: 
