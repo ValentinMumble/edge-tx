@@ -40,11 +40,27 @@ declare module lcd {
   function RGB(rbgHexa: number): number;
   function drawCircle(x: number, y: number, radius: number, flags?: number): void;
   function drawFilledCircle(x: number, y: number, radius: number, flags?: number): void;
-  function drawTriangle(): void;
-  function drawFilledTriangle(): void;
-  function drawArc(): void;
+  function drawTriangle(x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, flags?: number): void;
+  function drawFilledTriangle(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    x3: number,
+    y3: number,
+    flags?: number
+  ): void;
+  function drawArc(x: number, y: number, radius: number, arcStart: number, arcEnd: number, flags?: number): void;
   function drawPie(x: number, y: number, radius: number, arcStart: number, arcEnd: number, flags?: number): void;
-  function drawAnnulus(): void;
+  function drawAnnulus(
+    x: number,
+    y: number,
+    innerRadius: number,
+    outerRadius: number,
+    arcStart: number,
+    arcEnd: number,
+    flags?: number
+  ): void;
   function drawLineWithClipping(): void;
   function drawHudRectangle(): void;
   function exitFullScreen(): void;

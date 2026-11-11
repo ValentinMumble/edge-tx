@@ -1,1 +1,4 @@
 *.luac
+node_modules
+backups/
+update-2.12.5/

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Widget preview</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --page: #121417;
+        --panel: #1b1e22;
+        --line: #2c3036;
+        --ink: #e8eaed;
+        --muted: #8b929b;
+        --accent: #7cffb2;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--page);
+        color: var(--ink);
+        font:
+          14px/1.4 -apple-system,
+          system-ui,
+          sans-serif;
+      }
+      main {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        padding: 24px;
+        align-items: flex-start;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 18px;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .screen {
+        flex: none;
+      }
+      canvas {
+        display: block;
+        width: 960px;
+        max-width: calc(100vw - 48px);
+        image-rendering: pixelated;
+        border-radius: 10px;
+        border: 6px solid #050607;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      }
+      .controls {
+        flex: 1 1 300px;
+        max-width: 420px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      fieldset {
+        margin: 0;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--panel);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      legend {
+        padding: 0 6px;
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: lowercase;
+        font-family: ui-monospace, Menlo, monospace;
+      }
+      label.row {
+        display: grid;
+        grid-template-columns: 130px 1fr;
+        align-items: center;
+        gap: 10px;
+      }
+      select,
+      input[type='text'],
+      input[type='number'] {
+        width: 100%;
+        padding: 6px 8px;
+        border-radius: 7px;
+        border: 1px solid var(--line);
+        background: #101215;
+        color: var(--ink);
+        font: inherit;
+      }
+      .size {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 6px;
+        align-items: center;
+      }
+      .switch {
+        display: flex;
+        gap: 4px;
+      }
+      .switch button,
+      .play {
+        flex: 1;
+        padding: 6px 0;
+        border-radius: 7px;
+        border: 1px solid var(--line);
+        background: #101215;
+        color: var(--ink);
+        font: inherit;
+        cursor: pointer;
+      }
+      .switch button[aria-pressed='true'] {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      input[type='range'] {
+        width: 100%;
+      }
+      .error {
+        white-space: pre-wrap;
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 12px;
+        color: #ff8a80;
+      }
+      .sounds {
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 12px;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="screen">
+        <h1>Widget preview</h1>
+        <p class="muted" id="status">Loading…</p>
+        <canvas id="screen" width="480" height="272"></canvas>
+        <p class="error" id="error"></p>
+      </section>
+      <section class="controls">
+        <fieldset>
+          <legend>widget</legend>
+          <label class="row"
+            >Widget
+            <select id="widget"></select
+          ></label>
+          <label class="row"
+            >Zone
+            <select id="zone">
+              <option value="198x86">M2 EVO screen, top left (198 × 86)</option>
+              <option value="198x173">Layout 2 + 1, right (198 × 173)</option>
+              <option value="396x173">Whole main view (396 × 173)</option>
+              <option value="480x272">Full screen (480 × 272)</option>
+              <option value="74x39">Top bar slot (74 × 39)</option>
+              <option value="custom">Other size</option>
+            </select>
+          </label>
+          <div class="size" id="size" hidden>
+            <input type="number" id="width" min="20" max="480" value="198" aria-label="Width" />
+            <span class="muted">×</span>
+            <input type="number" id="height" min="20" max="272" value="86" aria-label="Height" />
+          </div>
+          <button class="play" id="play" type="button">Pause</button>
+        </fieldset>
+        <fieldset id="options">
+          <legend>options</legend>
+        </fieldset>
+        <fieldset id="sources" hidden>
+          <legend>other inputs it reads</legend>
+        </fieldset>
+        <fieldset>
+          <legend>model</legend>
+          <label class="row">Name <input type="text" id="model-name" value="M2 EVO" /></label>
+          <label class="row"
+            >Picture
+            <select id="model-bitmap"></select
+          ></label>
+        </fieldset>
+        <fieldset>
+          <legend>sounds played</legend>
+          <div class="sounds" id="sounds">None yet</div>
+        </fieldset>
+      </section>
+    </main>
+    <script src="../node_modules/fengari-web/dist/fengari-web.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

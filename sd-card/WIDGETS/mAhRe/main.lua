@@ -30,6 +30,10 @@
 --  Voice announcements of percentage remaining during active use.
 --  After reset, warn if battery is not fully charged
 --  After reset, check cells to verify that they are within VoltageDelta of each other
+--
+-- Edited for edge-tx (2026 November): the pack's size comes from the 6-position button pressed for it (PACKS below,
+--  the same as the Pack widget's), not from GV7, and the pack's name shows under the voltage. The checks start again
+--  on each new pack, not on a reset switch, and the pack-not-full check reads a pack voltage (VFAS) a cell.
 
 
 -- Description
@@ -110,9 +114,8 @@ local CurrentSensor = "Curr"
 -- Change as desired
 local CapacityReservePercent = 0 -- set to zero to disable
 
--- Switch used to reset the voltage checking features.
---  typically set to the same switch used to reset timers
-local SwReset = "sh"
+-- The voltage checking features start again by themselves on each new pack (edge-tx edit): no reset switch, so the
+--  switch it was on (SH) is only the rescue.
 
 --   Value used when checking to see if the cell is full for the check_for_full_battery check
 local CellFullVoltage = 4.0
@@ -193,6 +196,7 @@ local PlayFirstMissingCellWarning = true
 local PlayMissingCellWarning = true
 local InconsistentCellVoltageDetected = false
 local ResetDebounced = true
+local PackPowered = false -- a pack's voltage read at the last update, to tell a new pack (updated in reset_if_needed)
 local MaxWatts = "-----"
 local MaxAmps = "-----"
 
@@ -210,6 +214,23 @@ local xAlign = 0
 
 local BlinkWhenZero = 0 -- updated in run_func
 local Color = GREY
+
+-- The packs by 6-position button: press the button of the pack you plug in. Its size makes the mAh and % left.
+local PACKS = {
+  { name = "Gens Ace 1", mah = 700 },
+  { name = "Gens Ace 2", mah = 700 },
+  { name = "OMP 1", mah = 750 },
+  { name = "OMP 2", mah = 750 },
+  { name = "Eachine 1", mah = 500 },
+  { name = "Eachine 2", mah = 500 },
+}
+
+-- The pack of the button pressed: the buttons read -1024 to 1024 in six steps.
+local function packPlugged()
+  local value = getValue("6P") or 0
+  local button = math.max(1, math.min(6, math.floor((value + 1024) / 409.6 + 0.5) + 1))
+  return PACKS[button]
+end
 
 -- Based on results from http://rcdiy.ca/taranis-q-x7-battery-run-time/
 local VoltToPercentTable = {
@@ -348,10 +369,10 @@ local function check_for_full_battery(voltageSensorValue)
           end
         end
         CheckBatNotFull = false  -- since we have done the check, set to false so it is not ran again
-      elseif VoltageSensor == "VFAS" and type(voltageSensorValue) == "number" then --this is for the vfas sensor
+      elseif type(voltageSensorValue) == "number" and voltageSensorValue > 0.5 and (CellCount or 0) > 0 then -- the pack's voltage (VFAS)
+        -- a cell's share of the pack's voltage against a full cell's; with no pack yet (0 V), wait for one
         print(string.format("vfas: %f", voltageSensorValue))
-        --(string.format("vfas value: %d", voltageSensorValue))
-        if voltageSensorValue < (CellFullVoltage - .001) then
+        if voltageSensorValue / CellCount < (CellFullVoltage - .001) then
           --print("vfas cell not full detected")
           playBatNotFullWarning = true
         end
@@ -456,7 +477,7 @@ end
 -- ####################################################################
 local function init_func()
   -- Called once when model is loaded
-  BatCapFullmAh = model.getGlobalVariable(GVBatCap, GVFlightMode) * 100
+  BatCapFullmAh = packPlugged().mah
   -- BatCapmAh = BatCapFullmAh
   BatCapmAh = BatCapFullmAh * (100-CapacityReservePercent)/100
   BatRemainmAh = BatCapmAh
@@ -473,37 +494,34 @@ end
 
 -- ####################################################################
 local function reset_if_needed()
-  -- test if the reset switch is toggled, if so then reset all internal flags
-  if SwReset ~= "" then -- Update switch position
-    if ResetDebounced and HasSecondsElapsed(2) and -1024 ~= getValue(SwReset) then -- reset switch
-      print("reset switch toggled")
-      CheckBatNotFull = true
-      StartTime = nil
-      PlayInconsistentCellWarning = true
-      PlayFirstMissingCellWarning = true
-      PlayMissingCellWarning = true
-      PlayFirstInconsistentCellWarning = true
-      InconsistentCellVoltageDetected = false
-      VoltageHistory = {}
-      ResetDebounced = false
-      VoltsNow = 0
-      MaxWatts = "-----"
-      MaxAmps = "-----"
-      --print("reset event")
-    end
-    if not HasSecondsElapsed(2) then
-      --print("debounced")
-      ResetDebounced = true
-    end
+  -- a new pack plugged in resets all internal flags: its voltage comes back after none (the radio reads 0 for every
+  -- sensor while no telemetry streams) with the mAh count at 0; the model resets that count only when telemetry
+  -- stops while disarmed, so a dropout in flight is not a new pack
+  local voltage = VoltageSensor ~= "" and getValue(VoltageSensor) or 0
+  local powered = type(voltage) == "table" or (type(voltage) == "number" and voltage > 0.5)
+  if powered and not PackPowered and (mAhSensor == "" or (getValue(mAhSensor) or 0) < 5) then
+    print("new pack")
+    CheckBatNotFull = true
+    StartTime = nil
+    PlayInconsistentCellWarning = true
+    PlayFirstMissingCellWarning = true
+    PlayMissingCellWarning = true
+    PlayFirstInconsistentCellWarning = true
+    InconsistentCellVoltageDetected = false
+    VoltageHistory = {}
+    VoltsNow = 0
+    MaxWatts = "-----"
+    MaxAmps = "-----"
   end
+  PackPowered = powered
 end
 
 -- ####################################################################
 local function bg_func()
 
   reset_if_needed() -- test if the reset switch is toggled, if so then reset all internal flags
-  -- Check in battery capacity was changed
-  if BatCapFullmAh ~= model.getGlobalVariable(GVBatCap, GVFlightMode) * 100 then
+  -- Check in battery capacity was changed: another pack's button pressed
+  if BatCapFullmAh ~= packPlugged().mah then
     init_func()
   end
 
@@ -617,8 +635,10 @@ end
 local function drawBattery(xOrigin, yOrigin, wgt)
   volts = getCellVoltage(VoltageSensor)
 
+  local pack = packPlugged()
   if 0 == volts then
     lcd.drawText(50, 20, "No telemetry")
+    lcd.drawText(50, 42, pack.name .. ", " .. pack.mah .. " mAh", SMLSIZE + GREY)
 
     return
   end
@@ -661,6 +681,10 @@ local function drawBattery(xOrigin, yOrigin, wgt)
 
   -- draw VFAS
   lcd.drawText(wgt.zone.x + myBatt.x + myBatt.cath_w + myBatt.w + 15, wgt.zone.y, string.format("%.1f V", volts), DBLSIZE)
+
+  -- the pack plugged in, by its button
+  lcd.drawText(wgt.zone.x + myBatt.x + myBatt.cath_w + myBatt.w + 15, wgt.zone.y + 40, pack.name, SMLSIZE)
+  lcd.drawText(wgt.zone.x + myBatt.x + myBatt.cath_w + myBatt.w + 15, wgt.zone.y + 56, pack.mah .. " mAh", SMLSIZE + GREY)
 end
 
 -- ####################################################################
