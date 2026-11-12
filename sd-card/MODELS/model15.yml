@@ -8,7 +8,7 @@ header:
    labels: "Favorites"
 timers: 
    0:
-      start: 280
+      start: 0
       swtch: "!L10"
       value: 0
       mode: ON
@@ -157,7 +157,7 @@ mixData:
  -
    weight: -15
    destCh: 2
-   srcRaw: 6POS
+   srcRaw: S1
    carryTrim: 0
    mixWarn: 0
    mltpx: ADD
@@ -687,13 +687,19 @@ logicalSw:
       andsw: "NONE"
       delay: 0
       duration: 0
+   15:
+      func: FUNC_AND
+      def: "!TELEMETRY_STREAMING,L5"
+      andsw: "NONE"
+      delay: 0
+      duration: 0
 customFn: 
    0:
-      swtch: "!TELEMETRY_STREAMING"
+      swtch: "L16"
       func: RESET
       def: "6,1"
    1:
-      swtch: "!TELEMETRY_STREAMING"
+      swtch: "L16"
       func: RESET
       def: "Tmr1,1"
    2:

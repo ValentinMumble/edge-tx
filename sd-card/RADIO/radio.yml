@@ -1,4 +1,4 @@
-checksum: 51991
+checksum: 9785
 manuallyEdited: 0
 timezoneMinutes: 0
 ppmunit: 0
@@ -132,11 +132,11 @@ varioRange: 0
 varioRepeat: 0
 customFn: 
    0:
-      swtch: "6P10"
+      swtch: "ON"
       func: VOLUME
       def: "P3,1"
    1:
-      swtch: "6P10"
+      swtch: "ON"
       func: BACKLIGHT
       def: "SL2,0"
 serialPort: 

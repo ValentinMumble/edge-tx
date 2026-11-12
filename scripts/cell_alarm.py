@@ -12,6 +12,11 @@ text = raw.replace('\r\n', '\n')
 assert '   name: "M2 EVO"\n' in text, 'not the M2 EVO model'
 assert 'label: "VFAS"' in text, 'no VFAS sensor'
 
+# Already there (the repo's card has it, and deploy.sh runs every script on the radio each time): nothing to do.
+if '      func: FUNC_VNEG\n      def: "tele(5),1050"\n' in text and '      def: "lowbat,1,15"\n' in text:
+    print(f'{model}: the low-cell alarm is already there')
+    sys.exit(0)
+
 # VFAS must be telemetry sensor 5 with 2 decimals, so 1050 means 10.50 V.
 sensors = text[text.index('telemetrySensors: \n'):text.index('screenData: \n')]
 fifth = sensors[sensors.index('   5:\n'):sensors.index('   6:\n')]

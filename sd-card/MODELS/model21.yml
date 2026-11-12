@@ -8,7 +8,7 @@ header:
    labels: "Favorites"
 timers: 
    0:
-      start: 220
+      start: 0
       swtch: "!L10"
       value: 0
       mode: ON
@@ -157,7 +157,7 @@ mixData:
  -
    weight: -15
    destCh: 2
-   srcRaw: 6POS
+   srcRaw: S1
    carryTrim: 0
    mixWarn: 0
    mltpx: ADD

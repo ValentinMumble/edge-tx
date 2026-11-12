@@ -1,12 +1,10 @@
 {
   "private": true,
   "scripts": {
-    "build": "tstl",
-    "dev": "tstl --watch",
-    "preview": "node preview/serve.mjs"
+    "build": "tstl && node scripts/card-widgets.mjs",
+    "dev": "tstl --watch"
   },
   "devDependencies": {
-    "fengari-web": "0.1.4",
     "lua-types": "^2.11.0",
     "typescript-to-lua": "^1.6.3"
   },

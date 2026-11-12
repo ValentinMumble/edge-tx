@@ -8,7 +8,7 @@ header:
    labels: "Favorites"
 timers: 
    0:
-      start: 280
+      start: 0
       swtch: "!L10"
       value: 0
       mode: ON
@@ -173,7 +173,7 @@ mixData:
    name: "Motor1"
  -
    destCh: 2
-   srcRaw: "P2"
+   srcRaw: "P1"
    carryTrim: 0
    mixWarn: 0
    mltpx: ADD
@@ -791,13 +791,29 @@ logicalSw:
       lsState: 0
       delay: 0
       duration: 0
+   14:
+      func: FUNC_VNEG
+      def: "tele(5),1050"
+      andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
+      delay: 20
+      duration: 0
+   15:
+      func: FUNC_AND
+      def: "!TELEMETRY_STREAMING,L5"
+      andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
+      delay: 0
+      duration: 0
 customFn: 
    0:
-      swtch: "!TELEMETRY_STREAMING"
+      swtch: "L16"
       func: RESET
       def: "6,1"
    1:
-      swtch: "!TELEMETRY_STREAMING"
+      swtch: "L16"
       func: RESET
       def: "Tmr1,1"
    2:
@@ -836,6 +852,22 @@ customFn:
       swtch: "TELEMETRY_STREAMING"
       func: LOGS
       def: "2,1"
+   12:
+      swtch: "L15"
+      func: PLAY_TRACK
+      def: "lowbat,1,15"
+   13:
+      swtch: "L15"
+      func: HAPTIC
+      def: "3,1,15"
+   14:
+      swtch: "SA0"
+      func: PLAY_TRACK
+      def: "armed,1,1x"
+   15:
+      swtch: "!SA0"
+      func: PLAY_TRACK
+      def: "disarm,1,1x"
 flightModeData: 
    0:
       name: ""
@@ -1132,6 +1164,71 @@ screenData:
             4:
                type: Bool
                value: 
+                  boolValue: 0
+   1:
+      LayoutId: Layout2x3
+      layoutData:
+         zones:
+            0:
+               widgetName: "FlyTimer"
+               widgetData:
+                  options:
+                     0:
+                        type: Signed
+                        value:
+                           signedValue: 272
+            1:
+               widgetName: "FlightState"
+               widgetData:
+                  options:
+                     0:
+                        type: Source
+                        value:
+                           source: SC
+                     1:
+                        type: Source
+                        value:
+                           source: SF
+            2:
+               widgetName: "Session"
+               widgetData:
+                  options:
+            3:
+               widgetName: "Power"
+               widgetData:
+                  options:
+                     0:
+                        type: Signed
+                        value:
+                           signedValue: 40
+            4:
+               widgetName: "Link"
+               widgetData:
+                  options:
+            5:
+               widgetName: "Pack"
+               widgetData:
+                  options:
+         options:
+            0:
+               type: Bool
+               value:
+                  boolValue: 1
+            1:
+               type: Bool
+               value:
+                  boolValue: 0
+            2:
+               type: Bool
+               value:
+                  boolValue: 0
+            3:
+               type: Bool
+               value:
+                  boolValue: 0
+            4:
+               type: Bool
+               value:
                   boolValue: 0
 topbarData: 
    zones: 

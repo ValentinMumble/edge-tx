@@ -1,0 +1,10 @@
+{
+  "armed-model": "ArmedModel",
+  "flight-status": "FlightStatus",
+  "pack": "Pack",
+  "fly-timer": "FlyTimer",
+  "power": "Power",
+  "link": "Link",
+  "flight-state": "FlightState",
+  "session": "Session"
+}

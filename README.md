@@ -1,11 +1,12 @@
 # EdgeTX
 
-The RadioMaster TX16S's SD card, and its widgets written in TypeScript, turned into Lua with TypeScriptToLua:
-`npm run build` (or `npm run dev` to rebuild on every save) writes them to `output/`.
+The RadioMaster TX16S's SD card, its widgets written in TypeScript (turned into Lua with TypeScriptToLua), and the
+scripts that change its models. Flightdown shows and runs it (see Preview).
 
-`sd-card/` is the card as of 10 November 2026, after the update to EdgeTX 2.12.5 (its 2.12.3 SD pack, the M2 EVO's
-model and the radio settings rewritten by it); its widgets built from `src/` and mAhRe are this repo's versions, the
-others the card's. Full card copies taken around an update stay out of git (`backups/`, `update-2.12.5/`).
+`sd-card/` is the card as it should be: the card as of 10 November 2026, after the update to EdgeTX 2.12.5, with the
+model changes of `scripts/` made to it, and the widgets built from `src/` and the edited mAhRe in it. `npm run build`
+puts the built widgets there (`widgets.json` says which folder each goes in); `npm run dev` rebuilds them into
+`output/` on every save. Full card copies taken from the radio stay out of git (`backups/`, `update-2.12.5/`).
 
 - **ArmedModel:** the arming state at a glance: SAFE (grey-green), ARMED (amber, throttle cut) or LIVE (red, the border
   blinking), the SA and SF switches as two lights, the model's picture, and its main rotor seen from above in the
@@ -31,15 +32,17 @@ models reset that count only when telemetry stops while disarmed, so a telemetry
 
 ## Deploy
 
-`scripts/deploy.sh` puts it all on the radio, plugged in as USB storage: the built widgets and the edited mAhRe, and
-the model changes, a script each: the M2 EVO's low-cell alarm (`cell_alarm.py`), its SA sounds and second screen
-(`m2evo_screen.py`), the 6-position buttons freed for the packs (`six_pos.py`), the mAh count and timer 1 kept
-through a dropout (`disarmed_reset.py`), and timer 1 counting up the time with the motor on, the mAh used saying when
-to land (`timer_up.py`). It backs up what it changes in `backups/<date>` first.
+`scripts/deploy.sh` makes the radio's card, plugged in as USB storage, what `sd-card/` is. It runs on it the scripts
+that changed the models here, each one skipping a change already there: the M2 EVO's low-cell alarm
+(`cell_alarm.py`), its SA sounds and second screen (`m2evo_screen.py`), the 6-position buttons freed for the packs
+(`six_pos.py`), the mAh count and timer 1 kept through a dropout (`disarmed_reset.py`), timer 1 counting up the time
+with the motor on (`timer_up.py`). Then it copies the built widgets and mAhRe from `sd-card/`. It backs up what it
+changes in `backups/<date>` first, and names any model the radio changed since, to copy into `sd-card/MODELS`. A new
+model change is a new script, run on `sd-card/` and added to the deploy.
 
 ## Preview
 
-`npm run preview`, then open http://localhost:5420/preview/: a TX16S screen in the browser that runs the built
-widgets as they are (Lua in JavaScript, with Fengari) and reloads them on every save. Pick the widget and its zone
-size, flip its switches and sources, change the model's name and picture. Drawing follows the radio (whole pixels,
-angles from 12 o'clock, the theme's colours); fonts are close, not exact.
+[Flightdown](https://github.com/ValentinMumble/flightdown)'s Radio tab reads `sd-card/` from this repo (on GitHub, or
+the checkout beside it) and runs it in a TX16S screen in the browser (Lua in JavaScript, with Fengari): "Model
+screens" the models' screens, "Logic" what each switch and channel does, "One widget" a built widget in a zone of its
+size. With `npm run dev` running here and in Flightdown, it reloads a widget on every save.

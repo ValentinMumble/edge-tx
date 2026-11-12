@@ -15,6 +15,11 @@ newline = '\r\n' if '\r\n' in raw else '\n'
 text = raw.replace('\r\n', '\n')
 assert '   name: "M2 EVO"\n' in text, 'not the M2 EVO model'
 
+# Already there (the repo's card has it, and deploy.sh runs every script on the radio each time): nothing to do.
+if '      swtch: "SA0"\n      func: PLAY_TRACK\n      def: "armed,1,1x"\n' in text and 'widgetName: "FlightState"' in text:
+    print(f'{model}: the SA sounds and the second screen are already there')
+    sys.exit(0)
+
 # The sounds: after the last special function, in the next free slots.
 functions = text[text.index('customFn: \n'):text.index('flightModeData: \n')]
 assert '"SA0"' not in functions and '"!SA0"' not in functions, 'SA already has special functions'

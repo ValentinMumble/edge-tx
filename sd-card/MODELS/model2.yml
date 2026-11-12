@@ -5,7 +5,7 @@ header:
    labels: "Favorites"
 timers: 
    0:
-      start: 360
+      start: 0
       swtch: "!L10"
       value: 0
       mode: ON
