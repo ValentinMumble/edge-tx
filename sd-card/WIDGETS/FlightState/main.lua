@@ -45,7 +45,7 @@ local function light(x, y, width, height, word, on, color)
         width,
         height,
         word,
-        MIDSIZE + BOLD + (on and lcd.RGB(1053720) or lcd.RGB(10134445))
+        MIDSIZE + (on and lcd.RGB(1053720) or lcd.RGB(10134445))
     )
 end
 local function draw(widget, width, height)
@@ -69,7 +69,7 @@ local function draw(widget, width, height)
             width,
             height,
             "RESCUE",
-            DBLSIZE + BOLD + lcd.RGB(16777215)
+            DBLSIZE + lcd.RGB(16777215)
         )
         return
     end

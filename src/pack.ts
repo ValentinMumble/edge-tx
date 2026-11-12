@@ -38,7 +38,8 @@ function update(): void {}
 
 /** The 6-position button pressed: 1 to 6. */
 function slot(): number {
-  const value = getValue('6P');
+  // EdgeTX 2.12.5 names the TX16S's buttons "6pos" in Lua ("6P" is only their log column), exactly.
+  const value = getValue('6pos');
   return math.max(1, math.min(6, math.floor((value + 1024) / 409.6 + 0.5) + 1));
 }
 
@@ -78,7 +79,7 @@ function draw(widget: Widget, width: number, height: number): void {
     lcd.drawText(6, 20, 'No pack', MIDSIZE + muted);
     return;
   }
-  lcd.drawText(6, 16, `${string.format('%.2f', cell)} V`, MIDSIZE + BOLD + cellColor(cell));
+  lcd.drawText(6, 16, `${string.format('%.2f', cell)} V`, MIDSIZE + cellColor(cell));
   lcd.drawText(width - 6, 2, `low ${string.format('%.2f', widget.lowest)}`, SMLSIZE + RIGHT + cellColor(widget.lowest));
 
   // What is left of the pack, as a bar with its %.

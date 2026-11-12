@@ -46,17 +46,34 @@ end
 local function draw(widget, width, height)
     local rssi = getValue("RSSI")
     local quality = getValue("TQly")
+    if height < 50 then
+        lcd.drawText(
+            4,
+            1,
+            "Tele",
+            SMLSIZE + lcd.RGB(10134445)
+        )
+        local lost = rssi <= 0 and quality <= 0
+        local color = (lost or quality <= 50) and 16734815 or (quality <= 70 and 16756768 or 8181402)
+        lcd.drawText(
+            4,
+            15,
+            lost and "None" or tostring(quality) .. "%",
+            MIDSIZE + lcd.RGB(color)
+        )
+        return
+    end
     lcd.drawText(
         6,
         2,
-        "Link",
+        "Tele",
         SMLSIZE + lcd.RGB(10134445)
     )
     if rssi <= 0 and quality <= 0 then
         lcd.drawText(
             6,
             20,
-            "No link",
+            "No tele",
             MIDSIZE + lcd.RGB(10134445)
         )
         return

@@ -1,1 +1,1 @@
-/THEMES/FM2M_Concrete/theme.yml
+/THEMES/Cockpit/theme.yml

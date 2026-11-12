@@ -81,7 +81,7 @@ local function draw(widget, width, height)
         centerX,
         centerY,
         string.format("%.0f", amps),
-        MIDSIZE + BOLD + CENTER + VCENTER + lcd.RGB(15658734)
+        MIDSIZE + CENTER + VCENTER + lcd.RGB(15658734)
     )
     lcd.drawText(
         centerX,
@@ -100,7 +100,7 @@ local function draw(widget, width, height)
         x,
         16,
         string.format("%.0f", volts * amps) .. " W",
-        MIDSIZE + BOLD + lcd.RGB(15658734)
+        MIDSIZE + lcd.RGB(15658734)
     )
     lcd.drawText(
         x,

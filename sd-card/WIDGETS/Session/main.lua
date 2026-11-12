@@ -83,6 +83,37 @@ local function draw(widget, width, height)
     end
     local packs = model.getGlobalVariable(PACKS, 0)
     local minutes = math.floor(model.getGlobalVariable(AIR, 0) * 10 / 60)
+    if height < 50 then
+        lcd.drawText(
+            4,
+            1,
+            "Today",
+            SMLSIZE + lcd.RGB(10134445)
+        )
+        lcd.drawText(
+            width - 3,
+            1,
+            tostring(minutes) .. "'",
+            SMLSIZE + RIGHT + lcd.RGB(8181402)
+        )
+        lcd.drawText(
+            4,
+            15,
+            tostring(packs),
+            MIDSIZE + lcd.RGB(15658734)
+        )
+        local countWidth = lcd.sizeText(
+            tostring(packs),
+            MIDSIZE
+        )
+        lcd.drawText(
+            8 + countWidth,
+            22,
+            packs == 1 and "pack" or "packs",
+            SMLSIZE + lcd.RGB(10134445)
+        )
+        return
+    end
     lcd.drawText(
         6,
         2,
@@ -93,11 +124,11 @@ local function draw(widget, width, height)
         6,
         16,
         tostring(packs),
-        (height >= 60 and DBLSIZE or MIDSIZE) + BOLD + lcd.RGB(15658734)
+        (height >= 60 and DBLSIZE or MIDSIZE) + lcd.RGB(15658734)
     )
     local packsWidth = lcd.sizeText(
         tostring(packs),
-        (height >= 60 and DBLSIZE or MIDSIZE) + BOLD
+        height >= 60 and DBLSIZE or MIDSIZE
     )
     lcd.drawText(
         10 + packsWidth,
@@ -109,7 +140,7 @@ local function draw(widget, width, height)
         width - 6,
         16,
         tostring(minutes) .. " min",
-        MIDSIZE + BOLD + RIGHT + lcd.RGB(8181402)
+        MIDSIZE + RIGHT + lcd.RGB(8181402)
     )
     lcd.drawText(
         width - 6,

@@ -75,7 +75,7 @@ local function draw(widget, width, height)
         6,
         14,
         clock(widget.seconds),
-        (height >= 60 and DBLSIZE or MIDSIZE) + BOLD + color
+        (height >= 60 and DBLSIZE or MIDSIZE) + color
     )
     local barY = height - 12
     lcd.drawFilledRectangle(

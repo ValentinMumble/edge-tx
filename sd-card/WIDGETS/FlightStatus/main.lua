@@ -51,7 +51,7 @@ local function draw(widget, x, y, w, h)
             0,
             w,
             h,
-            COLOR_THEME_ACTIVE
+            lcd.RGB(3896745)
         )
     end
     local flightModeValue = getValue(widget.options.FlightModeSource)
@@ -60,7 +60,10 @@ local function draw(widget, x, y, w, h)
         x,
         y,
         "IU " .. tostring(flightMode),
-        bit32.bor(DBLSIZE, COLOR_THEME_EDIT)
+        bit32.bor(
+            DBLSIZE,
+            isGyroOn and lcd.RGB(16777215) or lcd.RGB(15658734)
+        )
     )
 end
 local function refresh(widget, event, touch)

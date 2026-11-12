@@ -57,14 +57,16 @@ function draw(widget: Widget, x: number, y: number, w: number, h: number): void 
   }
   const isGyroOn = getValue(widget.options.GyroSource) === MAX_VALUE;
 
+  // Self-level on: the zone turns blue, as the cockpit's LEVEL light (the theme's own "active" colour is a light grey).
   if (isGyroOn) {
-    lcd.drawFilledRectangle(0, 0, w, h, COLOR_THEME_ACTIVE);
+    lcd.drawFilledRectangle(0, 0, w, h, lcd.RGB(0x3b75a9));
   }
 
   const flightModeValue = getValue(widget.options.FlightModeSource);
   const flightMode = MIN_VALUE === flightModeValue ? 1 : 0 === flightModeValue ? 2 : 3;
 
-  lcd.drawText(x, y, `IU ${flightMode}`, DBLSIZE | COLOR_THEME_EDIT);
+  // Light on the top bar's dark grey, whatever the theme's colours (the Cockpit theme's EDIT is a dark red).
+  lcd.drawText(x, y, `IU ${flightMode}`, DBLSIZE | (isGyroOn ? lcd.RGB(0xffffff) : lcd.RGB(0xeeeeee)));
 }
 
 function refresh(widget: Widget, event: any, touch: any) {

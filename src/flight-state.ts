@@ -30,14 +30,14 @@ function centered(x: number, y: number, width: number, height: number, text: str
 function light(x: number, y: number, width: number, height: number, word: string, on: boolean, color: number) {
   if (on) lcd.drawFilledRectangle(x, y, width, height, lcd.RGB(color));
   else lcd.drawRectangle(x, y, width, height, lcd.RGB(0x5d6570), 2);
-  centered(x, y, width, height, word, MIDSIZE + BOLD + (on ? lcd.RGB(0x101418) : lcd.RGB(0x9aa3ad)));
+  centered(x, y, width, height, word, MIDSIZE + (on ? lcd.RGB(0x101418) : lcd.RGB(0x9aa3ad)));
 }
 
 function draw(widget: Widget, width: number, height: number): void {
   if (getValue('sh') > 0) {
     lcd.drawFilledRectangle(0, 0, width, height, lcd.RGB(0x8a1c20));
     lcd.drawText(6, 2, 'SH held', SMLSIZE + lcd.RGB(0xffd2d2));
-    centered(0, 0, width, height, 'RESCUE', DBLSIZE + BOLD + lcd.RGB(0xffffff));
+    centered(0, 0, width, height, 'RESCUE', DBLSIZE + lcd.RGB(0xffffff));
     return;
   }
   const gyro = getValue(widget.options.GyroSource || 'sc') >= 1024;

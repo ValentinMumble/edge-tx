@@ -1,0 +1,17 @@
+---
+summary:
+  name: Cockpit
+  author: edge-tx, from FM2M Concrete by JimB40
+  info: Concrete's greys with a dark top bar.
+colors:
+ PRIMARY1:   0xA0A0A0
+ PRIMARY2:   0xC8C8C8
+ PRIMARY3:   0x505050
+ SECONDARY1: 0x161616
+ SECONDARY2: 0x505050
+ SECONDARY3: 0x303030
+ FOCUS:      0x2F5F8F
+ EDIT:       0x7A2E2E
+ ACTIVE:     0x1F4A2C
+ WARNING:    0x404040
+ DISABLED:   0x808080

@@ -62,11 +62,20 @@ function draw(widget: Widget, width: number, height: number): void {
 
   const packs = model.getGlobalVariable(PACKS, 0);
   const minutes = math.floor((model.getGlobalVariable(AIR, 0) * 10) / 60);
+  // In the top bar (74 × 39): "Today" and the minutes over the packs.
+  if (height < 50) {
+    lcd.drawText(4, 1, 'Today', SMLSIZE + lcd.RGB(0x9aa3ad));
+    lcd.drawText(width - 3, 1, `${minutes}'`, SMLSIZE + RIGHT + lcd.RGB(0x7cd69a));
+    lcd.drawText(4, 15, `${packs}`, MIDSIZE + lcd.RGB(0xeeeeee));
+    const [countWidth] = lcd.sizeText(`${packs}`, MIDSIZE);
+    lcd.drawText(8 + countWidth, 22, packs === 1 ? 'pack' : 'packs', SMLSIZE + lcd.RGB(0x9aa3ad));
+    return;
+  }
   lcd.drawText(6, 2, 'Today', SMLSIZE + lcd.RGB(0x9aa3ad));
-  lcd.drawText(6, 16, `${packs}`, (height >= 60 ? DBLSIZE : MIDSIZE) + BOLD + lcd.RGB(0xeeeeee));
-  const [packsWidth] = lcd.sizeText(`${packs}`, (height >= 60 ? DBLSIZE : MIDSIZE) + BOLD);
+  lcd.drawText(6, 16, `${packs}`, (height >= 60 ? DBLSIZE : MIDSIZE) + lcd.RGB(0xeeeeee));
+  const [packsWidth] = lcd.sizeText(`${packs}`, height >= 60 ? DBLSIZE : MIDSIZE);
   lcd.drawText(10 + packsWidth, height >= 60 ? 30 : 22, packs === 1 ? 'pack' : 'packs', SMLSIZE + lcd.RGB(0x9aa3ad));
-  lcd.drawText(width - 6, 16, `${minutes} min`, MIDSIZE + BOLD + RIGHT + lcd.RGB(0x7cd69a));
+  lcd.drawText(width - 6, 16, `${minutes} min`, MIDSIZE + RIGHT + lcd.RGB(0x7cd69a));
   lcd.drawText(width - 6, height >= 60 ? 42 : 36, 'in the air', SMLSIZE + RIGHT + lcd.RGB(0x9aa3ad));
 }
 

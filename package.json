@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "build": "tstl && node scripts/card-widgets.mjs",
+    "build": "tstl && node scripts/card-widgets.mjs && node scripts/cockpit-panel.mjs",
     "dev": "tstl --watch"
   },
   "devDependencies": {

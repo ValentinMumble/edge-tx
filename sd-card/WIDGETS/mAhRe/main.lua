@@ -230,7 +230,8 @@ local PACKS = {
 
 -- The pack of the button pressed: the buttons read -1024 to 1024 in six steps.
 local function packPlugged()
-  local value = getValue("6P") or 0
+  -- EdgeTX 2.12.5 names the TX16S's buttons "6pos" in Lua ("6P" is only their log column), exactly
+  local value = getValue("6pos") or 0
   local button = math.max(1, math.min(6, math.floor((value + 1024) / 409.6 + 0.5) + 1))
   return PACKS[button]
 end

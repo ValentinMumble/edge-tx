@@ -1,6 +1,7 @@
 """Adds a low-cell alarm to the M2 EVO model (model20.yml): logical switch L15 is on when VFAS stays under 10.50 V
 (3.50 V a cell on 3S) for 2 seconds, and special functions 13 and 14 play "low battery" and vibrate every 15 seconds
 while it is on. Backs the file up first. Usage: cell_alarm.py <model20.yml> [<backup folder>]"""
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -13,7 +14,8 @@ assert '   name: "M2 EVO"\n' in text, 'not the M2 EVO model'
 assert 'label: "VFAS"' in text, 'no VFAS sensor'
 
 # Already there (the repo's card has it, and deploy.sh runs every script on the radio each time): nothing to do.
-if '      func: FUNC_VNEG\n      def: "tele(5),1050"\n' in text and '      def: "lowbat,1,15"\n' in text:
+# Its threshold may have moved since (cell_alarm_sag.py).
+if re.search(r'      func: FUNC_VNEG\n      def: "tele\(5\),\d+"\n', text) and '      def: "lowbat,1,15"\n' in text:
     print(f'{model}: the low-cell alarm is already there')
     sys.exit(0)
 

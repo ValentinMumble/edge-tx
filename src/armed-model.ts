@@ -206,8 +206,8 @@ function draw(widget: Widget, width: number, height: number): void {
     const centerX = width - radius - 4;
     const left = centerX - radius - 6;
     drawRotor(centerX, math.floor(height / 2), radius, widget.angle, share, state.fill, state.blade, state.tip);
-    lcd.drawText(6, 0, state.word, MIDSIZE + BOLD + lcd.RGB(state.ink));
-    const [wordWidth] = lcd.sizeText(state.word, MIDSIZE + BOLD);
+    lcd.drawText(6, 0, state.word, MIDSIZE + lcd.RGB(state.ink));
+    const [wordWidth] = lcd.sizeText(state.word, MIDSIZE);
     const [nameWidth] = lcd.sizeText(info.name!, SMLSIZE);
     if (6 + wordWidth + 8 + nameWidth <= left) lcd.drawText(left, 9, info.name!, SMLSIZE + RIGHT + lcd.RGB(0xc0c6cd));
     const pill = math.min(64, math.floor((left - 10) / 2));
@@ -220,7 +220,7 @@ function draw(widget: Widget, width: number, height: number): void {
     const radius = math.max(8, math.floor(height / 2) - 3);
     drawRotor(radius + 4, math.floor(height / 2), radius, widget.angle, share, state.fill, state.blade, state.tip);
     const x = radius * 2 + 12;
-    if (width - x >= 60) lcd.drawText(x, math.floor(height / 2) - 20, state.word, MIDSIZE + BOLD + lcd.RGB(state.ink));
+    if (width - x >= 60) lcd.drawText(x, math.floor(height / 2) - 20, state.word, MIDSIZE + lcd.RGB(state.ink));
     if (width - x >= 116 && height >= 40) {
       switchLight(x, math.floor(height / 2) + 4, 54, 'SA ARM', isArmed, 0xffb020, state.fill);
       switchLight(x + 58, math.floor(height / 2) + 4, 54, 'SF THR', isThrottleActive, 0xff5a5f, state.fill);

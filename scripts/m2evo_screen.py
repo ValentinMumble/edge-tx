@@ -16,7 +16,9 @@ text = raw.replace('\r\n', '\n')
 assert '   name: "M2 EVO"\n' in text, 'not the M2 EVO model'
 
 # Already there (the repo's card has it, and deploy.sh runs every script on the radio each time): nothing to do.
-if '      swtch: "SA0"\n      func: PLAY_TRACK\n      def: "armed,1,1x"\n' in text and 'widgetName: "FlightState"' in text:
+# Its screen may have become the cockpit since (cockpit_screen.py): the SA sounds say it ran (on SA up, or on SA down
+# since arm_down.py).
+if any(f'      swtch: "{where}"\n      func: PLAY_TRACK\n      def: "armed,1,1x"\n' in text for where in ('SA0', 'SA2')):
     print(f'{model}: the SA sounds and the second screen are already there')
     sys.exit(0)
 

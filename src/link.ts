@@ -44,9 +44,17 @@ function meter(
 function draw(widget: Widget, width: number, height: number): void {
   const rssi = getValue('RSSI');
   const quality = getValue('TQly');
-  lcd.drawText(6, 2, 'Link', SMLSIZE + lcd.RGB(0x9aa3ad));
+  // In the top bar (74 × 39): the link quality in %, amber then red as the bars turn ("LQ 100" would not fit).
+  if (height < 50) {
+    lcd.drawText(4, 1, 'Tele', SMLSIZE + lcd.RGB(0x9aa3ad));
+    const lost = rssi <= 0 && quality <= 0;
+    const color = lost || quality <= 50 ? 0xff5a5f : quality <= 70 ? 0xffb020 : 0x7cd69a;
+    lcd.drawText(4, 15, lost ? 'None' : `${quality}%`, MIDSIZE + lcd.RGB(color));
+    return;
+  }
+  lcd.drawText(6, 2, 'Tele', SMLSIZE + lcd.RGB(0x9aa3ad));
   if (rssi <= 0 && quality <= 0) {
-    lcd.drawText(6, 20, 'No link', MIDSIZE + lcd.RGB(0x9aa3ad));
+    lcd.drawText(6, 20, 'No tele', MIDSIZE + lcd.RGB(0x9aa3ad));
     return;
   }
   const row = math.max(16, math.floor((height - 18) / 2));

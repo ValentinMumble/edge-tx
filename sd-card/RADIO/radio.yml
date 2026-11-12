@@ -1,4 +1,4 @@
-checksum: 9785
+checksum: 59845
 manuallyEdited: 0
 timezoneMinutes: 0
 ppmunit: 0
@@ -110,7 +110,7 @@ speakerVolume: 1
 vBatMin: 70
 vBatMax: 84
 backlightBright: 0
-globalTimer: 386799
+globalTimer: 396876
 bluetoothBaudrate: 0
 bluetoothMode: OFF
 countryCode: 2
@@ -149,7 +149,7 @@ potsConfig:
       inv: 0
       name: ""
    P2:
-      type: slider
+      type: multipos_switch
       inv: 0
       name: ""
    P3:
@@ -202,7 +202,7 @@ uartSampleMode: 0
 imuMax: 0
 imuOffset: 0
 imuInvert: 0
-selectedTheme: "FM2M Concrete"
+selectedTheme: "Cockpit"
 labelSingleSelect: 0
 labelMultiMode: 0
 favMultiMode: 0

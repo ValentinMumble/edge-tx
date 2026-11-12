@@ -47,12 +47,12 @@ function draw(widget: Widget, width: number, height: number): void {
     const at = angle(widget.peak);
     lcd.drawAnnulus(centerX, centerY, radius - 7, radius + 1, at - 2, at + 2, lcd.RGB(0xff5a5f));
   }
-  lcd.drawText(centerX, centerY, string.format('%.0f', amps), MIDSIZE + BOLD + CENTER + VCENTER + lcd.RGB(0xeeeeee));
+  lcd.drawText(centerX, centerY, string.format('%.0f', amps), MIDSIZE + CENTER + VCENTER + lcd.RGB(0xeeeeee));
   lcd.drawText(centerX, centerY + 14, 'A', SMLSIZE + CENTER + lcd.RGB(0x9aa3ad));
 
   const x = centerX + radius + 10;
   lcd.drawText(x, 2, 'Power', SMLSIZE + lcd.RGB(0x9aa3ad));
-  lcd.drawText(x, 16, `${string.format('%.0f', volts * amps)} W`, MIDSIZE + BOLD + lcd.RGB(0xeeeeee));
+  lcd.drawText(x, 16, `${string.format('%.0f', volts * amps)} W`, MIDSIZE + lcd.RGB(0xeeeeee));
   lcd.drawText(x, height - 18, `peak ${string.format('%.1f', widget.peak)} A`, SMLSIZE + lcd.RGB(0xff5a5f));
 }
 

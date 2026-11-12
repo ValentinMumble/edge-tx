@@ -34,7 +34,7 @@ local function update()
 end
 --- The 6-position button pressed: 1 to 6.
 local function slot()
-    local value = getValue("6P")
+    local value = getValue("6pos")
     return math.max(
         1,
         math.min(
@@ -91,7 +91,7 @@ local function draw(widget, width, height)
         6,
         16,
         string.format("%.2f", cell) .. " V",
-        MIDSIZE + BOLD + cellColor(cell)
+        MIDSIZE + cellColor(cell)
     )
     lcd.drawText(
         width - 6,

@@ -355,9 +355,9 @@ local function draw(widget, width, height)
             6,
             0,
             state.word,
-            MIDSIZE + BOLD + lcd.RGB(state.ink)
+            MIDSIZE + lcd.RGB(state.ink)
         )
-        local wordWidth = lcd.sizeText(state.word, MIDSIZE + BOLD)
+        local wordWidth = lcd.sizeText(state.word, MIDSIZE)
         local nameWidth = lcd.sizeText(info.name, SMLSIZE)
         if 6 + wordWidth + 8 + nameWidth <= left then
             lcd.drawText(
@@ -414,7 +414,7 @@ local function draw(widget, width, height)
                 x,
                 math.floor(height / 2) - 20,
                 state.word,
-                MIDSIZE + BOLD + lcd.RGB(state.ink)
+                MIDSIZE + lcd.RGB(state.ink)
             )
         end
         if width - x >= 116 and height >= 40 then

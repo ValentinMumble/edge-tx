@@ -6,5 +6,6 @@
   "power": "Power",
   "link": "Link",
   "flight-state": "FlightState",
-  "session": "Session"
+  "session": "Session",
+  "cockpit": "Cockpit"
 }

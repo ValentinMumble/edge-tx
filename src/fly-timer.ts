@@ -52,7 +52,7 @@ function draw(widget: Widget, width: number, height: number): void {
 
   lcd.drawText(6, 2, 'In the air', SMLSIZE + lcd.RGB(0x9aa3ad));
   lcd.drawText(width - 6, 2, `land at ${clock(landAt)}`, SMLSIZE + RIGHT + lcd.RGB(0x9aa3ad));
-  lcd.drawText(6, 14, clock(widget.seconds), (height >= 60 ? DBLSIZE : MIDSIZE) + BOLD + color);
+  lcd.drawText(6, 14, clock(widget.seconds), (height >= 60 ? DBLSIZE : MIDSIZE) + color);
 
   const barY = height - 12;
   lcd.drawFilledRectangle(6, barY, width - 12, 6, lcd.RGB(0x3a4048));

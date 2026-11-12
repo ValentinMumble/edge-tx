@@ -74,6 +74,13 @@ for function in ('VOLUME', 'BACKLIGHT'):
         assert updated.count(old) == 1, f'radio.yml: more than one {function} on button 1'
         updated = updated.replace(old, f'      swtch: "ON"\n      func: {function}\n')
         changed.append(f'radio.yml: {function.lower()} always on')
+# The update to 2.12.5 left the buttons (P2) set up as a slider, so they barely move and the widgets read one pack
+# whatever is pressed: EdgeTX 2.12.5 calls a 6-position switch "multipos_switch".
+slider = '   P2:\n      type: slider\n'
+if slider in updated:
+    assert updated.count(slider) == 1, 'radio.yml: P2 set up more than once'
+    updated = updated.replace(slider, '   P2:\n      type: multipos_switch\n')
+    changed.append('radio.yml: the 6-position buttons are a 6-position switch again')
 if updated != text:
     assert len(updated.splitlines()) == len(text.splitlines())
     write(radio, updated, newline)
