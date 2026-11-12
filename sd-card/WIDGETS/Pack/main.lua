@@ -6,8 +6,8 @@ local options = {}
 --- The packs by 6-position button. Pick the button of the pack you plug in: its size makes the %, its name the log.
 local SLOTS = {
     {name = "Gens Ace 1", mah = 700},
-    {name = "Gens Ace 2", mah = 700},
-    {name = "OMP 1", mah = 750},
+    {name = "Gens Ace 3", mah = 750},
+    {name = "Gens Ace 4", mah = 750},
     {name = "OMP 2", mah = 750},
     {name = "Eachine 1", mah = 500},
     {name = "Eachine 2", mah = 500}
