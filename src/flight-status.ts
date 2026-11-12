@@ -36,7 +36,25 @@ function update(widget: Widget, options: Options) {
   widget.options = options;
 }
 
+/** SH held down: the rescue. The zone turns red and says RESCUE, as big as fits (it is longer than "IU 2"). */
+function drawRescue(x: number, y: number, w: number, h: number): void {
+  lcd.drawFilledRectangle(0, 0, w, h, lcd.RGB(0x8a1c20));
+  let size = SMLSIZE;
+  for (const bigger of [DBLSIZE, MIDSIZE, 0]) {
+    const [textWidth] = lcd.sizeText('RESCUE', bigger);
+    if (textWidth <= w - 4) {
+      size = bigger;
+      break;
+    }
+  }
+  lcd.drawText(x, y, 'RESCUE', size | lcd.RGB(0xffffff));
+}
+
 function draw(widget: Widget, x: number, y: number, w: number, h: number): void {
+  if (getValue('sh') > 0) {
+    drawRescue(x, y, w, h);
+    return;
+  }
   const isGyroOn = getValue(widget.options.GyroSource) === MAX_VALUE;
 
   if (isGyroOn) {

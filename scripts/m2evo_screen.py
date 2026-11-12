@@ -59,7 +59,7 @@ zones = {
                         value:
                            signedValue: 272
 '''),
-    1: ('FlightState', source(0, 'SE') + source(1, 'SC') + source(2, 'SF')),
+    1: ('FlightState', source(0, 'SC') + source(1, 'SF')),
     2: ('Session', ''),
     3: ('Power', '''                     0:
                         type: Signed

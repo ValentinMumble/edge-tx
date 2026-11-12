@@ -48,6 +48,12 @@ const STATES: Record<State, {word: string; fill: number; ink: number; blade: num
   live: {word: 'LIVE', fill: 0x5c1a1f, ink: 0xff5a5f, blade: 0xe6e9ed, tip: 0xfebe00},
 };
 
+/**
+ * SH held down: the flybarless unit's rescue levels the heli and climbs. Whatever the state, the zone turns red, says
+ * RESCUE and its border blinks fast, as long as SH is held (it springs back).
+ */
+const RESCUE = {word: 'RESCUE', fill: 0x8a1c20, ink: 0xffffff};
+
 function create(zone: Zone, options: Options): Widget {
   return {zone, options, angle: 30, speed: 0, lastTime: getTime()};
 }
@@ -183,11 +189,15 @@ function draw(widget: Widget, width: number, height: number): void {
   const isThrottleActive = getValue(widget.options.ThrottleCutSwitch) === MIN_VALUE;
   const live = isArmed && isThrottleActive;
   const share = turn(widget, live);
-  const state = STATES[live ? 'live' : isArmed ? 'armed' : 'safe'];
+  const rescue = getValue('sh') > 0;
+  const armedState = STATES[live ? 'live' : isArmed ? 'armed' : 'safe'];
+  const state = rescue ? {...armedState, ...RESCUE} : armedState;
 
   lcd.drawFilledRectangle(0, 0, width, height, lcd.RGB(state.fill));
-  // Live: the border blinks, a second on, a second off.
-  if (live && getTime() % 100 < 60) lcd.drawRectangle(0, 0, width, height, lcd.RGB(state.ink), 2);
+  // Live: the border blinks, a second on, a second off. Rescue: twice as fast.
+  if (rescue ? getTime() % 50 < 30 : live && getTime() % 100 < 60) {
+    lcd.drawRectangle(0, 0, width, height, lcd.RGB(state.ink), 2);
+  }
 
   // The M2 EVO's zone (2 + 1 layout, top left, with the top bar, sliders, trims and flight mode) is 198 × 86.
   if (height >= 80 && width >= 150) {
