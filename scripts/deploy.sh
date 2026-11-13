@@ -4,7 +4,8 @@
 #   EVO's low-cell alarm, SA sounds and one cockpit screen; the 6-position buttons freed for the packs ("Lower" on S1,
 #   volume and backlight always on, the buttons a 6-position switch again); the mAh count and timer 1 kept through a
 #   telemetry dropout; timer 1 counting up; the theme's readable menus (and the M2 EVO's clock); arming down; the
-#   sortie timer; the low-cell alarm only with a pack in; the receiver's sensors back in their slots;
+#   sortie timer; the low-cell alarm only with a pack in, then off (the Cockpit warns instead); the receiver's sensors
+#   back in their slots;
 # - the widgets built from src/ (widgets.json says which folder each goes in) and the edited mAhRe, from the repo's
 #   card, with their pictures (`npm run build` puts the built ones there, and the Cockpit's panel pictures).
 # Backs up the models, the radio settings and the widgets it replaces first, in backups/<today>, and lists at the end
@@ -41,6 +42,7 @@ python3 -I "$here/arm_down.py" "$card/MODELS/model20.yml"
 python3 -I "$here/sortie_timer.py" "$card/MODELS/model20.yml"
 python3 -I "$here/cell_alarm_live.py" "$card/MODELS/model20.yml"
 python3 -I "$here/cell_alarm_sag.py" "$card/MODELS/model20.yml"
+python3 -I "$here/cell_alarm_off.py" "$card/MODELS/model20.yml"
 python3 -I "$here/rescue_delay.py" "$card/MODELS/model20.yml"
 python3 -I "$here/sensor_ids.py" "$card/MODELS/model20.yml"
 python3 -I "$here/cockpit_theme.py" "$card"

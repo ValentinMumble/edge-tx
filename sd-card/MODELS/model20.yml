@@ -875,11 +875,11 @@ customFn:
    12:
       swtch: "L15"
       func: PLAY_TRACK
-      def: "lowbat,1,15"
+      def: "lowbat,0,15"
    13:
       swtch: "L15"
       func: HAPTIC
-      def: "3,1,15"
+      def: "3,0,15"
    14:
       swtch: "SA2"
       func: PLAY_TRACK

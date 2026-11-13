@@ -18,10 +18,12 @@ frame); `npm run dev` rebuilds the widgets into `output/` on every save. Full ca
 out of git (`backups/`, `update-2.12.5/`).
 
 - **Cockpit:** the M2 EVO's whole screen as a heli's instrument panel: warning lights (SAFE or ARMED, THR ON or OFF,
-  LEVEL, RESCUE, LOW BATT or NOT FULL, TELE), the throttle as a quadrant (a detent per idle up, evenly spaced, CUT
+  LEVEL, RESCUE, LOW BATT, LOW VOLT or NOT FULL, TELE), the throttle as a quadrant (a detent per idle up, evenly spaced, CUT
   guarded in hold) and the pitch as a collective against a degree scale, the battery as a fuel gauge (from the charge a
   pack had when plugged in, by its volts a cell, less the mAh used; the mAh left under the %, the % said every 10% with
-  mAhRe's sounds, the pack the 6-position buttons pick under it), the model's data plate, a First Limit Indicator (as
+  mAhRe's sounds, the pack the 6-position buttons pick under it; three buzzes every 15 s under 25% with the motor on;
+  "low battery" and two buzzes once a cell has spent about 2 s under 3.30 V under load, counted over the last few
+  seconds, so short dips add up), the model's data plate, a First Limit Indicator (as
   on Airbus helicopters: one needle for whichever limit comes first, the current against the pack's 30C, the cell from
   4.2 V down to 3.3 V or the charge used against 80 %, 10 at the limit, its letter saying which, its highest marked)
   and the average volts a cell as gauges, the amps, the power and the pack's peak current, and the right stick as a
@@ -63,7 +65,7 @@ freed for the packs and set up as a 6-position switch again (`six_pos.py`), the 
 dropout (`disarmed_reset.py`), timer 1 counting up the time with the motor on (`timer_up.py`), the theme's mid grey top
 bar, whose colour is also the menus' text (`readable_menus.py`), arming with SA down instead of up (`arm_down.py`),
 timer 2 for the sortie (`sortie_timer.py`), the low-cell alarm only with a pack in (`cell_alarm_live.py`) and only for
-real sag, 3.30 V a cell for 5 s (`cell_alarm_sag.py`), a rescue that climbs after 0.1 s of flat pitch, not 0.2 s
+real sag, 3.30 V a cell for 5 s (`cell_alarm_sag.py`), then off, as the Cockpit warns instead (`cell_alarm_off.py`), a rescue that climbs after 0.1 s of flat pitch, not 0.2 s
 (`rescue_delay.py`), the receiver's sensors back in their slots when the radio finds them under new IDs
 (`sensor_ids.py`), a theme of its own, Cockpit, with a dark top bar and readable menus (`cockpit_theme.py`, FM2M
 Concrete stays to go back to), the Timers widget in the top bar's empty zone (`topbar_timers.py`). Then it copies the

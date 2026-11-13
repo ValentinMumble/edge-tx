@@ -14,8 +14,8 @@ assert '   name: "M2 EVO"\n' in text, 'not the M2 EVO model'
 assert 'label: "VFAS"' in text, 'no VFAS sensor'
 
 # Already there (the repo's card has it, and deploy.sh runs every script on the radio each time): nothing to do.
-# Its threshold may have moved since (cell_alarm_sag.py).
-if re.search(r'      func: FUNC_VNEG\n      def: "tele\(5\),\d+"\n', text) and '      def: "lowbat,1,15"\n' in text:
+# Its threshold may have moved since (cell_alarm_sag.py), and its sound and buzz been turned off (cell_alarm_off.py).
+if re.search(r'      func: FUNC_VNEG\n      def: "tele\(5\),\d+"\n', text) and re.search(r'      def: "lowbat,[01],15"\n', text):
     print(f'{model}: the low-cell alarm is already there')
     sys.exit(0)
 

@@ -61,7 +61,7 @@ local function __TS__ObjectAssign(target, ...)
 end
 -- End of Lua Library inline imports
 local ____exports = {}
-local output, button, pack, cells, fuelLeft, look, at, lineHeight, label, dial, readout, objects, update, PACKS, PACK_C, CELL_FULL, CELL_FLOOR, DEEP, LOW_FUEL, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, AMBER, RED, UNLIT, EDGE, TOP, BOTTOM, clamp
+local output, button, pack, cells, fuelLeft, look, at, lineHeight, label, dial, readout, objects, update, PACKS, PACK_C, CELL_FULL, CELL_FLOOR, DEEP, LOW_FUEL, ALARM_EVERY, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, AMBER, RED, UNLIT, EDGE, TOP, BOTTOM, clamp
 function output(index)
     local value = getOutputValue(index)
     local ____opt_0 = model.getOutput(index)
@@ -152,7 +152,9 @@ function look(widget)
         9051168,
         16777215
     )
-    if widget.notFull and view.left >= LOW_FUEL then
+    if view.powered and getTime() - widget.sagAt < ALARM_EVERY then
+        set(4, "LOW VOLT", true, RED)
+    elseif widget.notFull and view.left >= LOW_FUEL then
         set(4, "NOT FULL", true, AMBER)
     else
         set(4, "LOW BATT", view.powered and view.left < LOW_FUEL, RED)
@@ -888,13 +890,15 @@ end
 local name = "Cockpit"
 --- The whole screen as a heli's instrument panel (480 × 227, under the top bar):
 -- - warning lights across the top: SAFE (green) or ARMED (SA down), THR ON or OFF (SF), LEVEL (SC, self-level),
---   RESCUE (SH), LOW BATT (or NOT FULL when the pack was not full when plugged in), TELE (no telemetry); the panel
---   turns dark yellow while the motor can spin;
+--   RESCUE (SH), LOW BATT (LOW VOLT while the low-cell alarm is on, NOT FULL when the pack was not full when plugged
+--   in), TELE (no telemetry); the panel turns dark yellow while the motor can spin;
 -- - the throttle as a quadrant: a detent per idle up evenly up the gate, CUT at its foot guarded in hold, the lever at
 --   the motor output (CH3); the pitch as a collective lever against a degree scale, at CH6;
 -- - the battery as a fuel gauge: the charge the pack had when plugged in (by its resting volts a cell) less the mAh
 --   used, against the size of the pack picked with the 6-position buttons (the mAh left under the %, the pack under
---   the gauge), saying the % left every 10% and warning when a pack is not full (mAhRe's sounds);
+--   the gauge), saying the % left every 10% and warning when a pack is not full (mAhRe's sounds), when a cell sags
+--   under 3.30 V for a while (the model's low-cell alarm, which waited for 5 s in a row, is off) and, with buzzes,
+--   when the pack runs low;
 -- - the model's data plate (picture, name, cells); a First Limit Indicator (as on Airbus helicopters: one needle for
 --   whichever limit comes first, here the current against the pack's 30C, the cell from 4.2 V down to 3.3 V, or the
 --   charge used against 80 %, 10 at the limit) and volts a cell as gauges; the amps, the power and the pack's peak
@@ -946,6 +950,18 @@ DEEP = 80
 --- Under this a cell is not full when plugged in (mAhRe's level), and the % left that lights LOW BATT.
 local FULL_CELL = 4
 LOW_FUEL = 25
+--- The low-cell alarm, in place of the model's (L15, now off): a 3S pack pulled hard dips under 3.30 V a cell for a
+-- second or two at a time, too short for a switch that waits for 5 s in a row. So the seconds a cell spends under
+-- SAG_CELL while drawing LOAD amps or more add up, fading by SAG_FADE (a dip 20 s ago counts a tenth), and past
+-- SAG_SECONDS the radio says "low battery" and buzzes twice, again after ALARM_EVERY (tens of ms) if the pack still
+-- sags. On the logs of 12 and 13 Nov 2026 it goes off on 9 packs of 10, where the old alarm did on 4.
+local SAG_CELL = 3.3
+local LOAD = 2
+local SAG_FADE = 10
+local SAG_SECONDS = 2
+ALARM_EVERY = 1500
+--- Long ago, for an alarm that has not gone off yet.
+local NEVER = -100000
 --- From this a cell counts as full at rest (89% in the table below, allowing for the voltage sensor's error).
 local FULL_START = 4.1
 local SOUNDS = "/WIDGETS/mAhRe/sounds/"
@@ -1028,13 +1044,26 @@ local function today()
     }
     return days[now.mon] + now.day
 end
+--- `times` buzzes of `length` (tens of ms), a tenth of a second apart.
+local function buzz(times, length)
+    do
+        local index = 0
+        while index < times do
+            playHaptic(length, 10)
+            index = index + 1
+        end
+    end
+end
 --- What runs whether the screen shows or not: a new pack starts the checks again; once its voltage settles, the charge
 -- it starts with (100% from 4.10 V a cell) and the not-full warning; the % left said at each 10% below that (5%
--- last, then empty), the peak current.
+-- last, then empty), the peak current; the low-cell alarm, and three buzzes every 15 s while the motor runs on a pack
+-- under LOW_FUEL % (a call said over the rotor is easy to miss, a buzz in the hands is not).
 local function follow(widget)
     local volts = getValue("VFAS")
     local powered = volts > 0.5
     local now = getTime()
+    local elapsed = clamp((now - widget.ticks) / 100, 0, 1)
+    widget.ticks = now
     if powered and not widget.powered and getValue("mAh") < NEW_PACK_MAH then
         widget.plugged = now
         widget.notFull = false
@@ -1042,10 +1071,20 @@ local function follow(widget)
         widget.peak = 0
         widget.peakFli = 0
         widget.startLeft = 100
+        widget.sag = 0
+        widget.sagAt = NEVER
+        widget.lowAt = NEVER
     end
     widget.powered = powered
     if not powered then
         return
+    end
+    local sagging = getValue("Curr") >= LOAD and volts / cells() < SAG_CELL
+    widget.sag = widget.sag * math.exp(-elapsed / SAG_FADE) + (sagging and elapsed or 0)
+    if widget.sag >= SAG_SECONDS and now - widget.sagAt >= ALARM_EVERY then
+        widget.sagAt = now
+        playFile("lowbat.wav")
+        buzz(2, 15)
     end
     if widget.plugged >= 0 and now - widget.plugged >= 200 then
         widget.plugged = -1
@@ -1065,6 +1104,11 @@ local function follow(widget)
     if step < widget.said and left < widget.said then
         widget.said = step
         playFile((SOUNDS .. (step == 0 and "BatNo" or ("Bat" .. tostring(step)) .. "L")) .. ".wav")
+    end
+    local running = getValue("sa") == 1024 and getValue("sf") == -1024
+    if running and left < LOW_FUEL and now - widget.lowAt >= ALARM_EVERY then
+        widget.lowAt = now
+        buzz(3, 30)
     end
 end
 local function create(zone, options)
@@ -1087,6 +1131,10 @@ local function create(zone, options)
         peakFli = 0,
         startLeft = 100,
         since = getTime(),
+        ticks = getTime(),
+        sag = 0,
+        sagAt = NEVER,
+        lowAt = NEVER,
         view = {
             live = false,
             motorOff = true,

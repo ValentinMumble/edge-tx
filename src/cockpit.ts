@@ -3,13 +3,15 @@ const name = 'Cockpit';
 /**
  * The whole screen as a heli's instrument panel (480 × 227, under the top bar):
  * - warning lights across the top: SAFE (green) or ARMED (SA down), THR ON or OFF (SF), LEVEL (SC, self-level),
- *   RESCUE (SH), LOW BATT (or NOT FULL when the pack was not full when plugged in), TELE (no telemetry); the panel
- *   turns dark yellow while the motor can spin;
+ *   RESCUE (SH), LOW BATT (LOW VOLT while the low-cell alarm is on, NOT FULL when the pack was not full when plugged
+ *   in), TELE (no telemetry); the panel turns dark yellow while the motor can spin;
  * - the throttle as a quadrant: a detent per idle up evenly up the gate, CUT at its foot guarded in hold, the lever at
  *   the motor output (CH3); the pitch as a collective lever against a degree scale, at CH6;
  * - the battery as a fuel gauge: the charge the pack had when plugged in (by its resting volts a cell) less the mAh
  *   used, against the size of the pack picked with the 6-position buttons (the mAh left under the %, the pack under
- *   the gauge), saying the % left every 10% and warning when a pack is not full (mAhRe's sounds);
+ *   the gauge), saying the % left every 10% and warning when a pack is not full (mAhRe's sounds), when a cell sags
+ *   under 3.30 V for a while (the model's low-cell alarm, which waited for 5 s in a row, is off) and, with buzzes,
+ *   when the pack runs low;
  * - the model's data plate (picture, name, cells); a First Limit Indicator (as on Airbus helicopters: one needle for
  *   whichever limit comes first, here the current against the pack's 30C, the cell from 4.2 V down to 3.3 V, or the
  *   charge used against 80 %, 10 at the limit) and volts a cell as gauges; the amps, the power and the pack's peak
@@ -69,6 +71,14 @@ type Widget = {
   startLeft: number;
   /** When the day was last checked for the sortie (getTime, tens of ms). */
   since: number;
+  /**
+   * The low-cell alarm: when follow() last ran, the seconds a cell has spent under SAG_CELL under load (fading), and
+   * when the alarm and the low fuel buzz last went off (getTime, tens of ms).
+   */
+  ticks: number;
+  sag: number;
+  sagAt: number;
+  lowAt: number;
   view: View;
 };
 
@@ -94,6 +104,20 @@ const DEEP = 80;
 /** Under this a cell is not full when plugged in (mAhRe's level), and the % left that lights LOW BATT. */
 const FULL_CELL = 4.0;
 const LOW_FUEL = 25;
+/**
+ * The low-cell alarm, in place of the model's (L15, now off): a 3S pack pulled hard dips under 3.30 V a cell for a
+ * second or two at a time, too short for a switch that waits for 5 s in a row. So the seconds a cell spends under
+ * SAG_CELL while drawing LOAD amps or more add up, fading by SAG_FADE (a dip 20 s ago counts a tenth), and past
+ * SAG_SECONDS the radio says "low battery" and buzzes twice, again after ALARM_EVERY (tens of ms) if the pack still
+ * sags. On the logs of 12 and 13 Nov 2026 it goes off on 9 packs of 10, where the old alarm did on 4.
+ */
+const SAG_CELL = 3.3;
+const LOAD = 2;
+const SAG_FADE = 10;
+const SAG_SECONDS = 2;
+const ALARM_EVERY = 1500;
+/** Long ago, for an alarm that has not gone off yet. */
+const NEVER = -100000;
 /** From this a cell counts as full at rest (89% in the table below, allowing for the voltage sensor's error). */
 const FULL_START = 4.1;
 const SOUNDS = '/WIDGETS/mAhRe/sounds/';
@@ -189,15 +213,24 @@ function today(): number {
   return days[now.mon - 1] + now.day;
 }
 
+/** `times` buzzes of `length` (tens of ms), a tenth of a second apart. */
+function buzz(times: number, length: number): void {
+  for (let index = 0; index < times; index++) playHaptic(length, 10);
+}
+
 /**
  * What runs whether the screen shows or not: a new pack starts the checks again; once its voltage settles, the charge
  * it starts with (100% from 4.10 V a cell) and the not-full warning; the % left said at each 10% below that (5%
- * last, then empty), the peak current.
+ * last, then empty), the peak current; the low-cell alarm, and three buzzes every 15 s while the motor runs on a pack
+ * under LOW_FUEL % (a call said over the rotor is easy to miss, a buzz in the hands is not).
  */
 function follow(widget: Widget): void {
   const volts = getValue('VFAS');
   const powered = volts > 0.5;
   const now = getTime();
+  // Seconds since the last run, at most one: a gap (a menu open) is not counted as time under.
+  const elapsed = clamp((now - widget.ticks) / 100, 0, 1);
+  widget.ticks = now;
   if (powered && !widget.powered && getValue('mAh') < NEW_PACK_MAH) {
     widget.plugged = now;
     widget.notFull = false;
@@ -205,9 +238,19 @@ function follow(widget: Widget): void {
     widget.peak = 0;
     widget.peakFli = 0;
     widget.startLeft = 100;
+    widget.sag = 0;
+    widget.sagAt = NEVER;
+    widget.lowAt = NEVER;
   }
   widget.powered = powered;
   if (!powered) return;
+  const sagging = getValue('Curr') >= LOAD && volts / cells() < SAG_CELL;
+  widget.sag = widget.sag * math.exp(-elapsed / SAG_FADE) + (sagging ? elapsed : 0);
+  if (widget.sag >= SAG_SECONDS && now - widget.sagAt >= ALARM_EVERY) {
+    widget.sagAt = now;
+    playFile('lowbat.wav');
+    buzz(2, 15);
+  }
   if (widget.plugged >= 0 && now - widget.plugged >= 200) {
     widget.plugged = -1;
     widget.startLeft = volts / cells() >= FULL_START ? 100 : chargeOf(volts / cells());
@@ -224,6 +267,11 @@ function follow(widget: Widget): void {
   if (step < widget.said && left < widget.said) {
     widget.said = step;
     playFile(`${SOUNDS}${step === 0 ? 'BatNo' : `Bat${step}L`}.wav`);
+  }
+  const running = getValue('sa') === 1024 && getValue('sf') === -1024;
+  if (running && left < LOW_FUEL && now - widget.lowAt >= ALARM_EVERY) {
+    widget.lowAt = now;
+    buzz(3, 30);
   }
 }
 
@@ -281,7 +329,9 @@ function look(widget: Widget): void {
   set(2, 'LEVEL', getValue('sc') >= 1024, 0x3b75a9, 0xffffff);
   // RESCUE and TELE white on dark red, as FMStatus's RESCUE in the top bar.
   set(3, 'RESCUE', view.rescue, 0x8a1c20, 0xffffff);
-  if (widget.notFull && view.left >= LOW_FUEL) set(4, 'NOT FULL', true, AMBER);
+  // LOW VOLT while the low-cell alarm is on (15 s from when it went off), before LOW BATT and NOT FULL.
+  if (view.powered && getTime() - widget.sagAt < ALARM_EVERY) set(4, 'LOW VOLT', true, RED);
+  else if (widget.notFull && view.left >= LOW_FUEL) set(4, 'NOT FULL', true, AMBER);
   else set(4, 'LOW BATT', view.powered && view.left < LOW_FUEL, RED);
   set(5, 'TELE', getValue('RSSI') <= 0, 0x8a1c20, 0xffffff);
 }
@@ -682,6 +732,10 @@ function create(zone: Zone, options: Options): Widget {
     peakFli: 0,
     startLeft: 100,
     since: getTime(),
+    ticks: getTime(),
+    sag: 0,
+    sagAt: NEVER,
+    lowAt: NEVER,
     view: {
       live: false,
       motorOff: true,
