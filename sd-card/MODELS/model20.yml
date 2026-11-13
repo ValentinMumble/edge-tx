@@ -22,7 +22,7 @@ timers:
    1:
       start: 0
       swtch: "!L10"
-      value: 876
+      value: 814
       mode: ON
       countdownBeep: 0
       minuteBeep: 0
@@ -896,9 +896,9 @@ flightModeData:
       fadeOut: 0
       gvars: 
          0:
-            val: 316
+            val: 317
          1:
-            val: 5
+            val: 4
          2:
             val: 0
          3:
@@ -912,7 +912,7 @@ flightModeData:
          7:
             val: 0
          8:
-            val: 316
+            val: 317
 thrTraceSrc: Thr
 switchWarning: 
    SA:

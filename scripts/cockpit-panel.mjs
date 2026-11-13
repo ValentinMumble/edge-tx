@@ -49,15 +49,19 @@ const GAUGES = [
     long: [0, 50, 100],
     window: [56, 33],
   },
+  // The First Limit Indicator: 0 to 11, the limit at 10, amber from 8, red past it.
   {
     x: 354,
     y: 121,
     radius: 30,
     low: 0,
-    high: 40,
-    bands: [[30, 40, RED]],
-    ticks: [0, 10, 20, 30, 40],
-    long: [0, 20, 40],
+    high: 11,
+    bands: [
+      [8, 10, AMBER],
+      [10, 11, RED],
+    ],
+    ticks: [0, 2, 4, 6, 8, 10],
+    long: [0, 10],
     window: [36, 14],
   },
   {
@@ -308,8 +312,10 @@ function draw(inside) {
   screw(panel, 462, 76);
   panel.fill(324, 33, 66, 44, 0x0b0c0d);
 
-  // The power, level with the cyclic's box (the timers are in the top bar).
+  // The amps, the power and the pack's peak current (the timers are in the top bar).
+  display(panel, 322, 162, 88);
   display(panel, 322, 180, 88);
+  display(panel, 322, 198, 88);
 
   // The cyclic's box: its cross, dotted, and the ring at the stick's centre.
   panel.fill(420, 158, 48, 48, SLOT);

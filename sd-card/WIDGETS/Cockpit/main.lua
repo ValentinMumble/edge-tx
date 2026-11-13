@@ -61,7 +61,7 @@ local function __TS__ObjectAssign(target, ...)
 end
 -- End of Lua Library inline imports
 local ____exports = {}
-local output, button, pack, cells, fuelLeft, look, at, lineHeight, label, dial, readout, objects, update, PACKS, LOW_FUEL, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, AMBER, RED, UNLIT, EDGE, TOP, BOTTOM, clamp
+local output, button, pack, cells, fuelLeft, look, at, lineHeight, label, dial, readout, objects, update, PACKS, PACK_C, CELL_FULL, CELL_FLOOR, DEEP, LOW_FUEL, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, AMBER, RED, UNLIT, EDGE, TOP, BOTTOM, clamp
 function output(index)
     local value = getOutputValue(index)
     local ____opt_0 = model.getOutput(index)
@@ -107,6 +107,16 @@ function look(widget)
     view.packName = plugged.name
     view.packMah = plugged.mah
     view.mahLeft = math.floor(plugged.mah * view.left / 100 + 0.5)
+    local shares = view.powered and ({{view.amps / (plugged.mah / 1000 * PACK_C), "A"}, {(CELL_FULL - view.cell) / (CELL_FULL - CELL_FLOOR), "V"}, {(100 - view.left) / DEEP, "%"}}) or ({{0, ""}})
+    local worst = shares[1]
+    for ____, share in ipairs(shares) do
+        if share[1] > worst[1] then
+            worst = share
+        end
+    end
+    view.fli = clamp(worst[1] * 10, 0, 11)
+    view.limit = worst[2]
+    widget.peakFli = math.max(widget.peakFli, view.fli)
     view.throttle = (output(2) + 1024) / 2048 * 100
     view.degrees = output(5) / 1024 * (widget.options.PitchRange or 12)
     view.aileron = getValue("ail")
@@ -776,19 +786,19 @@ function objects(widget)
         centerX = 354,
         centerY = 121,
         radius = 30,
-        title = "AMPS",
+        title = "FLI",
         low = 0,
-        high = 40,
-        value = function() return view.amps end,
+        high = 11,
+        value = function() return view.fli end,
         labels = {},
-        peak = function() return widget.peak end
+        peak = function() return widget.peakFli end
     })))
     __TS__SparseArrayPush(
         ____array_7,
         label(
             354,
             137,
-            function() return tostring(math.floor(view.amps + 0.5)) .. "A" end,
+            function() return view.powered and string.format("%.1f", view.fli) .. view.limit or "--" end,
             SMLSIZE,
             DIGITS,
             CENTER
@@ -819,13 +829,30 @@ function objects(widget)
         list,
         __TS__SparseArraySpread(____array_7)
     )
-    __TS__ArrayPushArray(
-        list,
-        readout(
+    local ____array_8 = __TS__SparseArrayNew(table.unpack(readout(
+        162,
+        "AMPS",
+        function() return string.format("%.1f", view.amps) .. " A" end
+    )))
+    __TS__SparseArrayPush(
+        ____array_8,
+        table.unpack(readout(
             180,
             "POWER",
             function() return tostring(math.floor(view.watts + 0.5)) .. " W" end
-        )
+        ))
+    )
+    __TS__SparseArrayPush(
+        ____array_8,
+        table.unpack(readout(
+            198,
+            "PEAK",
+            function() return tostring(math.floor(widget.peak + 0.5)) .. " A" end
+        ))
+    )
+    __TS__ArrayPush(
+        list,
+        __TS__SparseArraySpread(____array_8)
     )
     local function percent(value)
         return (value >= 0 and "+" or "") .. tostring(math.floor(value / 1024 * 100 + 0.5))
@@ -868,8 +895,10 @@ local name = "Cockpit"
 -- - the battery as a fuel gauge: the charge the pack had when plugged in (by its resting volts a cell) less the mAh
 --   used, against the size of the pack picked with the 6-position buttons (the mAh left under the %, the pack under
 --   the gauge), saying the % left every 10% and warning when a pack is not full (mAhRe's sounds);
--- - the model's data plate (picture, name, cells), the amps (with the pack's peak) and volts a cell as gauges, the
---   power, and the cyclic: where the right stick is, to check it. The timers (this pack's, the sortie's) are in the
+-- - the model's data plate (picture, name, cells); a First Limit Indicator (as on Airbus helicopters: one needle for
+--   whichever limit comes first, here the current against the pack's 30C, the cell from 4.2 V down to 3.3 V, or the
+--   charge used against 80 %, 10 at the limit) and volts a cell as gauges; the amps, the power and the pack's peak
+--   current; and the cyclic: where the right stick is, to check it. The timers (this pack's, the sortie's) are in the
 --   top bar (the Timers widget); this one starts the sortie's again each day.
 -- It is built from EdgeTX's LVGL objects (useLvgl): the radio keeps them on the screen and redraws only what changes,
 -- where a widget drawing with lcd calls redraws the whole screen 20 times a second. Everything that never moves is two
@@ -910,6 +939,10 @@ PACKS = {
 }
 --- A new pack: its voltage back after none with the mAh count at 0 (see Session).
 local NEW_PACK_MAH = 5
+PACK_C = 30
+CELL_FULL = 4.2
+CELL_FLOOR = 3.3
+DEEP = 80
 --- Under this a cell is not full when plugged in (mAhRe's level), and the % left that lights LOW BATT.
 local FULL_CELL = 4
 LOW_FUEL = 25
@@ -1007,6 +1040,7 @@ local function follow(widget)
         widget.notFull = false
         widget.said = 100
         widget.peak = 0
+        widget.peakFli = 0
         widget.startLeft = 100
     end
     widget.powered = powered
@@ -1050,6 +1084,7 @@ local function create(zone, options)
         notFull = false,
         said = 100,
         peak = 0,
+        peakFli = 0,
         startLeft = 100,
         since = getTime(),
         view = {
@@ -1063,6 +1098,8 @@ local function create(zone, options)
             mahLeft = 0,
             amps = 0,
             cell = 0,
+            fli = 0,
+            limit = "",
             watts = 0,
             throttle = 0,
             degrees = 0,

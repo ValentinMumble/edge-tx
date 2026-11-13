@@ -10,8 +10,10 @@ const name = 'Cockpit';
  * - the battery as a fuel gauge: the charge the pack had when plugged in (by its resting volts a cell) less the mAh
  *   used, against the size of the pack picked with the 6-position buttons (the mAh left under the %, the pack under
  *   the gauge), saying the % left every 10% and warning when a pack is not full (mAhRe's sounds);
- * - the model's data plate (picture, name, cells), the amps (with the pack's peak) and volts a cell as gauges, the
- *   power, and the cyclic: where the right stick is, to check it. The timers (this pack's, the sortie's) are in the
+ * - the model's data plate (picture, name, cells); a First Limit Indicator (as on Airbus helicopters: one needle for
+ *   whichever limit comes first, here the current against the pack's 30C, the cell from 4.2 V down to 3.3 V, or the
+ *   charge used against 80 %, 10 at the limit) and volts a cell as gauges; the amps, the power and the pack's peak
+ *   current; and the cyclic: where the right stick is, to check it. The timers (this pack's, the sortie's) are in the
  *   top bar (the Timers widget); this one starts the sortie's again each day.
  * It is built from EdgeTX's LVGL objects (useLvgl): the radio keeps them on the screen and redraws only what changes,
  * where a widget drawing with lcd calls redraws the whole screen 20 times a second. Everything that never moves is two
@@ -40,6 +42,9 @@ type View = {
   amps: number;
   cell: number;
   watts: number;
+  /** The First Limit Indicator: 10 at the first limit reached; and which one leads (A, V or %). */
+  fli: number;
+  limit: string;
   throttle: number;
   degrees: number;
   aileron: number;
@@ -58,6 +63,8 @@ type Widget = {
   /** The last % left said out loud (100 when nothing yet), and the pack's peak current. */
   said: number;
   peak: number;
+  /** The highest First Limit Indicator reading on this pack. */
+  peakFli: number;
   /** The % the pack had when plugged in, from its resting volts a cell (100 when full): the mAh used count from it. */
   startLeft: number;
   /** When the day was last checked for the sortie (getTime, tens of ms). */
@@ -76,6 +83,14 @@ const PACKS = [
 ];
 /** A new pack: its voltage back after none with the mAh count at 0 (see Session). */
 const NEW_PACK_MAH = 5;
+/**
+ * The First Limit Indicator's limits: the current a pack gives for long (amps an amp hour: a 700 mAh pack, 21 A), a
+ * cell from full to the floor it should not go under, and the share of the pack to use.
+ */
+const PACK_C = 30;
+const CELL_FULL = 4.2;
+const CELL_FLOOR = 3.3;
+const DEEP = 80;
 /** Under this a cell is not full when plugged in (mAhRe's level), and the % left that lights LOW BATT. */
 const FULL_CELL = 4.0;
 const LOW_FUEL = 25;
@@ -188,6 +203,7 @@ function follow(widget: Widget): void {
     widget.notFull = false;
     widget.said = 100;
     widget.peak = 0;
+    widget.peakFli = 0;
     widget.startLeft = 100;
   }
   widget.powered = powered;
@@ -231,6 +247,19 @@ function look(widget: Widget): void {
   view.packName = plugged.name;
   view.packMah = plugged.mah;
   view.mahLeft = math.floor((plugged.mah * view.left) / 100 + 0.5);
+  // The First Limit Indicator: each limit's share (1 at the limit), the worst one leading.
+  const shares: [number, string][] = view.powered
+    ? [
+        [view.amps / ((plugged.mah / 1000) * PACK_C), 'A'],
+        [(CELL_FULL - view.cell) / (CELL_FULL - CELL_FLOOR), 'V'],
+        [(100 - view.left) / DEEP, '%'],
+      ]
+    : [[0, '']];
+  let worst = shares[0];
+  for (const share of shares) if (share[0] > worst[0]) worst = share;
+  view.fli = clamp(worst[0] * 10, 0, 11);
+  view.limit = worst[1];
+  widget.peakFli = math.max(widget.peakFli, view.fli);
   view.throttle = ((output(2) + 1024) / 2048) * 100;
   view.degrees = (output(5) / 1024) * (widget.options.PitchRange || 12);
   view.aileron = getValue('ail');
@@ -576,20 +605,27 @@ function objects(widget: Widget): LvglObject[] {
     label(398, 72, () => `${cells()}S`, SMLSIZE, MUTED),
   );
 
-  // Amps (with the pack's peak) and volts a cell.
+  // The First Limit Indicator (with its highest on this pack) and volts a cell.
   list.push(
     ...dial({
       centerX: 354,
       centerY: 121,
       radius: 30,
-      title: 'AMPS',
+      title: 'FLI',
       low: 0,
-      high: 40,
-      value: () => view.amps,
+      high: 11,
+      value: () => view.fli,
       labels: [],
-      peak: () => widget.peak,
+      peak: () => widget.peakFli,
     }),
-    label(354, 137, () => `${math.floor(view.amps + 0.5)}A`, SMLSIZE, DIGITS, CENTER),
+    label(
+      354,
+      137,
+      () => (view.powered ? `${string.format('%.1f', view.fli)}${view.limit}` : '--'),
+      SMLSIZE,
+      DIGITS,
+      CENTER,
+    ),
     ...dial({
       centerX: 434,
       centerY: 121,
@@ -603,8 +639,12 @@ function objects(widget: Widget): LvglObject[] {
     label(434, 137, () => (view.powered ? string.format('%.2f', view.cell) : '--'), SMLSIZE, DIGITS, CENTER),
   );
 
-  // The power, level with the cyclic's box (the timers are in the top bar).
-  list.push(...readout(180, 'POWER', () => `${math.floor(view.watts + 0.5)} W`));
+  // The amps, the power and the pack's peak current, beside the cyclic's box (the timers are in the top bar).
+  list.push(
+    ...readout(162, 'AMPS', () => `${string.format('%.1f', view.amps)} A`),
+    ...readout(180, 'POWER', () => `${math.floor(view.watts + 0.5)} W`),
+    ...readout(198, 'PEAK', () => `${math.floor(widget.peak + 0.5)} A`),
+  );
 
   // The cyclic (the right stick): a dot where aileron and elevator put it, their values under it (its box, cross and
   // ring are in the panel picture).
@@ -639,6 +679,7 @@ function create(zone: Zone, options: Options): Widget {
     notFull: false,
     said: 100,
     peak: 0,
+    peakFli: 0,
     startLeft: 100,
     since: getTime(),
     view: {
@@ -652,6 +693,8 @@ function create(zone: Zone, options: Options): Widget {
       mahLeft: 0,
       amps: 0,
       cell: 0,
+      fli: 0,
+      limit: '',
       watts: 0,
       throttle: 0,
       degrees: 0,

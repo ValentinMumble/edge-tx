@@ -21,9 +21,11 @@ out of git (`backups/`, `update-2.12.5/`).
   LEVEL, RESCUE, LOW BATT or NOT FULL, TELE), the throttle as a quadrant (a detent per idle up, evenly spaced, CUT
   guarded in hold) and the pitch as a collective against a degree scale, the battery as a fuel gauge (from the charge a
   pack had when plugged in, by its volts a cell, less the mAh used; the mAh left under the %, the % said every 10% with
-  mAhRe's sounds, the pack the 6-position buttons pick under it), the model's data plate, amps and the average volts a
-  cell (the pack's voltage over its cells) as gauges, the power, and the right stick as a cyclic dot (the timers are
-  in the top bar). The panel turns dark yellow while the motor can
+  mAhRe's sounds, the pack the 6-position buttons pick under it), the model's data plate, a First Limit Indicator (as
+  on Airbus helicopters: one needle for whichever limit comes first, the current against the pack's 30C, the cell from
+  4.2 V down to 3.3 V or the charge used against 80 %, 10 at the limit, its letter saying which, its highest marked)
+  and the average volts a cell as gauges, the amps, the power and the pack's peak current, and the right stick as a
+  cyclic dot (the timers are in the top bar). The panel turns dark yellow while the motor can
   spin, LEVEL lights blue, RESCUE and TELE white on dark red. Built from EdgeTX's LVGL objects, so the radio redraws
   only what changes, and the screen keeps up at 20 frames a second (EdgeTX's most).
 - **ArmedModel:** the arming state at a glance: SAFE (grey-green), ARMED (amber, throttle cut) or LIVE (red, the border
@@ -64,8 +66,9 @@ timer 2 for the sortie (`sortie_timer.py`), the low-cell alarm only with a pack 
 real sag, 3.30 V a cell for 5 s (`cell_alarm_sag.py`), a rescue that climbs after 0.1 s of flat pitch, not 0.2 s
 (`rescue_delay.py`), the receiver's sensors back in their slots when the radio finds them under new IDs
 (`sensor_ids.py`), a theme of its own, Cockpit, with a dark top bar and readable menus (`cockpit_theme.py`, FM2M
-Concrete stays to go back to), the Timers widget in the top bar's empty zone (`topbar_timers.py`). Then it copies the built widgets and mAhRe from `sd-card/`. It backs up what it changes
-in `backups/<date>` first, and names any model the radio changed since, to copy into `sd-card/MODELS`. A new model
+Concrete stays to go back to), the Timers widget in the top bar's empty zone (`topbar_timers.py`). Then it copies the
+built widgets and mAhRe from `sd-card/`. It backs up what it changes in `backups/<date>` first, and names any model the
+radio changed since, to copy into `sd-card/MODELS`. A new model
 change is a new script, run on `sd-card/` and added to the deploy.
 
 ## Preview
