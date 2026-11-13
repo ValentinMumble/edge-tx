@@ -1167,6 +1167,9 @@ topbarData:
       2:
          widgetName: "Link"
          widgetData: 
+      3:
+         widgetName: "Timers"
+         widgetData: 
       4:
          widgetName: "Radio Info"
          widgetData: 

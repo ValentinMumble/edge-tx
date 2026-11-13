@@ -11,8 +11,8 @@ const name = 'Cockpit';
  *   used, against the size of the pack picked with the 6-position buttons (the mAh left under the %, the pack under
  *   the gauge), saying the % left every 10% and warning when a pack is not full (mAhRe's sounds);
  * - the model's data plate (picture, name, cells), the amps (with the pack's peak) and volts a cell as gauges, the
- *   power, the time with the motor on this pack (timer 1) and today (timer 2, the sortie), and the cyclic: where the
- *   right stick is, to check it.
+ *   power, and the cyclic: where the right stick is, to check it. The timers (this pack's, the sortie's) are in the
+ *   top bar (the Timers widget); this one starts the sortie's again each day.
  * It is built from EdgeTX's LVGL objects (useLvgl): the radio keeps them on the screen and redraws only what changes,
  * where a widget drawing with lcd calls redraws the whole screen 20 times a second. Everything that never moves is two
  * pictures beside this file (scripts/cockpit-panel.mjs draws them at the positions used here); the rest are objects
@@ -46,9 +46,6 @@ type View = {
   elevator: number;
   packName: string;
   packMah: number;
-  /** Seconds with the motor on: this pack (timer 1), today (timer 2). */
-  packTime: number;
-  sortieTime: number;
   lights: Light[];
 };
 type Widget = {
@@ -238,8 +235,6 @@ function look(widget: Widget): void {
   view.degrees = (output(5) / 1024) * (widget.options.PitchRange || 12);
   view.aileron = getValue('ail');
   view.elevator = getValue('ele');
-  view.packTime = model.getTimer(0).value ?? 0;
-  view.sortieTime = model.getTimer(1)?.value ?? 0;
 
   // SAFE lit green while disarmed, ARMED amber; THR ON amber while the throttle is on (out of hold), THR OFF dark in
   // hold; LEVEL blue with white letters, as the flight mode tile in the top bar, while self-level is on.
@@ -301,16 +296,6 @@ function label(
     object.align = RIGHT;
   }
   return object;
-}
-
-/** m:ss, or h:mm:ss past an hour. */
-function clock(seconds: number): string {
-  const whole = math.max(0, math.floor(seconds));
-  const hours = math.floor(whole / 3600);
-  const minutes = math.floor((whole % 3600) / 60);
-  return hours > 0
-    ? `${hours}:${string.format('%02d:%02d', minutes, whole % 60)}`
-    : `${minutes}:${string.format('%02d', whole % 60)}`;
 }
 
 type Dial = {
@@ -618,12 +603,8 @@ function objects(widget: Widget): LvglObject[] {
     label(434, 137, () => (view.powered ? string.format('%.2f', view.cell) : '--'), SMLSIZE, DIGITS, CENTER),
   );
 
-  // The power, and the time with the motor on: this pack, and the whole sortie (today).
-  list.push(
-    ...readout(162, 'POWER', () => `${math.floor(view.watts + 0.5)} W`),
-    ...readout(180, 'PACK', () => clock(view.packTime)),
-    ...readout(198, 'SORTIE', () => clock(view.sortieTime)),
-  );
+  // The power, level with the cyclic's box (the timers are in the top bar).
+  list.push(...readout(180, 'POWER', () => `${math.floor(view.watts + 0.5)} W`));
 
   // The cyclic (the right stick): a dot where aileron and elevator put it, their values under it (its box, cross and
   // ring are in the panel picture).
@@ -678,8 +659,6 @@ function create(zone: Zone, options: Options): Widget {
       elevator: 0,
       packName: '',
       packMah: 0,
-      packTime: 0,
-      sortieTime: 0,
       lights,
     },
   };

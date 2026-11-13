@@ -7,5 +7,6 @@
   "link": "Link",
   "flight-state": "FlightState",
   "session": "Session",
-  "cockpit": "Cockpit"
+  "cockpit": "Cockpit",
+  "top-timers": "Timers"
 }

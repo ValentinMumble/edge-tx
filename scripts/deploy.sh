@@ -44,6 +44,7 @@ python3 -I "$here/cell_alarm_sag.py" "$card/MODELS/model20.yml"
 python3 -I "$here/rescue_delay.py" "$card/MODELS/model20.yml"
 python3 -I "$here/sensor_ids.py" "$card/MODELS/model20.yml"
 python3 -I "$here/cockpit_theme.py" "$card"
+python3 -I "$here/topbar_timers.py" "$card/MODELS/model20.yml"
 
 for folder in $folders; do
   mkdir -p "$card/WIDGETS/$folder"

@@ -61,7 +61,7 @@ local function __TS__ObjectAssign(target, ...)
 end
 -- End of Lua Library inline imports
 local ____exports = {}
-local output, button, pack, cells, fuelLeft, look, at, lineHeight, label, clock, dial, readout, objects, update, PACKS, LOW_FUEL, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, AMBER, RED, UNLIT, EDGE, TOP, BOTTOM, clamp
+local output, button, pack, cells, fuelLeft, look, at, lineHeight, label, dial, readout, objects, update, PACKS, LOW_FUEL, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, AMBER, RED, UNLIT, EDGE, TOP, BOTTOM, clamp
 function output(index)
     local value = getOutputValue(index)
     local ____opt_0 = model.getOutput(index)
@@ -111,9 +111,6 @@ function look(widget)
     view.degrees = output(5) / 1024 * (widget.options.PitchRange or 12)
     view.aileron = getValue("ail")
     view.elevator = getValue("ele")
-    view.packTime = model.getTimer(0).value or 0
-    local ____opt_2 = model.getTimer(1)
-    view.sortieTime = ____opt_2 and ____opt_2.value or 0
     local lights = view.lights
     local function set(index, word, on, color, ink)
         if ink == nil then
@@ -193,20 +190,11 @@ function label(x, y, text, font, color, align)
     end
     return object
 end
-function clock(seconds)
-    local whole = math.max(
-        0,
-        math.floor(seconds)
-    )
-    local hours = math.floor(whole / 3600)
-    local minutes = math.floor(whole % 3600 / 60)
-    return hours > 0 and (tostring(hours) .. ":") .. string.format("%02d:%02d", minutes, whole % 60) or (tostring(minutes) .. ":") .. string.format("%02d", whole % 60)
-end
 function dial(spec)
-    local ____spec_4 = spec
-    local x = ____spec_4.centerX
-    local y = ____spec_4.centerY
-    local radius = ____spec_4.radius
+    local ____spec_2 = spec
+    local x = ____spec_2.centerX
+    local y = ____spec_2.centerY
+    local radius = ____spec_2.radius
     local big = radius > 50
     local function angle(value)
         return -135 + (clamp(value, spec.low, spec.high) - spec.low) / (spec.high - spec.low) * 270
@@ -362,12 +350,12 @@ function objects(widget)
         end
     )
     local idles = {widget.options.Idle1, widget.options.Idle2, widget.options.Idle3}
-    local ____array_5 = __TS__SparseArrayNew(
+    local ____array_3 = __TS__SparseArrayNew(
         0,
         table.unpack(idles)
     )
-    __TS__SparseArrayPush(____array_5, 100)
-    local stops = {__TS__SparseArraySpread(____array_5)}
+    __TS__SparseArrayPush(____array_3, 100)
+    local stops = {__TS__SparseArraySpread(____array_3)}
     local function stopY(index)
         return math.floor(BOTTOM - index / (#stops - 1) * (BOTTOM - TOP))
     end
@@ -543,13 +531,13 @@ function objects(widget)
             stripe = stripe + 1
         end
     end
-    local ____temp_7 = stopY(0) - 23
-    local function ____temp_8()
+    local ____temp_5 = stopY(0) - 23
+    local function ____temp_6()
         return view.hold
     end
-    local ____array_6 = __TS__SparseArrayNew(table.unpack(stripes))
+    local ____array_4 = __TS__SparseArrayNew(table.unpack(stripes))
     __TS__SparseArrayPush(
-        ____array_6,
+        ____array_4,
         {
             type = "rectangle",
             x = 0,
@@ -562,11 +550,11 @@ function objects(widget)
     list[#list + 1] = {
         type = "box",
         x = 34,
-        y = ____temp_7,
+        y = ____temp_5,
         w = 20,
         h = 7,
-        visible = ____temp_8,
-        children = {__TS__SparseArraySpread(____array_6)}
+        visible = ____temp_6,
+        children = {__TS__SparseArraySpread(____array_4)}
     }
     list[#list + 1] = label(
         44,
@@ -784,7 +772,7 @@ function objects(widget)
             MUTED
         )
     )
-    local ____array_9 = __TS__SparseArrayNew(table.unpack(dial({
+    local ____array_7 = __TS__SparseArrayNew(table.unpack(dial({
         centerX = 354,
         centerY = 121,
         radius = 30,
@@ -796,7 +784,7 @@ function objects(widget)
         peak = function() return widget.peak end
     })))
     __TS__SparseArrayPush(
-        ____array_9,
+        ____array_7,
         label(
             354,
             137,
@@ -817,7 +805,7 @@ function objects(widget)
         }))
     )
     __TS__SparseArrayPush(
-        ____array_9,
+        ____array_7,
         label(
             434,
             137,
@@ -829,32 +817,15 @@ function objects(widget)
     )
     __TS__ArrayPush(
         list,
-        __TS__SparseArraySpread(____array_9)
+        __TS__SparseArraySpread(____array_7)
     )
-    local ____array_10 = __TS__SparseArrayNew(table.unpack(readout(
-        162,
-        "POWER",
-        function() return tostring(math.floor(view.watts + 0.5)) .. " W" end
-    )))
-    __TS__SparseArrayPush(
-        ____array_10,
-        table.unpack(readout(
-            180,
-            "PACK",
-            function() return clock(view.packTime) end
-        ))
-    )
-    __TS__SparseArrayPush(
-        ____array_10,
-        table.unpack(readout(
-            198,
-            "SORTIE",
-            function() return clock(view.sortieTime) end
-        ))
-    )
-    __TS__ArrayPush(
+    __TS__ArrayPushArray(
         list,
-        __TS__SparseArraySpread(____array_10)
+        readout(
+            180,
+            "POWER",
+            function() return tostring(math.floor(view.watts + 0.5)) .. " W" end
+        )
     )
     local function percent(value)
         return (value >= 0 and "+" or "") .. tostring(math.floor(value / 1024 * 100 + 0.5))
@@ -898,8 +869,8 @@ local name = "Cockpit"
 --   used, against the size of the pack picked with the 6-position buttons (the mAh left under the %, the pack under
 --   the gauge), saying the % left every 10% and warning when a pack is not full (mAhRe's sounds);
 -- - the model's data plate (picture, name, cells), the amps (with the pack's peak) and volts a cell as gauges, the
---   power, the time with the motor on this pack (timer 1) and today (timer 2, the sortie), and the cyclic: where the
---   right stick is, to check it.
+--   power, and the cyclic: where the right stick is, to check it. The timers (this pack's, the sortie's) are in the
+--   top bar (the Timers widget); this one starts the sortie's again each day.
 -- It is built from EdgeTX's LVGL objects (useLvgl): the radio keeps them on the screen and redraws only what changes,
 -- where a widget drawing with lcd calls redraws the whole screen 20 times a second. Everything that never moves is two
 -- pictures beside this file (scripts/cockpit-panel.mjs draws them at the positions used here); the rest are objects
@@ -1099,8 +1070,6 @@ local function create(zone, options)
             elevator = 0,
             packName = "",
             packMah = 0,
-            packTime = 0,
-            sortieTime = 0,
             lights = lights
         }
     }

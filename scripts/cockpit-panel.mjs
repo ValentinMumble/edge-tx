@@ -308,10 +308,8 @@ function draw(inside) {
   screw(panel, 462, 76);
   panel.fill(324, 33, 66, 44, 0x0b0c0d);
 
-  // Power, this pack's motor time, the sortie's.
-  display(panel, 322, 162, 88);
+  // The power, level with the cyclic's box (the timers are in the top bar).
   display(panel, 322, 180, 88);
-  display(panel, 322, 198, 88);
 
   // The cyclic's box: its cross, dotted, and the ring at the stick's centre.
   panel.fill(420, 158, 48, 48, SLOT);
