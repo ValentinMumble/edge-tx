@@ -6,11 +6,12 @@
 #   telemetry dropout; timer 1 counting up; the theme's readable menus (and the M2 EVO's clock); arming down; the
 #   sortie timer; the low-cell alarm only with a pack in, then off (the Cockpit warns instead); the receiver's sensors
 #   back in their slots; the log kept going while armed; S1 a -20 to +20% knob (10 in idle up 3), with a start warning
-#   for it at the middle; the idle ups' head speeds; the K110S model when the card has none;
+#   for it at the middle; the idle ups' head speeds; the K110S model when the card has none, its idle up 1 made Low
+#   RPM (SB freed), its log started once the motor may run for 3 s, its one cockpit screen and its cut-out picture;
 # - the widgets built from src/ (widgets.json says which folder each goes in) and the edited mAhRe, from the repo's
-#   card, with their pictures (`npm run build` puts the built ones there, and the Cockpit's panel pictures).
-# Backs up the models, the radio settings and the widgets it replaces first, in backups/<today>, and lists at the end
-# any model that still differs from the repo's: changed on the radio since, to bring into the repo.
+#   card, with their pictures (`npm run build` puts the built ones there, and the cockpits' panel pictures).
+# Backs up the models, the radio settings, the widgets and the picture it replaces first, in backups/<today>, and lists
+# at the end any model that still differs from the repo's: changed on the radio since, to bring into the repo.
 set -euo pipefail
 card="/Volumes/NO NAME"
 here="$(cd "$(dirname "$0")" && pwd)"
@@ -52,13 +53,19 @@ python3 -I "$here/continuous_log.py" "$card/MODELS/model20.yml"
 python3 -I "$here/s1_knob.py" "$card/MODELS/model20.yml"
 python3 -I "$here/idle_ups.py" "$card/MODELS/model20.yml"
 python3 -I "$here/k110s_model.py" "$card"
+python3 -I "$here/k110s_iu1_low.py" "$card/MODELS/model21.yml"
+python3 -I "$here/k110s_low_speed.py" "$card/MODELS/model21.yml"
+python3 -I "$here/k110s_log.py" "$card/MODELS/model21.yml"
+python3 -I "$here/k110s_rescue.py" "$card/MODELS/model21.yml"
+python3 -I "$here/k110s_screen.py" "$card/MODELS/model21.yml"
+python3 -I "$here/k110s_picture.py" "$card" "$backup/IMAGES"
 
 for folder in $folders; do
   mkdir -p "$card/WIDGETS/$folder"
   # -X: without the Mac's file attributes, which would leave a "._main.lua" beside it on the card.
   cp -X "$repo/sd-card/WIDGETS/$folder/main.lua" "$card/WIDGETS/$folder/main.lua"
   rm -f "$card/WIDGETS/$folder/main.luac"
-  # Its pictures too (the Cockpit's gauge faces).
+  # Its pictures too (the cockpits' panels).
   for picture in "$repo/sd-card/WIDGETS/$folder"/*.png; do
     if [ -f "$picture" ]; then cp -X "$picture" "$card/WIDGETS/$folder/"; fi
   done

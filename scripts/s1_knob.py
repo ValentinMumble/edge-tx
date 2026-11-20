@@ -9,6 +9,7 @@ more than about 2% off the middle. The top bar's FMStatus gets S1 as its S1Sourc
 under the idle up. Skips a model already changed (deploy.sh runs every script on the radio each time). Backs the file
 up first.
 Usage: s1_knob.py <model20.yml> [<backup folder>]"""
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -31,17 +32,32 @@ KNOB = (
     + LOWER.replace(SPELL, '   weight: 10\n   offset: 0\n   swtch: "L3"\n').replace('"Lower"', '"S1 IU3"')
 )
 WARNING = 'potsWarnMode: WARN_MANUAL\n'
+# S1's warning on, at the middle: the radio writes the position back without the 0 (its default), so on is enough
+# unless a position other than 0 is written.
 CENTRE = 'potsWarnEnabled: 1\npotsWarnPosition: \n   0:\n      val: 0\n'
+centred = 'potsWarnEnabled: 1\n' in text and not re.search(r'potsWarnPosition: \n   0:\n      val: -?[1-9]', text)
 GYRO = (
     '         widgetName: "FMStatus"\n         widgetData: \n            options: \n'
     '               0:\n                  type: Source\n                  value: \n                     source: SE\n'
     '               1:\n                  type: Source\n                  value: \n                     source: ch(4)\n'
 )
-SHOWN = GYRO + (
-    '               3:\n                  type: Source\n                  value: \n                     source: P1\n'
-)
+S1_OPTION = '               3:\n                  type: Source\n                  value: \n                     source: P1\n'
+# Its LowSource (option 3), as the radio writes it back when unset, between the gyro and S1.
+UNSET_LOW = '               2:\n                  type: Source\n                  value: \n                     source: NONE\n'
 
-if KNOB in text and WARNING in text and CENTRE in text and SHOWN in text:
+
+def top_bar_status(text: str) -> tuple[int, int]:
+    """Where the top bar's FMStatus widget sits in the model: from its name to the next widget."""
+    name = '         widgetName: "FMStatus"\n'
+    start = text.index(name)
+    end = text.find('widgetName:', start + len(name))
+    return start, end if end > 0 else len(text)
+
+
+start, end = top_bar_status(text)
+shown = 'source: P1\n' in text[start:end]
+
+if KNOB in text and WARNING in text and centred and shown:
     print(f'{model}: S1 is already a knob of -20 to +20% (10 in idle up 3), with its start warning')
     sys.exit(0)
 if KNOB not in text:
@@ -50,12 +66,13 @@ if KNOB not in text:
 if WARNING not in text:
     assert text.count('potsWarnMode: WARN_OFF\n') == 1, 'no pots warning mode to set'
     text = text.replace('potsWarnMode: WARN_OFF\n', WARNING, 1)
-if CENTRE not in text:
+if not centred:
     assert text.count('potsWarnEnabled: 0\n') == 1 and 'potsWarnPosition:' not in text, 'pots warning already set'
     text = text.replace('potsWarnEnabled: 0\n', CENTRE, 1)
-if SHOWN not in text:
+if not shown:
     assert text.count(GYRO) == 1, "the top bar's FMStatus is not as cockpit_screen.py left it"
-    text = text.replace(GYRO, SHOWN, 1)
+    after = GYRO + UNSET_LOW if GYRO + UNSET_LOW in text else GYRO
+    text = text.replace(after, after + S1_OPTION, 1)
 
 if len(sys.argv) > 2:
     backup = Path(sys.argv[2])

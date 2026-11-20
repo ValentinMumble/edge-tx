@@ -15,8 +15,8 @@ Moving to a RadioMaster GX10: the plan and checklist are in [docs/gx10-migration
 model changes of `scripts/` made to it, and the widgets built from `src/` and the edited mAhRe in it. Its models are
 the M2 EVO and the K110S (below); the others left the radio on 12 November 2026 and are in this repo's
 history. `npm run build`
-puts the built widgets there (`widgets.json` says which folder each goes in), with the Cockpit's panel
-(`scripts/cockpit-panel.mjs` draws its fixed parts as pictures, cheaper for the radio than drawing them each
+puts the built widgets there (`widgets.json` says which folder each goes in), with the cockpits' panels
+(`scripts/cockpit-panel.mjs` draws their fixed parts as pictures, cheaper for the radio than drawing them each
 frame); `npm run dev` rebuilds the widgets into `output/` on every save. Full card copies taken from the radio stay
 out of git (`backups/`, `update-2.12.5/`).
 
@@ -31,6 +31,12 @@ out of git (`backups/`, `update-2.12.5/`).
   a cell as a gauge, and the right stick as a cyclic dot (the timers are in the top bar). The panel turns dark yellow while the motor can
   spin, LEVEL lights blue, RESCUE and TELE white on dark red. Built from EdgeTX's LVGL objects, so the radio redraws
   only what changes, and the screen keeps up at 20 frames a second (EdgeTX's most).
+- **K110Cockpit:** the K110S's whole screen, laid out as the Cockpit so nothing moves when switching models: the
+  same lights (LEVEL in 6G; RESCUE while SH is held; TELE stays dark; LOW BATT under 30 s left on the Pack timer), quadrant
+  (detents LOW, IU2, IU3 at their curves' mid stick throttle) and collective, the Pack timer as the fuel gauge (the time
+  left, how fast it counts now, the sortie under it), the data plate, the throttle curves in the pitch curve's box (the
+  Low RPM ramp, IU2, IU3, the one on SE lit with a dot at the stick, read from the model), the idle ups as three tiles
+  in SE's order where the cell gauge is, and the cyclic.
 - **ArmedModel:** the arming state at a glance: SAFE (grey-green), ARMED (amber, throttle cut) or LIVE (red, the border
   blinking), the SA and SF switches as two lights, the model's picture, and its main rotor seen from above in the
   state's colours: still when safe, spooling up when live (a blur and the rotor disc show as it gains speed), coasting
@@ -59,11 +65,15 @@ Pack, FlyTimer, Power, Session and mAhRe start again on a new pack: its voltage 
 models reset that count only when telemetry stops while disarmed, so a telemetry dropout in flight is not a new pack.
 
 **The K110S** (`model21.yml`, Futaba S-FHSS, no telemetry), switched as the M2 EVO: SA down arms, SF holds, SC down
-is 6G (self-level, else 3D), SE picks idle up 1 to 3 (70, 80, 90% throttle), SB down Low RPM (0 to 60% up the stick,
-over SE, with a gentler pitch). Its Pack timer counts down from 4:00 in THR% mode, its throttle source CH9: CH3
-scaled so 90% counts a second a second, so it runs slower at lower head speeds (x0.67 hovering in Low RPM) and
-stops in hold; it starts again while disarmed. Its screen: the model armed or not, the Pack timer, the gyro and hold.
-It logs to the card while armed, a line every 0.2 s (sticks, switches, outputs; no battery, as it has no telemetry).
+is 6G (self-level, else 3D), SE picks the idle up: IU1 (up) Low RPM (a steady 60%, 65 at the stick's ends, with a
+gentler pitch; `k110s_low_speed.py`), IU2 80%, IU3 90%, each a gentle V. SB does nothing. SH held is a rescue, built
+as the M2 EVO's: 6G, the pitch flat, then +60% after 0.1 s (`k110s_rescue.py`). Its Pack timer counts down
+from 4:00 in THR% mode, its throttle source CH9: CH3 scaled so 90% counts about a second a second, so it runs slower
+at lower head speeds (x0.61 in Low RPM)
+and stops in hold; it starts again while disarmed. Its screen: the K110Cockpit under the top bar. It logs to the
+card once the motor may run (armed, out of hold) for 3 s in a row, a line every 0.2 s (sticks, switches, outputs; no
+battery, as it has no telemetry): S-FHSS is one-way, so the radio cannot tell the heli is on, and switches flipped on
+the bench each made a log.
 
 ## Deploy
 
@@ -71,7 +81,7 @@ It logs to the card while armed, a line every 0.2 s (sticks, switches, outputs; 
 that changed the models here, each one skipping a change already there: the M2 EVO's low-cell alarm (`cell_alarm.py`),
 its SA sounds (`m2evo_screen.py`), its one cockpit screen and top bar (`cockpit_screen.py`), the 6-position buttons
 freed for the packs and set up as a 6-position switch again (`six_pos.py`), the mAh count and timer 1 kept through a
-dropout (`disarmed_reset.py`), timer 1 counting up the time with the motor on (`timer_up.py`), the theme's mid grey top
+dropout (`disarmed_reset.py`), timer 1 counting up the time with the motor on, on models with telemetry (`timer_up.py`), the theme's mid grey top
 bar, whose colour is also the menus' text (`readable_menus.py`), arming with SA down instead of up (`arm_down.py`),
 timer 2 for the sortie (`sortie_timer.py`), the low-cell alarm only with a pack in (`cell_alarm_live.py`) and only for
 real sag, 3.30 V a cell for 5 s (`cell_alarm_sag.py`), then off, as the Cockpit warns instead (`cell_alarm_off.py`), a rescue that climbs after 0.1 s of flat pitch, not 0.2 s
@@ -82,7 +92,9 @@ going while armed, so a telemetry gap does not split a pack in two files (`conti
 knob of -20 to +20% in every idle up (10 in idle up 3, so it tops out at +60, OMPHobby's highest) with a
 start warning to set it at the middle (`s1_knob.py`), the idle ups' head
 speeds (`idle_ups.py`: FM1 8, FM2 20, FM3 50 % on CH3), the K110S model
-when the card has none (`k110s_model.py`). Then it copies the
+when the card has none (`k110s_model.py`), its IU1 made Low RPM and SB freed (`k110s_iu1_low.py`), its log from 3 s
+of motor on (`k110s_log.py`), its one cockpit screen (`k110s_screen.py`) and its picture cut out as the M2 EVO's
+(`k110s_picture.py`). Then it copies the
 built widgets and mAhRe from `sd-card/`. It backs up what it changes in `backups/<date>` first, and names any model the
 radio changed since, to copy into `sd-card/MODELS`. A new model
 change is a new script, run on `sd-card/` and added to the deploy.

@@ -7,11 +7,16 @@
  * windows, the digital windows' frames, the data plate and the cyclic box. The widget draws what moves, and all the
  * text, in the radio's own font.
  *
- * Every position here is one src/cockpit.ts draws the rest against: change both together. The radio keeps a picture
- * without transparency at 16 bits a pixel (RGB565), so colours are snapped to that here, and Flightdown shows what the
- * radio shows. Writes sd-card/WIDGETS/Cockpit/panel.png and panel-live.png.
+ * The K110S's cockpit (src/k110s-cockpit.ts) is the same panel, so nothing moves when switching models, with two
+ * changes: its big gauge is the Pack timer's (4:00 to 0, a tick every 30 s), and three idle up tiles stand where the
+ * cell gauge is (it has no telemetry).
+ *
+ * Every position here is one src/cockpit.ts and src/k110s-cockpit.ts draw the rest against: change them together. The
+ * radio keeps a picture without transparency at 16 bits a pixel (RGB565), so colours are snapped to that here, and
+ * Flightdown shows what the radio shows. Writes panel.png and panel-live.png in sd-card/WIDGETS/Cockpit and
+ * sd-card/WIDGETS/K110Cockpit.
  */
-import {writeFileSync} from 'node:fs';
+import {mkdirSync, writeFileSync} from 'node:fs';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {deflateSync} from 'node:zlib';
@@ -32,39 +37,60 @@ const EDGE = 0x3a3d40;
 const WINDOW = 0x050606;
 const WINDOW_EDGE = 0x33373b;
 
-/** The gauges: centre, radius, range, coloured bands (from, to, colour), ticks, the ticks drawn long, the window. */
-const GAUGES = [
-  {
-    x: 226,
-    y: 117,
-    radius: 72,
-    low: 0,
-    high: 100,
-    bands: [
-      [0, 20, RED],
-      [20, 35, AMBER],
-      [35, 100, GREEN],
-    ],
-    ticks: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-    long: [0, 50, 100],
-    window: [56, 33],
-  },
-  // Volts a cell, over the cyclic's box.
-  {
-    x: 442,
-    y: 121,
-    radius: 28,
-    low: 3.2,
-    high: 4.2,
-    bands: [
-      [3.2, 3.3, RED],
-      [3.3, 3.5, AMBER],
-      [3.5, 4.2, GREEN],
-    ],
-    ticks: [3.2, 3.4, 3.6, 3.8, 4.0, 4.2],
-    long: [3.2, 4.2],
-    window: [36, 14],
-  },
+/** A gauge: centre, radius, range, coloured bands (from, to, colour), ticks, the ticks drawn long, the window. */
+const BATTERY = {
+  x: 226,
+  y: 117,
+  radius: 72,
+  low: 0,
+  high: 100,
+  bands: [
+    [0, 20, RED],
+    [20, 35, AMBER],
+    [35, 100, GREEN],
+  ],
+  ticks: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+  long: [0, 50, 100],
+  window: [56, 33],
+};
+/** Volts a cell, over the cyclic's box. */
+const CELL = {
+  x: 442,
+  y: 121,
+  radius: 28,
+  low: 3.2,
+  high: 4.2,
+  bands: [
+    [3.2, 3.3, RED],
+    [3.3, 3.5, AMBER],
+    [3.5, 4.2, GREEN],
+  ],
+  ticks: [3.2, 3.4, 3.6, 3.8, 4.0, 4.2],
+  long: [3.2, 4.2],
+  window: [36, 14],
+};
+/**
+ * The K110S's Pack timer in the battery's place, in seconds left of 4:00: red under 30 s (where its LOW BATT lights),
+ * amber under a minute.
+ */
+const PACK_TIME = {
+  ...BATTERY,
+  high: 240,
+  bands: [
+    [0, 30, RED],
+    [30, 60, AMBER],
+    [60, 240, GREEN],
+  ],
+  ticks: [0, 30, 60, 90, 120, 150, 180, 210, 240],
+  long: [0, 120, 240],
+};
+/** The K110S's three idle up tiles in the cell gauge's place, one over the other: its widget fills the one flown. */
+const TILES = {x: 412, y: 92, width: 60, height: 19, step: 21};
+
+/** Each widget's panel: its folder, its gauges and whether it has the idle up tiles. */
+const PANELS = [
+  {folder: 'Cockpit', gauges: [BATTERY, CELL], tiles: false},
+  {folder: 'K110Cockpit', gauges: [PACK_TIME], tiles: true},
 ];
 
 /** The lever gates run from y 42 (top) to 198 (bottom): five throttle stops and nine pitch ticks, evenly spaced. */
@@ -250,7 +276,7 @@ function display(panel, x, y, width) {
   panel.frame(x, y, width, 15, WINDOW_EDGE);
 }
 
-function draw(inside) {
+function draw(inside, {gauges, tiles}) {
   const panel = new Panel();
   panel.fill(0, 0, WIDTH, HEIGHT, 0x050606);
   panel.fill(2, 2, WIDTH - 4, HEIGHT - 4, inside);
@@ -289,7 +315,13 @@ function draw(inside) {
   display(panel, 20, BOTTOM + 7, 48);
   display(panel, 84, BOTTOM + 7, 48);
 
-  for (const spec of GAUGES) gauge(panel, spec);
+  for (const spec of gauges) gauge(panel, spec);
+  if (tiles) {
+    for (let index = 0; index < 3; index += 1) {
+      panel.fill(TILES.x, TILES.y + index * TILES.step, TILES.width, TILES.height, 0x0e0f10);
+      panel.frame(TILES.x, TILES.y + index * TILES.step, TILES.width, TILES.height, EDGE);
+    }
+  }
 
   // The data plate: the plate, its frame and screws, the picture's box.
   panel.fill(318, 27, 152, 56, 0x2c2f33);
@@ -345,12 +377,16 @@ function png(rows) {
   ]);
 }
 
-const folder = join(dirname(fileURLToPath(import.meta.url)), '..', 'sd-card', 'WIDGETS', 'Cockpit');
-// The panel grey, and dark yellow while live (armed, throttle on), as ARMED and THR ON.
-for (const [file, inside] of [
-  ['panel', 0x0c0d0e],
-  ['panel-live', 0x3a2c06],
-]) {
-  writeFileSync(join(folder, `${file}.png`), png(draw(inside).rgb565()));
+const widgets = join(dirname(fileURLToPath(import.meta.url)), '..', 'sd-card', 'WIDGETS');
+for (const spec of PANELS) {
+  const folder = join(widgets, spec.folder);
+  mkdirSync(folder, {recursive: true});
+  // The panel grey, and dark yellow while live (armed, throttle on), as ARMED and THR ON.
+  for (const [file, inside] of [
+    ['panel', 0x0c0d0e],
+    ['panel-live', 0x3a2c06],
+  ]) {
+    writeFileSync(join(folder, `${file}.png`), png(draw(inside, spec).rgb565()));
+  }
 }
-console.log('Cockpit panel: panel.png, panel-live.png');
+console.log(`Cockpit panels: panel.png, panel-live.png in ${PANELS.map(spec => spec.folder).join(', ')}`);

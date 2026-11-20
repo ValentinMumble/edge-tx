@@ -145,26 +145,6 @@ mixData:
    name: "IU3"
  -
    destCh: 2
-   srcRaw: "I2"
-   carryTrim: 0
-   mixWarn: 0
-   mltpx: REPL
-   delayPrec: 0
-   speedPrec: 0
-   flightModes: 000000000
-   weight: 100
-   offset: 0
-   swtch: "L7"
-   curve:
-      type: 3
-      value: 4
-   delayUp: 0
-   delayDown: 0
-   speedUp: 0
-   speedDown: 0
-   name: "Low"
- -
-   destCh: 2
    srcRaw: "MAX"
    carryTrim: 0
    mixWarn: 0
@@ -232,6 +212,23 @@ mixData:
    speedDown: 0
    name: "6G"
  -
+   destCh: 4
+   srcRaw: "MAX"
+   carryTrim: 0
+   mixWarn: 0
+   mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
+   offset: 0
+   swtch: "L9"
+   delayUp: 0
+   delayDown: 0
+   speedUp: 0
+   speedDown: 0
+   name: "Rescue"
+ -
    destCh: 5
    srcRaw: "I2"
    carryTrim: 0
@@ -259,15 +256,49 @@ mixData:
    flightModes: 000000000
    weight: 100
    offset: 0
-   swtch: "L7"
+   swtch: "L1"
    curve:
       type: 3
-      value: 5
+      value: 4
    delayUp: 0
    delayDown: 0
    speedUp: 0
    speedDown: 0
    name: "PitLow"
+ -
+   destCh: 5
+   srcRaw: "MAX"
+   carryTrim: 0
+   mixWarn: 0
+   mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 0
+   offset: 0
+   swtch: "L9"
+   delayUp: 0
+   delayDown: 0
+   speedUp: 0
+   speedDown: 0
+   name: "Flat"
+ -
+   destCh: 5
+   srcRaw: "MAX"
+   carryTrim: 0
+   mixWarn: 0
+   mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 60
+   offset: 0
+   swtch: "L9"
+   delayUp: 1
+   delayDown: 0
+   speedUp: 0
+   speedDown: 0
+   name: "Climb"
  -
    destCh: 8
    srcRaw: "ch(2)"
@@ -408,7 +439,7 @@ curves:
       type: 0
       smooth: 0
       points: 0
-      name: "IU1"
+      name: "Low"
    1:
       type: 0
       smooth: 0
@@ -422,24 +453,19 @@ curves:
    3:
       type: 0
       smooth: 0
-      points: 0
-      name: "Low"
-   4:
-      type: 0
-      smooth: 0
       points: -3
       name: "CPL"
 points:
    0:
-      val: 50
+      val: 30
    1:
-      val: 40
+      val: 20
    2:
-      val: 40
+      val: 20
    3:
-      val: 40
+      val: 20
    4:
-      val: 50
+      val: 30
    5:
       val: 70
    6:
@@ -461,18 +487,8 @@ points:
    14:
       val: 90
    15:
-      val: -100
-   16:
-      val: -20
-   17:
-      val: 20
-   18:
-      val: 20
-   19:
-      val: 20
-   20:
       val: -25
-   21:
+   16:
       val: 100
 logicalSw:
    0:
@@ -523,9 +539,17 @@ logicalSw:
       lsState: 0
       delay: 0
       duration: 0
-   6:
+   7:
+      func: FUNC_AND
+      def: "!L4,!L5"
+      andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
+      delay: 30
+      duration: 0
+   8:
       func: FUNC_VPOS
-      def: "SB,0"
+      def: "SH,0"
       andsw: "NONE"
       lsPersist: 0
       lsState: 0
@@ -573,19 +597,15 @@ customFn:
       func: PLAY_TRACK
       def: "fm-pwr,1,1x"
    8:
-      swtch: "SB2"
-      func: PLAY_TRACK
-      def: "fm-nrm,1,1x"
-   9:
       swtch: "SA2"
       func: PLAY_TRACK
       def: "armed,1,1x"
-   10:
+   9:
       swtch: "!SA2"
       func: PLAY_TRACK
       def: "disarm,1,1x"
-   11:
-      swtch: "SA2"
+   10:
+      swtch: "L8"
       func: LOGS
       def: "2,1"
 flightModeData:
@@ -597,8 +617,6 @@ flightModeData:
 thrTraceSrc: ch(8)
 switchWarning:
    SA:
-      pos: up
-   SB:
       pos: up
    SC:
       pos: up
@@ -649,36 +667,17 @@ inputNames:
 potsWarnEnabled: 0
 screenData:
    0:
-      LayoutId: Layout2P1
+      LayoutId: Layout1x1
       layoutData:
          zones:
             0:
-               widgetName: "ArmedModel"
+               widgetName: "K110Cockpit"
                widgetData:
                   options:
                      0:
-                        type: Source
+                        type: Signed
                         value:
-                           source: ls(5)
-                     1:
-                        type: Source
-                        value:
-                           source: ls(4)
-            1:
-               widgetName: "Timer"
-               widgetData:
-            2:
-               widgetName: "FlightState"
-               widgetData:
-                  options:
-                     0:
-                        type: Source
-                        value:
-                           source: SC
-                     1:
-                        type: Source
-                        value:
-                           source: SF
+                           signedValue: 12
          options:
             0:
                type: Bool
@@ -717,7 +716,7 @@ topbarData:
                2:
                   type: Source
                   value:
-                     source: ls(7)
+                     source: ls(1)
       1:
          widgetName: "Timers"
          widgetData:

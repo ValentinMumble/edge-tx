@@ -2,7 +2,9 @@
 the pack is flown (80 % of a 700 mAh pack went after 4:14 one day, 3:21 another): the mAh used (mAhRe's callouts, the
 Pack widget) say when to land, the low-cell alarm backs it up, and the timer only tells the time run.
 
-For every model whose timer 1 runs on "!L10" (the motor on). Usage: timer_up.py <card folder>"""
+For every model whose timer 1 runs on "!L10" (the motor on) and that has telemetry sensors. A model with none (the
+K110S, on one-way S-FHSS) has no mAh to land by: its timer keeps counting down, its only fuel gauge.
+Usage: timer_up.py <card folder>"""
 import re
 import sys
 from pathlib import Path
@@ -14,6 +16,8 @@ for model in sorted((card / 'MODELS').glob('model*.yml')):
     raw = model.read_bytes().decode('utf-8')
     newline = '\r\n' if '\r\n' in raw else '\n'
     text = raw.replace('\r\n', '\n')
+    if not re.search(r'^telemetrySensors: *\n', text, re.M):
+        continue
     first_timer = re.search(r'^timers: \n   0:\n(?:      .*\n)+', text, re.M)
     if not first_timer or '      swtch: "!L10"\n' not in first_timer.group(0):
         continue

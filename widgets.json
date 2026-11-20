@@ -8,5 +8,6 @@
   "flight-state": "FlightState",
   "session": "Session",
   "cockpit": "Cockpit",
-  "top-timers": "Timers"
+  "top-timers": "Timers",
+  "k110s-cockpit": "K110Cockpit"
 }
