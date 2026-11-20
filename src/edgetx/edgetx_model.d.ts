@@ -24,7 +24,7 @@ declare module model {
   function setLogicalSwitch(): void;
   function getCustomFunction(): void;
   function setCustomFunction(): void;
-  function getCurve(): void;
+  function getCurve(index: number): Curve | undefined;
   function setCurve(): void;
   function getOutput(index: number): ModelOutput;
   function setOutput(): void;
@@ -32,6 +32,17 @@ declare module model {
   function setGlobalVariable(gv: number, fm: number, value: number): void;
   function getSensor(): void;
   function resetSensor(): void;
+}
+
+/** A curve as model.getCurve gives it: y (and a custom curve's x, ends included) from -100 to 100, from 1 in Lua. */
+declare interface Curve {
+  name: string;
+  /** 0 standard (points evenly across), 1 custom (its own x). */
+  type: number;
+  smooth: boolean;
+  points: number;
+  y: number[];
+  x?: number[];
 }
 
 declare interface Model {

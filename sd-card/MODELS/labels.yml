@@ -12,3 +12,12 @@ Models:
     labels: "Favorites"
     bitmap: "M2_EVO_o.png"
     lastopen: 1784585138
+  model21.yml:
+    hash: ""
+    name: "K110S"
+    mod0id: 4
+    mod0type: 6
+    mod0rf: 20
+    labels: "Favorites"
+    bitmap: "K110S.png"
+    lastopen: 0

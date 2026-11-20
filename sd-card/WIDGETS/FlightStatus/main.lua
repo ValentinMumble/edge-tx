@@ -6,7 +6,9 @@ end
 local name = "FMStatus"
 local MIN_VALUE = -1024
 local MAX_VALUE = 1024
-local options = {{"FlightModeSource", SOURCE, 1}, {"GyroSource", SOURCE, 1}}
+local options = {{"FlightModeSource", SOURCE, 1}, {"GyroSource", SOURCE, 1}, {"LowSource", SOURCE, 0}, {"S1Source", SOURCE, 0}}
+--- What S1 adds to each idle up's throttle at either end, in its % (s1_knob.py's lines, as the Cockpit's knob).
+local S1_RANGE = {20, 20, 10}
 local function create(zone, options)
     local widget = {zone = zone, options = options}
     update(widget, options)
@@ -56,13 +58,35 @@ local function draw(widget, x, y, w, h)
     end
     local flightModeValue = getValue(widget.options.FlightModeSource)
     local flightMode = MIN_VALUE == flightModeValue and 1 or (0 == flightModeValue and 2 or 3)
+    local low = getValue(widget.options.LowSource or 0) > 0
+    local ink = isGyroOn and lcd.RGB(16777215) or lcd.RGB(15658734)
+    local mode = low and "LOW" or "IU " .. tostring(flightMode)
+    local s1 = widget.options.S1Source or 0
+    if s1 == 0 then
+        lcd.drawText(
+            x,
+            y,
+            mode,
+            bit32.bor(DBLSIZE, ink)
+        )
+        return
+    end
+    local added = math.floor(getValue(s1) / 1024 * S1_RANGE[flightMode] + 0.5)
+    local line = ("S1 " .. (added > 0 and "+" or "")) .. tostring(added)
+    local ____, small = lcd.sizeText(line, SMLSIZE)
     lcd.drawText(
         x,
         y,
-        "IU " .. tostring(flightMode),
+        mode,
+        bit32.bor(MIDSIZE, ink)
+    )
+    lcd.drawText(
+        x,
+        y + h - small,
+        line,
         bit32.bor(
-            DBLSIZE,
-            isGyroOn and lcd.RGB(16777215) or lcd.RGB(15658734)
+            SMLSIZE,
+            added == 0 and ink or lcd.RGB(16761165)
         )
     )
 end

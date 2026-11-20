@@ -9,9 +9,12 @@ scripts that change its models. Flightdown shows and runs it (see Preview).
 
 The M2 EVO's screen (the Cockpit widget under the top bar), as Flightdown's Radio tab draws it.
 
+Moving to a RadioMaster GX10: the plan and checklist are in [docs/gx10-migration.md](docs/gx10-migration.md).
+
 `sd-card/` is the card as it should be: the card as of 10 November 2026, after the update to EdgeTX 2.12.5, with the
-model changes of `scripts/` made to it, and the widgets built from `src/` and the edited mAhRe in it. Its only model is
-the M2 EVO: the others left the radio on 12 November 2026 and are in this repo's history. `npm run build`
+model changes of `scripts/` made to it, and the widgets built from `src/` and the edited mAhRe in it. Its models are
+the M2 EVO and the K110S (below); the others left the radio on 12 November 2026 and are in this repo's
+history. `npm run build`
 puts the built widgets there (`widgets.json` says which folder each goes in), with the Cockpit's panel
 (`scripts/cockpit-panel.mjs` draws its fixed parts as pictures, cheaper for the radio than drawing them each
 frame); `npm run dev` rebuilds the widgets into `output/` on every save. Full card copies taken from the radio stay
@@ -19,15 +22,13 @@ out of git (`backups/`, `update-2.12.5/`).
 
 - **Cockpit:** the M2 EVO's whole screen as a heli's instrument panel: warning lights (SAFE or ARMED, THR ON or OFF,
   LEVEL, RESCUE, LOW BATT, LOW VOLT or NOT FULL, TELE), the throttle as a quadrant (a detent per idle up, evenly spaced, CUT
-  guarded in hold) and the pitch as a collective against a degree scale, the battery as a fuel gauge (from the charge a
+  guarded in hold, what S1 adds on the lever's knob) and the pitch as a collective against a degree scale, the battery as a fuel gauge (from the charge a
   pack had when plugged in, by its volts a cell, less the mAh used; the mAh left under the %, the % said every 10% with
   mAhRe's sounds, the pack the 6-position buttons pick under it; three buzzes every 15 s under 25% with the motor on;
   "low battery" and two buzzes once a cell has spent about 2 s under 3.30 V under load, counted over the last few
-  seconds, so short dips add up), the model's data plate, a First Limit Indicator (as
-  on Airbus helicopters: one needle for whichever limit comes first, the current against the pack's 30C, the cell from
-  4.2 V down to 3.3 V or the charge used against 80 %, 10 at the limit, its letter saying which, its highest marked)
-  and the average volts a cell as gauges, the amps, the power and the pack's peak current, and the right stick as a
-  cyclic dot (the timers are in the top bar). The panel turns dark yellow while the motor can
+  seconds, so short dips add up), the model's data plate, the pitch curve flown (the idle up's CP1 to CP3, or CPL while
+  LEVEL is lit, read from the model) with a dot at the collective stick and the most pitch it gives, the average volts
+  a cell as a gauge, and the right stick as a cyclic dot (the timers are in the top bar). The panel turns dark yellow while the motor can
   spin, LEVEL lights blue, RESCUE and TELE white on dark red. Built from EdgeTX's LVGL objects, so the radio redraws
   only what changes, and the screen keeps up at 20 frames a second (EdgeTX's most).
 - **ArmedModel:** the arming state at a glance: SAFE (grey-green), ARMED (amber, throttle cut) or LIVE (red, the border
@@ -42,8 +43,9 @@ out of git (`backups/`, `update-2.12.5/`).
   top bar, in %, under "Tele".
 - **FlightState:** the gyro (SC) and the throttle hold (SF) as two lights (the flight mode is in the top bar); RESCUE in
   red while SH is held.
-- **FMStatus** (in the top bar): the idle up on SE (IU 1 to 3), lit while the gyro (SC) is on; RESCUE in red while SH
-  is held.
+- **FMStatus** (in the top bar): the idle up on SE (IU 1 to 3), LOW while its third source is on (the K110S's Low
+  RPM), on the M2 EVO what S1 adds under it (amber off the middle), lit while the gyro (SC) is on; RESCUE in red while
+  SH is held.
 - **Session:** packs flown and time in the air today, kept across power cycles in global variables 1 to 3; both
   small in the top bar.
 - **Timers** (in the top bar): the time with the motor on this pack (timer 1) over the sortie's, today's (timer 2),
@@ -55,6 +57,13 @@ out of git (`backups/`, `update-2.12.5/`).
 
 Pack, FlyTimer, Power, Session and mAhRe start again on a new pack: its voltage back with the mAh count at 0. The
 models reset that count only when telemetry stops while disarmed, so a telemetry dropout in flight is not a new pack.
+
+**The K110S** (`model21.yml`, Futaba S-FHSS, no telemetry), switched as the M2 EVO: SA down arms, SF holds, SC down
+is 6G (self-level, else 3D), SE picks idle up 1 to 3 (70, 80, 90% throttle), SB down Low RPM (0 to 60% up the stick,
+over SE, with a gentler pitch). Its Pack timer counts down from 4:00 in THR% mode, its throttle source CH9: CH3
+scaled so 90% counts a second a second, so it runs slower at lower head speeds (x0.67 hovering in Low RPM) and
+stops in hold; it starts again while disarmed. Its screen: the model armed or not, the Pack timer, the gyro and hold.
+It logs to the card while armed, a line every 0.2 s (sticks, switches, outputs; no battery, as it has no telemetry).
 
 ## Deploy
 
@@ -68,7 +77,12 @@ timer 2 for the sortie (`sortie_timer.py`), the low-cell alarm only with a pack 
 real sag, 3.30 V a cell for 5 s (`cell_alarm_sag.py`), then off, as the Cockpit warns instead (`cell_alarm_off.py`), a rescue that climbs after 0.1 s of flat pitch, not 0.2 s
 (`rescue_delay.py`), the receiver's sensors back in their slots when the radio finds them under new IDs
 (`sensor_ids.py`), a theme of its own, Cockpit, with a dark top bar and readable menus (`cockpit_theme.py`, FM2M
-Concrete stays to go back to), the Timers widget in the top bar's empty zone (`topbar_timers.py`). Then it copies the
+Concrete stays to go back to), the Timers widget in the top bar's empty zone (`topbar_timers.py`), the log kept
+going while armed, so a telemetry gap does not split a pack in two files (`continuous_log.py`), S1 a head speed
+knob of -20 to +20% in every idle up (10 in idle up 3, so it tops out at +60, OMPHobby's highest) with a
+start warning to set it at the middle (`s1_knob.py`), the idle ups' head
+speeds (`idle_ups.py`: FM1 8, FM2 20, FM3 50 % on CH3), the K110S model
+when the card has none (`k110s_model.py`). Then it copies the
 built widgets and mAhRe from `sd-card/`. It backs up what it changes in `backups/<date>` first, and names any model the
 radio changed since, to copy into `sd-card/MODELS`. A new model
 change is a new script, run on `sd-card/` and added to the deploy.

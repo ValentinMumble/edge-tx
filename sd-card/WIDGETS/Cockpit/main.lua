@@ -61,7 +61,7 @@ local function __TS__ObjectAssign(target, ...)
 end
 -- End of Lua Library inline imports
 local ____exports = {}
-local output, button, pack, cells, fuelLeft, look, at, lineHeight, label, dial, readout, objects, update, PACKS, PACK_C, CELL_FULL, CELL_FLOOR, DEEP, LOW_FUEL, ALARM_EVERY, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, AMBER, RED, UNLIT, EDGE, TOP, BOTTOM, clamp
+local output, button, pack, cells, fuelLeft, look, at, lineHeight, label, dial, curveXs, curveAt, readCurves, objects, update, PACKS, LOW_FUEL, ALARM_EVERY, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, AMBER, RED, UNLIT, EDGE, TOP, BOTTOM, clamp, PLOT_X, PLOT_Y, plotAt
 function output(index)
     local value = getOutputValue(index)
     local ____opt_0 = model.getOutput(index)
@@ -95,28 +95,19 @@ function look(widget)
     view.rescue = getValue("sh") > 0
     local mode = getValue("se")
     view.idle = mode <= -512 and 1 or (mode >= 512 and 3 or 2)
+    view.s1 = math.floor(getValue("s1") / 1024 * (view.idle == 3 and 10 or 20) + 0.5)
     view.motorOff = view.hold or not armed
     view.live = not view.motorOff
     local volts = getValue("VFAS")
     view.powered = volts > 0.5
-    view.amps = view.powered and getValue("Curr") or 0
     view.cell = view.powered and volts / cells() or 0
     view.left = view.powered and fuelLeft(widget) or 0
-    view.watts = view.amps * volts
     local plugged = pack()
     view.packName = plugged.name
     view.packMah = plugged.mah
     view.mahLeft = math.floor(plugged.mah * view.left / 100 + 0.5)
-    local shares = view.powered and ({{view.amps / (plugged.mah / 1000 * PACK_C), "A"}, {(CELL_FULL - view.cell) / (CELL_FULL - CELL_FLOOR), "V"}, {(100 - view.left) / DEEP, "%"}}) or ({{0, ""}})
-    local worst = shares[1]
-    for ____, share in ipairs(shares) do
-        if share[1] > worst[1] then
-            worst = share
-        end
-    end
-    view.fli = clamp(worst[1] * 10, 0, 11)
-    view.limit = worst[2]
-    widget.peakFli = math.max(widget.peakFli, view.fli)
+    view.curve = getValue("sc") >= 1024 and "CPL" or "CP" .. tostring(view.idle)
+    view.stick = getValue("thr")
     view.throttle = (output(2) + 1024) / 2048 * 100
     view.degrees = output(5) / 1024 * (widget.options.PitchRange or 12)
     view.aileron = getValue("ail")
@@ -232,21 +223,6 @@ function dial(spec)
             )
         end
     end
-    local peak = spec.peak
-    if peak then
-        objects[#objects + 1] = {
-            type = "triangle",
-            color = rgb(AMBER),
-            pts = function()
-                local at1 = angle(peak(nil))
-                return {
-                    at(x, y, radius + 1, at1),
-                    at(x, y, radius - 6, at1 - 5),
-                    at(x, y, radius - 6, at1 + 5)
-                }
-            end
-        }
-    end
     objects[#objects + 1] = label(
         x,
         y - math.floor(radius * 0.32),
@@ -285,24 +261,45 @@ function dial(spec)
     }
     return objects
 end
-function readout(y, title, value)
-    return {
-        label(
-            326,
-            y + 7,
-            title,
-            TINSIZE,
-            MUTED
-        ),
-        label(
-            406,
-            y + 7,
-            value,
-            SMLSIZE,
-            DIGITS,
-            RIGHT
-        )
-    }
+function curveXs(curve)
+    local xs = {}
+    do
+        local index = 0
+        while index < #curve.y do
+            xs[#xs + 1] = curve.x and curve.x[index + 1] or -100 + 200 * index / (#curve.y - 1)
+            index = index + 1
+        end
+    end
+    return xs
+end
+function curveAt(curve, across)
+    local xs = curveXs(curve)
+    do
+        local index = 1
+        while index < #xs do
+            if across <= xs[index + 1] or index == #xs - 1 then
+                local span = xs[index + 1] - xs[index]
+                local share = span == 0 and 1 or clamp((across - xs[index]) / span, 0, 1)
+                return curve.y[index] + share * (curve.y[index + 1] - curve.y[index])
+            end
+            index = index + 1
+        end
+    end
+    return 0
+end
+function readCurves()
+    local curves = {}
+    do
+        local index = 0
+        while index < 32 do
+            local curve = model.getCurve(index)
+            if curve and curve.name ~= "" and #curve.y >= 2 then
+                curves[curve.name] = curve
+            end
+            index = index + 1
+        end
+    end
+    return curves
 end
 function objects(widget)
     local view = widget.view
@@ -458,21 +455,6 @@ function objects(widget)
             )
         end
     )
-    local ridges = {}
-    do
-        local ridge = -12
-        while ridge <= 12 do
-            ridges[#ridges + 1] = {
-                type = "vline",
-                x = 23 + ridge,
-                y = 5,
-                w = 1,
-                h = 10,
-                color = function() return view.motorOff and rgb(6120298) or rgb(10133670) end
-            }
-            ridge = ridge + 4
-        end
-    end
     list[#list + 1] = {
         type = "box",
         x = 21,
@@ -524,7 +506,14 @@ function objects(widget)
                 h = 1,
                 color = rgb(4869973)
             },
-            table.unpack(ridges)
+            label(
+                23,
+                10,
+                function() return ("S1 " .. (view.s1 > 0 and "+" or "")) .. tostring(view.s1) end,
+                TINSIZE,
+                rgb(1316377),
+                CENTER
+            )
         }
     }
     local stripes = {}
@@ -784,43 +773,106 @@ function objects(widget)
             MUTED
         )
     )
+    local function flown()
+        return widget.curves[view.curve]
+    end
+    __TS__ArrayPush(
+        list,
+        label(
+            326,
+            99,
+            "PITCH",
+            TINSIZE,
+            MUTED
+        ),
+        label(
+            402,
+            99,
+            function() return view.curve end,
+            TINSIZE,
+            DIGITS,
+            RIGHT
+        ),
+        {
+            type = "line",
+            thickness = 2,
+            rounded = true,
+            color = GREEN,
+            visible = function() return flown() ~= nil end,
+            pts = function()
+                local curve = flown()
+                if not curve then
+                    return {
+                        plotAt(-100, 0),
+                        plotAt(100, 0)
+                    }
+                end
+                local xs = curveXs(curve)
+                local points = {}
+                do
+                    local index = 0
+                    while index < #xs do
+                        points[#points + 1] = plotAt(xs[index + 1], curve.y[index + 1])
+                        index = index + 1
+                    end
+                end
+                return points
+            end
+        },
+        {
+            type = "circle",
+            x = PLOT_X,
+            y = PLOT_Y,
+            radius = 3,
+            filled = true,
+            color = rgb(16777215),
+            visible = function() return flown() ~= nil end,
+            pos = function()
+                local curve = flown()
+                local across = view.stick / 1024 * 100
+                return table.unpack(plotAt(
+                    across,
+                    curve and curveAt(curve, across) or 0
+                ))
+            end
+        },
+        label(
+            363,
+            213,
+            function()
+                local curve = flown()
+                if not curve then
+                    return "no curve"
+                end
+                local most = 0
+                for ____, point in ipairs(curve.y) do
+                    most = math.max(
+                        most,
+                        math.abs(point)
+                    )
+                end
+                return ("max " .. string.format("%.1f", most / 100 * (widget.options.PitchRange or 12))) .. "°"
+            end,
+            TINSIZE,
+            DIGITS,
+            CENTER
+        )
+    )
     local ____array_7 = __TS__SparseArrayNew(table.unpack(dial({
-        centerX = 354,
+        centerX = 442,
         centerY = 121,
-        radius = 30,
-        title = "FLI",
-        low = 0,
-        high = 11,
-        value = function() return view.fli end,
-        labels = {},
-        peak = function() return widget.peakFli end
+        radius = 28,
+        title = "CELL",
+        low = 3.2,
+        high = 4.2,
+        value = function() return view.cell end,
+        labels = {}
     })))
     __TS__SparseArrayPush(
         ____array_7,
         label(
-            354,
-            137,
-            function() return view.powered and string.format("%.1f", view.fli) .. view.limit or "--" end,
-            SMLSIZE,
-            DIGITS,
-            CENTER
-        ),
-        table.unpack(dial({
-            centerX = 434,
-            centerY = 121,
-            radius = 30,
-            title = "CELL",
-            low = 3.2,
-            high = 4.2,
-            value = function() return view.cell end,
-            labels = {}
-        }))
-    )
-    __TS__SparseArrayPush(
-        ____array_7,
-        label(
-            434,
-            137,
+            442,
+            136,
             function() return view.powered and string.format("%.2f", view.cell) or "--" end,
             SMLSIZE,
             DIGITS,
@@ -831,31 +883,6 @@ function objects(widget)
         list,
         __TS__SparseArraySpread(____array_7)
     )
-    local ____array_8 = __TS__SparseArrayNew(table.unpack(readout(
-        162,
-        "AMPS",
-        function() return string.format("%.1f", view.amps) .. " A" end
-    )))
-    __TS__SparseArrayPush(
-        ____array_8,
-        table.unpack(readout(
-            180,
-            "POWER",
-            function() return tostring(math.floor(view.watts + 0.5)) .. " W" end
-        ))
-    )
-    __TS__SparseArrayPush(
-        ____array_8,
-        table.unpack(readout(
-            198,
-            "PEAK",
-            function() return tostring(math.floor(widget.peak + 0.5)) .. " A" end
-        ))
-    )
-    __TS__ArrayPush(
-        list,
-        __TS__SparseArraySpread(____array_8)
-    )
     local function percent(value)
         return (value >= 0 and "+" or "") .. tostring(math.floor(value / 1024 * 100 + 0.5))
     end
@@ -863,15 +890,15 @@ function objects(widget)
         list,
         {
             type = "circle",
-            x = 444,
+            x = 442,
             y = 182,
             radius = 3,
             filled = true,
             color = GREEN,
-            pos = function() return 444 + math.floor(clamp(view.aileron, -1024, 1024) / 1024 * 20), 182 - math.floor(clamp(view.elevator, -1024, 1024) / 1024 * 20) end
+            pos = function() return 442 + math.floor(clamp(view.aileron, -1024, 1024) / 1024 * 20), 182 - math.floor(clamp(view.elevator, -1024, 1024) / 1024 * 20) end
         },
         label(
-            444,
+            442,
             213,
             function() return (("A" .. percent(view.aileron)) .. " E") .. percent(view.elevator) end,
             TINSIZE,
@@ -883,6 +910,7 @@ function objects(widget)
 end
 function update(widget, options)
     widget.options = options
+    widget.curves = readCurves()
     look(widget)
     lvgl.clear()
     lvgl.build(objects(widget))
@@ -893,17 +921,17 @@ local name = "Cockpit"
 --   RESCUE (SH), LOW BATT (LOW VOLT while the low-cell alarm is on, NOT FULL when the pack was not full when plugged
 --   in), TELE (no telemetry); the panel turns dark yellow while the motor can spin;
 -- - the throttle as a quadrant: a detent per idle up evenly up the gate, CUT at its foot guarded in hold, the lever at
---   the motor output (CH3); the pitch as a collective lever against a degree scale, at CH6;
+--   the motor output (CH3), what S1 adds to it on its knob; the pitch as a collective lever against a degree scale,
+--   at CH6;
 -- - the battery as a fuel gauge: the charge the pack had when plugged in (by its resting volts a cell) less the mAh
 --   used, against the size of the pack picked with the 6-position buttons (the mAh left under the %, the pack under
 --   the gauge), saying the % left every 10% and warning when a pack is not full (mAhRe's sounds), when a cell sags
 --   under 3.30 V for a while (the model's low-cell alarm, which waited for 5 s in a row, is off) and, with buzzes,
 --   when the pack runs low;
--- - the model's data plate (picture, name, cells); a First Limit Indicator (as on Airbus helicopters: one needle for
---   whichever limit comes first, here the current against the pack's 30C, the cell from 4.2 V down to 3.3 V, or the
---   charge used against 80 %, 10 at the limit) and volts a cell as gauges; the amps, the power and the pack's peak
---   current; and the cyclic: where the right stick is, to check it. The timers (this pack's, the sortie's) are in the
---   top bar (the Timers widget); this one starts the sortie's again each day.
+-- - the model's data plate (picture, name, cells); the pitch curve flown (the idle up's, CP1 to CP3, or the self-level
+--   one, CPL, while LEVEL is lit) with a dot at the collective stick, read from the model; volts a cell as a gauge;
+--   and the cyclic: where the right stick is, to check it. The timers (this pack's, the sortie's) are in the top bar
+--   (the Timers widget); this one starts the sortie's again each day.
 -- It is built from EdgeTX's LVGL objects (useLvgl): the radio keeps them on the screen and redraws only what changes,
 -- where a widget drawing with lcd calls redraws the whole screen 20 times a second. Everything that never moves is two
 -- pictures beside this file (scripts/cockpit-panel.mjs draws them at the positions used here); the rest are objects
@@ -917,7 +945,7 @@ local options = {{
 }, {
     "Idle2",
     VALUE,
-    58,
+    60,
     0,
     100
 }, {
@@ -934,19 +962,15 @@ local options = {{
     20
 }}
 PACKS = {
-    {name = "Gens Ace 1", mah = 700},
     {name = "Gens Ace 3", mah = 750},
     {name = "Gens Ace 4", mah = 750},
     {name = "OMP 2", mah = 750},
+    {name = "Eachine 2", mah = 500},
     {name = "Eachine 1", mah = 500},
-    {name = "Eachine 2", mah = 500}
+    {name = "None", mah = 750}
 }
 --- A new pack: its voltage back after none with the mAh count at 0 (see Session).
 local NEW_PACK_MAH = 5
-PACK_C = 30
-CELL_FULL = 4.2
-CELL_FLOOR = 3.3
-DEEP = 80
 --- Under this a cell is not full when plugged in (mAhRe's level), and the % left that lights LOW BATT.
 local FULL_CELL = 4
 LOW_FUEL = 25
@@ -1056,7 +1080,7 @@ local function buzz(times, length)
 end
 --- What runs whether the screen shows or not: a new pack starts the checks again; once its voltage settles, the charge
 -- it starts with (100% from 4.10 V a cell) and the not-full warning; the % left said at each 10% below that (5%
--- last, then empty), the peak current; the low-cell alarm, and three buzzes every 15 s while the motor runs on a pack
+-- last, then empty); the low-cell alarm, and three buzzes every 15 s while the motor runs on a pack
 -- under LOW_FUEL % (a call said over the rotor is easy to miss, a buzz in the hands is not).
 local function follow(widget)
     local volts = getValue("VFAS")
@@ -1068,8 +1092,6 @@ local function follow(widget)
         widget.plugged = now
         widget.notFull = false
         widget.said = 100
-        widget.peak = 0
-        widget.peakFli = 0
         widget.startLeft = 100
         widget.sag = 0
         widget.sagAt = NEVER
@@ -1095,10 +1117,6 @@ local function follow(widget)
             playFile(SOUNDS .. "BNFull.wav")
         end
     end
-    widget.peak = math.max(
-        widget.peak,
-        getValue("Curr")
-    )
     local left = fuelLeft(widget)
     local step = left <= 0 and 0 or (left <= 5 and 5 or math.ceil(left / 10) * 10)
     if step < widget.said and left < widget.said then
@@ -1111,6 +1129,14 @@ local function follow(widget)
         buzz(3, 30)
     end
 end
+PLOT_X = 363
+PLOT_Y = 157
+local PLOT_W = 38
+local PLOT_H = 44
+plotAt = function(across, up) return {
+    PLOT_X + math.floor(clamp(across, -100, 100) / 100 * PLOT_W + 0.5),
+    PLOT_Y - math.floor(clamp(up, -100, 100) / 100 * PLOT_H + 0.5)
+} end
 local function create(zone, options)
     local lights = {}
     do
@@ -1127,8 +1153,7 @@ local function create(zone, options)
         plugged = -1,
         notFull = false,
         said = 100,
-        peak = 0,
-        peakFli = 0,
+        curves = {},
         startLeft = 100,
         since = getTime(),
         ticks = getTime(),
@@ -1144,12 +1169,11 @@ local function create(zone, options)
             powered = false,
             left = 0,
             mahLeft = 0,
-            amps = 0,
             cell = 0,
-            fli = 0,
-            limit = "",
-            watts = 0,
             throttle = 0,
+            curve = "CP2",
+            stick = 0,
+            s1 = 0,
             degrees = 0,
             aileron = 0,
             elevator = 0,

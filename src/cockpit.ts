@@ -6,17 +6,17 @@ const name = 'Cockpit';
  *   RESCUE (SH), LOW BATT (LOW VOLT while the low-cell alarm is on, NOT FULL when the pack was not full when plugged
  *   in), TELE (no telemetry); the panel turns dark yellow while the motor can spin;
  * - the throttle as a quadrant: a detent per idle up evenly up the gate, CUT at its foot guarded in hold, the lever at
- *   the motor output (CH3); the pitch as a collective lever against a degree scale, at CH6;
+ *   the motor output (CH3), what S1 adds to it on its knob; the pitch as a collective lever against a degree scale,
+ *   at CH6;
  * - the battery as a fuel gauge: the charge the pack had when plugged in (by its resting volts a cell) less the mAh
  *   used, against the size of the pack picked with the 6-position buttons (the mAh left under the %, the pack under
  *   the gauge), saying the % left every 10% and warning when a pack is not full (mAhRe's sounds), when a cell sags
  *   under 3.30 V for a while (the model's low-cell alarm, which waited for 5 s in a row, is off) and, with buzzes,
  *   when the pack runs low;
- * - the model's data plate (picture, name, cells); a First Limit Indicator (as on Airbus helicopters: one needle for
- *   whichever limit comes first, here the current against the pack's 30C, the cell from 4.2 V down to 3.3 V, or the
- *   charge used against 80 %, 10 at the limit) and volts a cell as gauges; the amps, the power and the pack's peak
- *   current; and the cyclic: where the right stick is, to check it. The timers (this pack's, the sortie's) are in the
- *   top bar (the Timers widget); this one starts the sortie's again each day.
+ * - the model's data plate (picture, name, cells); the pitch curve flown (the idle up's, CP1 to CP3, or the self-level
+ *   one, CPL, while LEVEL is lit) with a dot at the collective stick, read from the model; volts a cell as a gauge;
+ *   and the cyclic: where the right stick is, to check it. The timers (this pack's, the sortie's) are in the top bar
+ *   (the Timers widget); this one starts the sortie's again each day.
  * It is built from EdgeTX's LVGL objects (useLvgl): the radio keeps them on the screen and redraws only what changes,
  * where a widget drawing with lcd calls redraws the whole screen 20 times a second. Everything that never moves is two
  * pictures beside this file (scripts/cockpit-panel.mjs draws them at the positions used here); the rest are objects
@@ -24,7 +24,7 @@ const name = 'Cockpit';
  */
 const options: any[] = [
   ['Idle1', VALUE, 54, 0, 100],
-  ['Idle2', VALUE, 58, 0, 100],
+  ['Idle2', VALUE, 60, 0, 100],
   ['Idle3', VALUE, 75, 0, 100],
   ['PitchRange', VALUE, 12, 1, 20],
 ];
@@ -41,13 +41,13 @@ type View = {
   powered: boolean;
   left: number;
   mahLeft: number;
-  amps: number;
   cell: number;
-  watts: number;
-  /** The First Limit Indicator: 10 at the first limit reached; and which one leads (A, V or %). */
-  fli: number;
-  limit: string;
   throttle: number;
+  /** The pitch curve flown (its name in the model) and the collective stick (-1024 to 1024). */
+  curve: string;
+  stick: number;
+  /** What S1 adds to the idle up's throttle (s1_knob.py), in its % (-100 to 100 scale). */
+  s1: number;
   degrees: number;
   aileron: number;
   elevator: number;
@@ -62,11 +62,10 @@ type Widget = {
   /** When the pack's voltage came back (ticks), for the not-full check once it settles; -1 when done. */
   plugged: number;
   notFull: boolean;
-  /** The last % left said out loud (100 when nothing yet), and the pack's peak current. */
+  /** The last % left said out loud (100 when nothing yet). */
   said: number;
-  peak: number;
-  /** The highest First Limit Indicator reading on this pack. */
-  peakFli: number;
+  /** The model's curves by name, read when the screen is built. */
+  curves: Record<string, Curve>;
   /** The % the pack had when plugged in, from its resting volts a cell (100 when full): the mAh used count from it. */
   startLeft: number;
   /** When the day was last checked for the sortie (getTime, tens of ms). */
@@ -84,23 +83,15 @@ type Widget = {
 
 /** The packs by 6-position button, as the Pack widget and mAhRe have them. */
 const PACKS = [
-  {name: 'Gens Ace 1', mah: 700},
   {name: 'Gens Ace 3', mah: 750},
   {name: 'Gens Ace 4', mah: 750},
   {name: 'OMP 2', mah: 750},
-  {name: 'Eachine 1', mah: 500},
   {name: 'Eachine 2', mah: 500},
+  {name: 'Eachine 1', mah: 500},
+  {name: 'None', mah: 750},
 ];
 /** A new pack: its voltage back after none with the mAh count at 0 (see Session). */
 const NEW_PACK_MAH = 5;
-/**
- * The First Limit Indicator's limits: the current a pack gives for long (amps an amp hour: a 700 mAh pack, 21 A), a
- * cell from full to the floor it should not go under, and the share of the pack to use.
- */
-const PACK_C = 30;
-const CELL_FULL = 4.2;
-const CELL_FLOOR = 3.3;
-const DEEP = 80;
 /** Under this a cell is not full when plugged in (mAhRe's level), and the % left that lights LOW BATT. */
 const FULL_CELL = 4.0;
 const LOW_FUEL = 25;
@@ -221,7 +212,7 @@ function buzz(times: number, length: number): void {
 /**
  * What runs whether the screen shows or not: a new pack starts the checks again; once its voltage settles, the charge
  * it starts with (100% from 4.10 V a cell) and the not-full warning; the % left said at each 10% below that (5%
- * last, then empty), the peak current; the low-cell alarm, and three buzzes every 15 s while the motor runs on a pack
+ * last, then empty); the low-cell alarm, and three buzzes every 15 s while the motor runs on a pack
  * under LOW_FUEL % (a call said over the rotor is easy to miss, a buzz in the hands is not).
  */
 function follow(widget: Widget): void {
@@ -235,8 +226,6 @@ function follow(widget: Widget): void {
     widget.plugged = now;
     widget.notFull = false;
     widget.said = 100;
-    widget.peak = 0;
-    widget.peakFli = 0;
     widget.startLeft = 100;
     widget.sag = 0;
     widget.sagAt = NEVER;
@@ -261,7 +250,6 @@ function follow(widget: Widget): void {
       playFile(`${SOUNDS}BNFull.wav`);
     }
   }
-  widget.peak = math.max(widget.peak, getValue('Curr'));
   const left = fuelLeft(widget);
   const step = left <= 0 ? 0 : left <= 5 ? 5 : math.ceil(left / 10) * 10;
   if (step < widget.said && left < widget.said) {
@@ -283,31 +271,21 @@ function look(widget: Widget): void {
   view.rescue = getValue('sh') > 0;
   const mode = getValue('se');
   view.idle = mode <= -512 ? 1 : mode >= 512 ? 3 : 2;
+  // S1's mix lines (s1_knob.py): -20 to +20 % in idle ups 1 and 2, -10 to +10 % in idle up 3.
+  view.s1 = math.floor((getValue('s1') / 1024) * (view.idle === 3 ? 10 : 20) + 0.5);
   view.motorOff = view.hold || !armed;
   view.live = !view.motorOff;
   const volts = getValue('VFAS');
   view.powered = volts > 0.5;
-  view.amps = view.powered ? getValue('Curr') : 0;
   view.cell = view.powered ? volts / cells() : 0;
   view.left = view.powered ? fuelLeft(widget) : 0;
-  view.watts = view.amps * volts;
   const plugged = pack();
   view.packName = plugged.name;
   view.packMah = plugged.mah;
   view.mahLeft = math.floor((plugged.mah * view.left) / 100 + 0.5);
-  // The First Limit Indicator: each limit's share (1 at the limit), the worst one leading.
-  const shares: [number, string][] = view.powered
-    ? [
-        [view.amps / ((plugged.mah / 1000) * PACK_C), 'A'],
-        [(CELL_FULL - view.cell) / (CELL_FULL - CELL_FLOOR), 'V'],
-        [(100 - view.left) / DEEP, '%'],
-      ]
-    : [[0, '']];
-  let worst = shares[0];
-  for (const share of shares) if (share[0] > worst[0]) worst = share;
-  view.fli = clamp(worst[0] * 10, 0, 11);
-  view.limit = worst[1];
-  widget.peakFli = math.max(widget.peakFli, view.fli);
+  // The pitch curve flown: the self-level one while LEVEL is lit (SC), else the idle up's (the model's Coll lines).
+  view.curve = getValue('sc') >= 1024 ? 'CPL' : `CP${view.idle}`;
+  view.stick = getValue('thr');
   view.throttle = ((output(2) + 1024) / 2048) * 100;
   view.degrees = (output(5) / 1024) * (widget.options.PitchRange || 12);
   view.aileron = getValue('ail');
@@ -386,10 +364,9 @@ type Dial = {
   high: number;
   value: () => number;
   labels: [number, string][];
-  peak?: () => number;
 };
 
-/** A round instrument's figures, peak marker, name, needle and hub: its face and window are in the panel picture. */
+/** A round instrument's figures, name, needle and hub: its face and window are in the panel picture. */
 function dial(spec: Dial): LvglObject[] {
   const {centerX: x, centerY: y, radius} = spec;
   const big = radius > 50;
@@ -402,17 +379,6 @@ function dial(spec: Dial): LvglObject[] {
       const [labelX, labelY] = at(x, y, radius - 20, angle(value));
       objects.push(label(labelX, labelY, text, 0, INK, CENTER));
     }
-  }
-  const peak = spec.peak;
-  if (peak) {
-    objects.push({
-      type: 'triangle',
-      color: rgb(AMBER),
-      pts: () => {
-        const at1 = angle(peak());
-        return [at(x, y, radius + 1, at1), at(x, y, radius - 6, at1 - 5), at(x, y, radius - 6, at1 + 5)];
-      },
-    });
   }
   objects.push(label(x, y - math.floor(radius * 0.32), spec.title, big ? SMLSIZE : TINSIZE, MUTED, CENTER));
   // The needle: a thick line from just behind the hub to near the scale, then the hub over it.
@@ -431,12 +397,46 @@ function dial(spec: Dial): LvglObject[] {
   return objects;
 }
 
-/**
- * A small digital window's words (its frame is in the panel picture, 88 wide at x 322): its name on the left, its value
- * on the right.
- */
-function readout(y: number, title: string, value: () => string): LvglObject[] {
-  return [label(326, y + 7, title, TINSIZE, MUTED), label(406, y + 7, value, SMLSIZE, DIGITS, RIGHT)];
+/** The pitch curve's plot (its box and cross are in the panel picture): centre and half sizes, -100 to 100 each way. */
+const PLOT_X = 363;
+const PLOT_Y = 157;
+const PLOT_W = 38;
+const PLOT_H = 44;
+const plotAt = (across: number, up: number): [number, number] => [
+  PLOT_X + math.floor((clamp(across, -100, 100) / 100) * PLOT_W + 0.5),
+  PLOT_Y - math.floor((clamp(up, -100, 100) / 100) * PLOT_H + 0.5),
+];
+
+/** Where a curve's points sit across: its own x (ends included), else evenly from -100 to 100. */
+function curveXs(curve: Curve): number[] {
+  const xs: number[] = [];
+  for (let index = 0; index < curve.y.length; index++) {
+    xs.push(curve.x ? curve.x[index] : -100 + (200 * index) / (curve.y.length - 1));
+  }
+  return xs;
+}
+
+/** A curve's value at `across` (%): its points joined straight, as the mixer applies it. */
+function curveAt(curve: Curve, across: number): number {
+  const xs = curveXs(curve);
+  for (let index = 1; index < xs.length; index++) {
+    if (across <= xs[index] || index === xs.length - 1) {
+      const span = xs[index] - xs[index - 1];
+      const share = span === 0 ? 1 : clamp((across - xs[index - 1]) / span, 0, 1);
+      return curve.y[index - 1] + share * (curve.y[index] - curve.y[index - 1]);
+    }
+  }
+  return 0;
+}
+
+/** The model's curves by name (EdgeTX keeps 32): the screen draws the pitch curve flown from them. */
+function readCurves(): Record<string, Curve> {
+  const curves: Record<string, Curve> = {};
+  for (let index = 0; index < 32; index++) {
+    const curve = model.getCurve(index);
+    if (curve && curve.name !== '' && curve.y.length >= 2) curves[curve.name] = curve;
+  }
+  return curves;
 }
 
 /** Every object of the screen, in drawing order, for the options as they are. */
@@ -497,18 +497,8 @@ function objects(widget: Widget): LvglObject[] {
     );
   });
   // The throttle's T-handle across its gate: a stem out of the slot, a knob lit along its top edge and shaded along its
-  // foot, with grip ridges; grey when the motor cannot run.
-  const ridges: LvglObject[] = [];
-  for (let ridge = -12; ridge <= 12; ridge += 4) {
-    ridges.push({
-      type: 'vline',
-      x: 23 + ridge,
-      y: 5,
-      w: 1,
-      h: 10,
-      color: () => (view.motorOff ? rgb(0x5d636a) : rgb(0x9aa0a6)),
-    });
-  }
+  // foot, grey when the motor cannot run, and on it what S1 adds to the head speed ("S1 0" at the middle, where it
+  // should be when the flight starts).
   list.push({
     type: 'box',
     x: 21,
@@ -530,7 +520,7 @@ function objects(widget: Widget): LvglObject[] {
       },
       {type: 'hline', x: 2, y: 2, w: 42, h: 1, color: () => (view.motorOff ? rgb(0x9aa0a6) : rgb(0xffffff))},
       {type: 'hline', x: 2, y: 17, w: 42, h: 1, color: rgb(0x4a4f55)},
-      ...ridges,
+      label(23, 10, () => `S1 ${view.s1 > 0 ? '+' : ''}${view.s1}`, TINSIZE, rgb(0x141619), CENTER),
     ],
   });
   // The guard in hold: a striped bar across the gate above CUT, as on a real quadrant.
@@ -655,45 +645,70 @@ function objects(widget: Widget): LvglObject[] {
     label(398, 72, () => `${cells()}S`, SMLSIZE, MUTED),
   );
 
-  // The First Limit Indicator (with its highest on this pack) and volts a cell.
+  // The pitch curve flown, across its box beside the cell gauge and the cyclic: its points joined, a dot at the
+  // collective stick, its name, and the most pitch it gives either way.
+  const flown = () => widget.curves[view.curve];
   list.push(
-    ...dial({
-      centerX: 354,
-      centerY: 121,
-      radius: 30,
-      title: 'FLI',
-      low: 0,
-      high: 11,
-      value: () => view.fli,
-      labels: [],
-      peak: () => widget.peakFli,
-    }),
+    label(326, 99, 'PITCH', TINSIZE, MUTED),
+    label(402, 99, () => view.curve, TINSIZE, DIGITS, RIGHT),
+    {
+      type: 'line',
+      thickness: 2,
+      rounded: true,
+      color: GREEN,
+      visible: () => flown() !== undefined,
+      pts: () => {
+        const curve = flown();
+        if (!curve) return [plotAt(-100, 0), plotAt(100, 0)];
+        const xs = curveXs(curve);
+        const points: [number, number][] = [];
+        for (let index = 0; index < xs.length; index++) points.push(plotAt(xs[index], curve.y[index]));
+        return points;
+      },
+    },
+    {
+      type: 'circle',
+      x: PLOT_X,
+      y: PLOT_Y,
+      radius: 3,
+      filled: true,
+      color: rgb(0xffffff),
+      visible: () => flown() !== undefined,
+      pos: () => {
+        const curve = flown();
+        const across = (view.stick / 1024) * 100;
+        return $multi(...plotAt(across, curve ? curveAt(curve, across) : 0));
+      },
+    },
     label(
-      354,
-      137,
-      () => (view.powered ? `${string.format('%.1f', view.fli)}${view.limit}` : '--'),
-      SMLSIZE,
+      363,
+      213,
+      () => {
+        const curve = flown();
+        if (!curve) return 'no curve';
+        let most = 0;
+        for (const point of curve.y) most = math.max(most, math.abs(point));
+        return `max ${string.format('%.1f', (most / 100) * (widget.options.PitchRange || 12))}°`;
+      },
+      TINSIZE,
       DIGITS,
       CENTER,
     ),
+  );
+
+  // Volts a cell, over the cyclic's box.
+  list.push(
     ...dial({
-      centerX: 434,
+      centerX: 442,
       centerY: 121,
-      radius: 30,
+      radius: 28,
       title: 'CELL',
       low: 3.2,
       high: 4.2,
       value: () => view.cell,
       labels: [],
     }),
-    label(434, 137, () => (view.powered ? string.format('%.2f', view.cell) : '--'), SMLSIZE, DIGITS, CENTER),
-  );
-
-  // The amps, the power and the pack's peak current, beside the cyclic's box (the timers are in the top bar).
-  list.push(
-    ...readout(162, 'AMPS', () => `${string.format('%.1f', view.amps)} A`),
-    ...readout(180, 'POWER', () => `${math.floor(view.watts + 0.5)} W`),
-    ...readout(198, 'PEAK', () => `${math.floor(widget.peak + 0.5)} A`),
+    label(442, 136, () => (view.powered ? string.format('%.2f', view.cell) : '--'), SMLSIZE, DIGITS, CENTER),
   );
 
   // The cyclic (the right stick): a dot where aileron and elevator put it, their values under it (its box, cross and
@@ -702,18 +717,18 @@ function objects(widget: Widget): LvglObject[] {
   list.push(
     {
       type: 'circle',
-      x: 444,
+      x: 442,
       y: 182,
       radius: 3,
       filled: true,
       color: GREEN,
       pos: () =>
         $multi(
-          444 + math.floor((clamp(view.aileron, -1024, 1024) / 1024) * 20),
+          442 + math.floor((clamp(view.aileron, -1024, 1024) / 1024) * 20),
           182 - math.floor((clamp(view.elevator, -1024, 1024) / 1024) * 20),
         ),
     },
-    label(444, 213, () => `A${percent(view.aileron)} E${percent(view.elevator)}`, TINSIZE, DIGITS, CENTER),
+    label(442, 213, () => `A${percent(view.aileron)} E${percent(view.elevator)}`, TINSIZE, DIGITS, CENTER),
   );
   return list;
 }
@@ -728,8 +743,7 @@ function create(zone: Zone, options: Options): Widget {
     plugged: -1,
     notFull: false,
     said: 100,
-    peak: 0,
-    peakFli: 0,
+    curves: {},
     startLeft: 100,
     since: getTime(),
     ticks: getTime(),
@@ -745,12 +759,11 @@ function create(zone: Zone, options: Options): Widget {
       powered: false,
       left: 0,
       mahLeft: 0,
-      amps: 0,
       cell: 0,
-      fli: 0,
-      limit: '',
-      watts: 0,
       throttle: 0,
+      curve: 'CP2',
+      stick: 0,
+      s1: 0,
       degrees: 0,
       aileron: 0,
       elevator: 0,
@@ -766,6 +779,7 @@ function create(zone: Zone, options: Options): Widget {
 /** New options (idle ups, pitch range): the screen built again for them. */
 function update(widget: Widget, options: Options): void {
   widget.options = options;
+  widget.curves = readCurves();
   look(widget);
   lvgl.clear();
   lvgl.build(objects(widget));

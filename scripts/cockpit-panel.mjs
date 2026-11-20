@@ -49,25 +49,11 @@ const GAUGES = [
     long: [0, 50, 100],
     window: [56, 33],
   },
-  // The First Limit Indicator: 0 to 11, the limit at 10, amber from 8, red past it.
+  // Volts a cell, over the cyclic's box.
   {
-    x: 354,
+    x: 442,
     y: 121,
-    radius: 30,
-    low: 0,
-    high: 11,
-    bands: [
-      [8, 10, AMBER],
-      [10, 11, RED],
-    ],
-    ticks: [0, 2, 4, 6, 8, 10],
-    long: [0, 10],
-    window: [36, 14],
-  },
-  {
-    x: 434,
-    y: 121,
-    radius: 30,
+    radius: 28,
     low: 3.2,
     high: 4.2,
     bands: [
@@ -312,17 +298,19 @@ function draw(inside) {
   screw(panel, 462, 76);
   panel.fill(324, 33, 66, 44, 0x0b0c0d);
 
-  // The amps, the power and the pack's peak current (the timers are in the top bar).
-  display(panel, 322, 162, 88);
-  display(panel, 322, 180, 88);
-  display(panel, 322, 198, 88);
+  // The pitch curve's box, its title over the plot and the plot's cross, dotted, at the middle of the stick and pitch
+  // (the widget draws the curve and its dot, centred on 363, 157, 38 across and 44 up each way).
+  panel.fill(320, 92, 86, 114, SLOT);
+  panel.frame(320, 92, 86, 114, EDGE);
+  panel.dotted(325, 157, 401, 157, EDGE);
+  panel.dotted(363, 113, 363, 201, EDGE);
 
   // The cyclic's box: its cross, dotted, and the ring at the stick's centre.
-  panel.fill(420, 158, 48, 48, SLOT);
-  panel.frame(420, 158, 48, 48, EDGE);
-  panel.dotted(444, 160, 444, 204, EDGE);
-  panel.dotted(422, 182, 466, 182, EDGE);
-  panel.ring(444, 182, 10, 0x2a2d30);
+  panel.fill(418, 158, 48, 48, SLOT);
+  panel.frame(418, 158, 48, 48, EDGE);
+  panel.dotted(442, 160, 442, 204, EDGE);
+  panel.dotted(420, 182, 464, 182, EDGE);
+  panel.ring(442, 182, 10, 0x2a2d30);
   return panel;
 }
 

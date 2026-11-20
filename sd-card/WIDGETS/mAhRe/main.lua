@@ -220,12 +220,12 @@ local Color = GREY
 
 -- The packs by 6-position button: press the button of the pack you plug in. Its size makes the mAh and % left.
 local PACKS = {
-  { name = "Gens Ace 1", mah = 700 },
   { name = "Gens Ace 3", mah = 750 },
   { name = "Gens Ace 4", mah = 750 },
   { name = "OMP 2", mah = 750 },
-  { name = "Eachine 1", mah = 500 },
   { name = "Eachine 2", mah = 500 },
+  { name = "Eachine 1", mah = 500 },
+  { name = "None", mah = 750 },
 }
 
 -- The pack of the button pressed: the buttons read -1024 to 1024 in six steps.

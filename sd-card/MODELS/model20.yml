@@ -22,7 +22,7 @@ timers:
    1:
       start: 0
       swtch: "!L10"
-      value: 814
+      value: 991
       mode: ON
       countdownBeep: 0
       minuteBeep: 0
@@ -192,14 +192,31 @@ mixData:
    delayPrec: 0
    speedPrec: 0
    flightModes: 000000000
-   weight: -15
-   offset: -15
-   swtch: "L1"
+   weight: 20
+   offset: 0
+   swtch: "!L3"
    delayUp: 0
    delayDown: 0
    speedUp: 0
    speedDown: 0
-   name: "Lower"
+   name: "S1"
+ -
+   destCh: 2
+   srcRaw: "P1"
+   carryTrim: 0
+   mixWarn: 0
+   mltpx: ADD
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 10
+   offset: 0
+   swtch: "L3"
+   delayUp: 0
+   delayDown: 0
+   speedUp: 0
+   speedDown: 0
+   name: "S1 IU3"
  -
    destCh: 2
    srcRaw: "I2"
@@ -641,9 +658,9 @@ points:
    6:
       val: 50
    7:
-      val: 15
+      val: 20
    8:
-      val: 15
+      val: 20
    9:
       val: 50
    10:
@@ -888,6 +905,10 @@ customFn:
       swtch: "!SA2"
       func: PLAY_TRACK
       def: "disarm,1,1x"
+   16:
+      swtch: "SA2"
+      func: LOGS
+      def: "2,1"
 flightModeData: 
    0:
       name: ""
@@ -896,9 +917,9 @@ flightModeData:
       fadeOut: 0
       gvars: 
          0:
-            val: 317
+            val: 324
          1:
-            val: 4
+            val: 8
          2:
             val: 0
          3:
@@ -912,7 +933,7 @@ flightModeData:
          7:
             val: 0
          8:
-            val: 317
+            val: 324
 thrTraceSrc: Thr
 switchWarning: 
    SA:
@@ -928,7 +949,7 @@ rfAlarms:
    warning: 45
    critical: 42
 thrTrimSw: 0
-potsWarnMode: WARN_OFF
+potsWarnMode: WARN_MANUAL
 jitterFilter: GLOBAL
 moduleData: 
    0:
@@ -967,7 +988,10 @@ inputNames:
       val: "Lvl"
    5:
       val: "Coll"
-potsWarnEnabled: 0
+potsWarnEnabled: 1
+potsWarnPosition: 
+   0:
+      val: 0
 telemetrySensors: 
    0:
       id1: 
@@ -1117,7 +1141,7 @@ screenData:
                      1:
                         type: Signed
                         value: 
-                           signedValue: 58
+                           signedValue: 60
                      2:
                         type: Signed
                         value: 
@@ -1161,6 +1185,10 @@ topbarData:
                   type: Source
                   value: 
                      source: ch(4)
+               3:
+                  type: Source
+                  value: 
+                     source: P1
       1:
          widgetName: "Session"
          widgetData: 

@@ -5,7 +5,8 @@
 #   volume and backlight always on, the buttons a 6-position switch again); the mAh count and timer 1 kept through a
 #   telemetry dropout; timer 1 counting up; the theme's readable menus (and the M2 EVO's clock); arming down; the
 #   sortie timer; the low-cell alarm only with a pack in, then off (the Cockpit warns instead); the receiver's sensors
-#   back in their slots;
+#   back in their slots; the log kept going while armed; S1 a -20 to +20% knob (10 in idle up 3), with a start warning
+#   for it at the middle; the idle ups' head speeds; the K110S model when the card has none;
 # - the widgets built from src/ (widgets.json says which folder each goes in) and the edited mAhRe, from the repo's
 #   card, with their pictures (`npm run build` puts the built ones there, and the Cockpit's panel pictures).
 # Backs up the models, the radio settings and the widgets it replaces first, in backups/<today>, and lists at the end
@@ -47,6 +48,10 @@ python3 -I "$here/rescue_delay.py" "$card/MODELS/model20.yml"
 python3 -I "$here/sensor_ids.py" "$card/MODELS/model20.yml"
 python3 -I "$here/cockpit_theme.py" "$card"
 python3 -I "$here/topbar_timers.py" "$card/MODELS/model20.yml"
+python3 -I "$here/continuous_log.py" "$card/MODELS/model20.yml"
+python3 -I "$here/s1_knob.py" "$card/MODELS/model20.yml"
+python3 -I "$here/idle_ups.py" "$card/MODELS/model20.yml"
+python3 -I "$here/k110s_model.py" "$card"
 
 for folder in $folders; do
   mkdir -p "$card/WIDGETS/$folder"

@@ -5,11 +5,20 @@ const MAX_VALUE = 1024;
 const options: any[] = [
   ['FlightModeSource', SOURCE, 1],
   ['GyroSource', SOURCE, 1],
+  ['LowSource', SOURCE, 0],
+  ['S1Source', SOURCE, 0],
 ];
+
+/** What S1 adds to each idle up's throttle at either end, in its % (s1_knob.py's lines, as the Cockpit's knob). */
+const S1_RANGE = [20, 20, 10];
 
 interface Options {
   FlightModeSource: number;
   GyroSource: number;
+  /** On while the low head speed is picked (the K110S's SB down, its L7): the zone says LOW instead of IU 1 to 3. */
+  LowSource: number;
+  /** The S1 knob, on a model where it changes the head speed (the M2 EVO): what it adds shows under the idle up. */
+  S1Source: number;
 }
 
 interface Widget {
@@ -64,9 +73,22 @@ function draw(widget: Widget, x: number, y: number, w: number, h: number): void 
 
   const flightModeValue = getValue(widget.options.FlightModeSource);
   const flightMode = MIN_VALUE === flightModeValue ? 1 : 0 === flightModeValue ? 2 : 3;
+  const low = getValue(widget.options.LowSource ?? 0) > 0;
 
   // Light on the top bar's dark grey, whatever the theme's colours (the Cockpit theme's EDIT is a dark red).
-  lcd.drawText(x, y, `IU ${flightMode}`, DBLSIZE | (isGyroOn ? lcd.RGB(0xffffff) : lcd.RGB(0xeeeeee)));
+  const ink = isGyroOn ? lcd.RGB(0xffffff) : lcd.RGB(0xeeeeee);
+  const mode = low ? 'LOW' : `IU ${flightMode}`;
+  const s1 = widget.options.S1Source ?? 0;
+  if (s1 === 0) {
+    lcd.drawText(x, y, mode, DBLSIZE | ink);
+    return;
+  }
+  // With S1: the idle up smaller, and under it what S1 adds, amber while it is off the middle.
+  const added = math.floor((getValue(s1) / 1024) * S1_RANGE[flightMode - 1] + 0.5);
+  const line = `S1 ${added > 0 ? '+' : ''}${added}`;
+  const [, small] = lcd.sizeText(line, SMLSIZE);
+  lcd.drawText(x, y, mode, MIDSIZE | ink);
+  lcd.drawText(x, y + h - small, line, SMLSIZE | (added === 0 ? ink : lcd.RGB(0xffc14d)));
 }
 
 function refresh(widget: Widget, event: any, touch: any) {
