@@ -61,7 +61,7 @@ local function __TS__ObjectAssign(target, ...)
 end
 -- End of Lua Library inline imports
 local ____exports = {}
-local output, button, pack, cells, fuelLeft, look, at, lineHeight, label, dial, curveXs, curveAt, readCurves, objects, update, PACKS, LOW_FUEL, ALARM_EVERY, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, AMBER, RED, UNLIT, EDGE, TOP, BOTTOM, clamp, PLOT_X, PLOT_Y, plotAt
+local output, button, pack, cells, fuelLeft, look, at, lineHeight, label, dial, curveXs, curveAt, readCurves, objects, update, PACKS, LOW_FUEL, ALARM_EVERY, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, BLUE, AMBER, RED, UNLIT, EDGE, TOP, BOTTOM, clamp, PLOT_X, PLOT_Y, plotAt
 function output(index)
     local value = getOutputValue(index)
     local ____opt_0 = model.getOutput(index)
@@ -110,6 +110,7 @@ function look(widget)
     view.stick = getValue("thr")
     view.throttle = (output(2) + 1024) / 2048 * 100
     view.degrees = output(5) / 1024 * (widget.options.PitchRange or 12)
+    view.collective = output(5) / 1024 * 100
     view.aileron = getValue("ail")
     view.elevator = getValue("ele")
     local lights = view.lights
@@ -776,29 +777,105 @@ function objects(widget)
     local function flown()
         return widget.curves[view.curve]
     end
+    --- An idle up's throttle (1 to 3) across the stick, from its curve (FM1 to FM3), else flat at its placard.
+    local function throttleAt(idle, across)
+        local curve = widget.curves["FM" .. tostring(idle)]
+        return curve and curveAt(curve, across) or idles[idle] * 2 - 100
+    end
+    --- An idle up's throttle line, lifted by `extra` (what S1 adds).
+    local function throttleLine(idle, extra)
+        local curve = widget.curves["FM" .. tostring(idle)]
+        if not curve then
+            return {
+                plotAt(
+                    -100,
+                    throttleAt(idle, 0) + extra
+                ),
+                plotAt(
+                    100,
+                    throttleAt(idle, 0) + extra
+                )
+            }
+        end
+        local xs = curveXs(curve)
+        local points = {}
+        do
+            local index = 0
+            while index < #xs do
+                points[#points + 1] = plotAt(xs[index + 1], curve.y[index + 1] + extra)
+                index = index + 1
+            end
+        end
+        return points
+    end
     __TS__ArrayPush(
         list,
         label(
             326,
             99,
-            "PITCH",
+            "THR",
             TINSIZE,
-            MUTED
+            GREEN
         ),
         label(
-            402,
+            347,
             99,
-            function() return view.curve end,
+            "PITCH",
             TINSIZE,
-            DIGITS,
-            RIGHT
-        ),
+            BLUE
+        )
+    )
+    list[#list + 1] = label(
+        402,
+        99,
+        function() return view.curve end,
+        TINSIZE,
+        DIGITS,
+        RIGHT
+    )
+    __TS__ArrayForEach(
+        {1, 2, 3},
+        function(____, idle)
+            list[#list + 1] = {
+                type = "line",
+                thickness = 1,
+                color = DIM,
+                pts = function() return throttleLine(idle, 0) end
+            }
+        end
+    )
+    __TS__ArrayPush(
+        list,
         {
             type = "line",
             thickness = 2,
             rounded = true,
             color = GREEN,
-            visible = function() return flown() ~= nil end,
+            pts = function() return throttleLine(view.idle, view.s1) end
+        },
+        {
+            type = "circle",
+            x = PLOT_X,
+            y = PLOT_Y,
+            radius = 3,
+            filled = true,
+            color = rgb(16777215),
+            pos = function()
+                local across = view.stick / 1024 * 100
+                return table.unpack(plotAt(
+                    across,
+                    throttleAt(view.idle, across) + view.s1
+                ))
+            end
+        }
+    )
+    __TS__ArrayPush(
+        list,
+        {
+            type = "line",
+            thickness = 2,
+            rounded = true,
+            color = BLUE,
             pts = function()
                 local curve = flown()
                 if not curve then
@@ -825,16 +902,8 @@ function objects(widget)
             y = PLOT_Y,
             radius = 3,
             filled = true,
-            color = rgb(16777215),
-            visible = function() return flown() ~= nil end,
-            pos = function()
-                local curve = flown()
-                local across = view.stick / 1024 * 100
-                return table.unpack(plotAt(
-                    across,
-                    curve and curveAt(curve, across) or 0
-                ))
-            end
+            color = BLUE,
+            pos = function() return table.unpack(plotAt(view.stick / 1024 * 100, view.collective)) end
         },
         label(
             363,
@@ -928,8 +997,10 @@ local name = "Cockpit"
 --   the gauge), saying the % left every 10% and warning when a pack is not full (mAhRe's sounds), when a cell sags
 --   under 3.30 V for a while (the model's low-cell alarm, which waited for 5 s in a row, is off) and, with buzzes,
 --   when the pack runs low;
--- - the model's data plate (picture, name, cells); the pitch curve flown (the idle up's, CP1 to CP3, or the self-level
---   one, CPL, while LEVEL is lit) with a dot at the collective stick, read from the model; volts a cell as a gauge;
+-- - the model's data plate (picture, name, cells); the curves as the K110Cockpit draws them: the idle ups' flat
+--   throttle lines (FM1 to FM3, the governor's head speeds), the one SE picks lit green with what S1 adds, and over
+--   them the pitch curve flown in blue (the idle up's, CP1 to CP3, or the self-level one, CPL, while LEVEL is lit),
+--   a dot at the collective stick on the throttle and at the pitch sent, read from the model; volts a cell as a gauge;
 --   and the cyclic: where the right stick is, to check it. The timers (this pack's, the sortie's) are in the top bar
 --   (the Timers widget); this one starts the sortie's again each day.
 -- It is built from EdgeTX's LVGL objects (useLvgl): the radio keeps them on the screen and redraws only what changes,
@@ -998,6 +1069,7 @@ DIM = rgb(7041916)
 LABEL = rgb(13225683)
 DIGITS = rgb(8191922)
 GREEN = rgb(5230987)
+BLUE = rgb(7124223)
 AMBER = 16756768
 RED = 16731471
 UNLIT = rgb(5067351)
@@ -1175,6 +1247,7 @@ local function create(zone, options)
             stick = 0,
             s1 = 0,
             degrees = 0,
+            collective = 0,
             aileron = 0,
             elevator = 0,
             packName = "",

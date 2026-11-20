@@ -59,6 +59,10 @@ python3 -I "$here/k110s_log.py" "$card/MODELS/model21.yml"
 python3 -I "$here/k110s_rescue.py" "$card/MODELS/model21.yml"
 python3 -I "$here/k110s_screen.py" "$card/MODELS/model21.yml"
 python3 -I "$here/k110s_picture.py" "$card" "$backup/IMAGES"
+python3 -I "$here/m2evo_failsafe.py" "$card/MODELS/model20.yml"
+cp -X "$repo/sd-card/MODELS/M2_EVO.txt" "$repo/sd-card/MODELS/K110S.txt" "$card/MODELS/"
+python3 -I "$here/checklists.py" "$card"
+python3 -I "$here/inactivity_alarm.py" "$card"
 
 for folder in $folders; do
   mkdir -p "$card/WIDGETS/$folder"

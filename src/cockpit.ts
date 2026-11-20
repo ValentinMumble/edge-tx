@@ -13,8 +13,10 @@ const name = 'Cockpit';
  *   the gauge), saying the % left every 10% and warning when a pack is not full (mAhRe's sounds), when a cell sags
  *   under 3.30 V for a while (the model's low-cell alarm, which waited for 5 s in a row, is off) and, with buzzes,
  *   when the pack runs low;
- * - the model's data plate (picture, name, cells); the pitch curve flown (the idle up's, CP1 to CP3, or the self-level
- *   one, CPL, while LEVEL is lit) with a dot at the collective stick, read from the model; volts a cell as a gauge;
+ * - the model's data plate (picture, name, cells); the curves as the K110Cockpit draws them: the idle ups' flat
+ *   throttle lines (FM1 to FM3, the governor's head speeds), the one SE picks lit green with what S1 adds, and over
+ *   them the pitch curve flown in blue (the idle up's, CP1 to CP3, or the self-level one, CPL, while LEVEL is lit),
+ *   a dot at the collective stick on the throttle and at the pitch sent, read from the model; volts a cell as a gauge;
  *   and the cyclic: where the right stick is, to check it. The timers (this pack's, the sortie's) are in the top bar
  *   (the Timers widget); this one starts the sortie's again each day.
  * It is built from EdgeTX's LVGL objects (useLvgl): the radio keeps them on the screen and redraws only what changes,
@@ -49,6 +51,8 @@ type View = {
   /** What S1 adds to the idle up's throttle (s1_knob.py), in its % (-100 to 100 scale). */
   s1: number;
   degrees: number;
+  /** The pitch sent (CH6, -100 to 100 %). */
+  collective: number;
   aileron: number;
   elevator: number;
   packName: string;
@@ -122,6 +126,8 @@ const DIM = rgb(0x6b737c);
 const LABEL = rgb(0xc9ced3);
 const DIGITS = rgb(0x7cffb2);
 const GREEN = rgb(0x4fd18b);
+/** The pitch curve and its dot, over the green throttle lines (as on the K110Cockpit). */
+const BLUE = rgb(0x6cb4ff);
 const AMBER = 0xffb020;
 const RED = 0xff4d4f;
 const UNLIT = rgb(0x4d5257);
@@ -288,6 +294,7 @@ function look(widget: Widget): void {
   view.stick = getValue('thr');
   view.throttle = ((output(2) + 1024) / 2048) * 100;
   view.degrees = (output(5) / 1024) * (widget.options.PitchRange || 12);
+  view.collective = (output(5) / 1024) * 100;
   view.aileron = getValue('ail');
   view.elevator = getValue('ele');
 
@@ -645,18 +652,54 @@ function objects(widget: Widget): LvglObject[] {
     label(398, 72, () => `${cells()}S`, SMLSIZE, MUTED),
   );
 
-  // The pitch curve flown, across its box beside the cell gauge and the cyclic: its points joined, a dot at the
-  // collective stick, its name, and the most pitch it gives either way.
+  // The curves, across their box beside the cell gauge and the cyclic, as the K110Cockpit draws them: the idle ups'
+  // throttle lines dim (flat: the ESC's governor holds a head speed for each), the one SE picks lit green with what S1
+  // adds and a dot at the collective stick, the pitch curve flown over them in blue with a dot at the pitch sent, its
+  // name, and the most pitch it gives either way.
   const flown = () => widget.curves[view.curve];
+  /** An idle up's throttle (1 to 3) across the stick, from its curve (FM1 to FM3), else flat at its placard. */
+  const throttleAt = (idle: number, across: number) => {
+    const curve = widget.curves[`FM${idle}`];
+    return curve ? curveAt(curve, across) : idles[idle - 1] * 2 - 100;
+  };
+  /** An idle up's throttle line, lifted by `extra` (what S1 adds). */
+  const throttleLine = (idle: number, extra: number): [number, number][] => {
+    const curve = widget.curves[`FM${idle}`];
+    if (!curve) return [plotAt(-100, throttleAt(idle, 0) + extra), plotAt(100, throttleAt(idle, 0) + extra)];
+    const xs = curveXs(curve);
+    const points: [number, number][] = [];
+    for (let index = 0; index < xs.length; index++) points.push(plotAt(xs[index], curve.y[index] + extra));
+    return points;
+  };
+  list.push(label(326, 99, 'THR', TINSIZE, GREEN), label(347, 99, 'PITCH', TINSIZE, BLUE));
+  list.push(label(402, 99, () => view.curve, TINSIZE, DIGITS, RIGHT));
+  // forEach, not a for loop: in the Lua it becomes, a for loop's functions all share one `idle`, 4 once it is over.
+  [1, 2, 3].forEach(idle => {
+    list.push({type: 'line', thickness: 1, color: DIM, pts: () => throttleLine(idle, 0)});
+  });
   list.push(
-    label(326, 99, 'PITCH', TINSIZE, MUTED),
-    label(402, 99, () => view.curve, TINSIZE, DIGITS, RIGHT),
+    {type: 'line', thickness: 2, rounded: true, color: GREEN, pts: () => throttleLine(view.idle, view.s1)},
+    {
+      type: 'circle',
+      x: PLOT_X,
+      y: PLOT_Y,
+      radius: 3,
+      filled: true,
+      color: rgb(0xffffff),
+      pos: () => {
+        const across = (view.stick / 1024) * 100;
+        return $multi(...plotAt(across, throttleAt(view.idle, across) + view.s1));
+      },
+    },
+  );
+  list.push(
+    // No `visible` function on a line: EdgeTX 2.12.5 crashes when a line is hidden before it has its points (the
+    // K110Cockpit froze the radio that way). With no curve, the line lies flat.
     {
       type: 'line',
       thickness: 2,
       rounded: true,
-      color: GREEN,
-      visible: () => flown() !== undefined,
+      color: BLUE,
       pts: () => {
         const curve = flown();
         if (!curve) return [plotAt(-100, 0), plotAt(100, 0)];
@@ -666,19 +709,15 @@ function objects(widget: Widget): LvglObject[] {
         return points;
       },
     },
+    // The pitch sent (CH6) at the collective stick: on its curve, off it while the rescue holds it flat or climbs.
     {
       type: 'circle',
       x: PLOT_X,
       y: PLOT_Y,
       radius: 3,
       filled: true,
-      color: rgb(0xffffff),
-      visible: () => flown() !== undefined,
-      pos: () => {
-        const curve = flown();
-        const across = (view.stick / 1024) * 100;
-        return $multi(...plotAt(across, curve ? curveAt(curve, across) : 0));
-      },
+      color: BLUE,
+      pos: () => $multi(...plotAt((view.stick / 1024) * 100, view.collective)),
     },
     label(
       363,
@@ -765,6 +804,7 @@ function create(zone: Zone, options: Options): Widget {
       stick: 0,
       s1: 0,
       degrees: 0,
+      collective: 0,
       aileron: 0,
       elevator: 0,
       packName: '',

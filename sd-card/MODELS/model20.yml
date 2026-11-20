@@ -45,7 +45,7 @@ throttleReversed: 0
 enableCustomThrottleWarning: 0
 disableTelemetryWarning: 0
 showInstanceIds: 0
-checklistInteractive: 0
+checklistInteractive: 1
 customThrottleWarningPosition: 0
 beepANACenter: 0
 mixData: 
@@ -958,7 +958,7 @@ moduleData:
       subType: 64,2
       channelsStart: 0
       channelsCount: 16
-      failsafeMode: HOLD
+      failsafeMode: CUSTOM
       mod: 
          multi: 
             disableTelemetry: 0
@@ -968,6 +968,39 @@ moduleData:
             receiverTelemetryOff: 0
             receiverHigherChannels: 0
             optionValue: 0
+failsafeChannels:
+   0:
+      val: 2000
+   1:
+      val: 2000
+   2:
+      val: 1024
+   3:
+      val: 2000
+   4:
+      val: 2000
+   5:
+      val: 2000
+   6:
+      val: 2000
+   7:
+      val: 2000
+   8:
+      val: 2000
+   9:
+      val: 2000
+   10:
+      val: 2000
+   11:
+      val: 2000
+   12:
+      val: 2000
+   13:
+      val: 2000
+   14:
+      val: 2000
+   15:
+      val: 2000
 trainerData: 
    mode: MASTER_TRAINER_JACK
    channelsStart: 0

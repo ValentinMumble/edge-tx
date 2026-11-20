@@ -38,14 +38,14 @@ displayTrims: 0
 ignoreSensorIds: 0
 trimInc: 1
 disableThrottleWarning: 1
-displayChecklist: 0
+displayChecklist: 1
 extendedLimits: 0
 extendedTrims: 0
 throttleReversed: 0
 enableCustomThrottleWarning: 0
 disableTelemetryWarning: 1
 showInstanceIds: 0
-checklistInteractive: 0
+checklistInteractive: 1
 customThrottleWarningPosition: 0
 beepANACenter: 0
 mixData:

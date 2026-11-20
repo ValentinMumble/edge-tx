@@ -60,7 +60,7 @@ local function __TS__ArrayMap(self, callbackfn, thisArg)
 end
 -- End of Lua Library inline imports
 local ____exports = {}
-local output, clock, look, at, lineHeight, label, dial, curveXs, curveAt, readShapes, objects, update, MODES, LOW_TIME, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, AMBER, RED, UNLIT, EDGE, DARK_INK, TOP, BOTTOM, TILE_X, TILE_Y, TILE_W, TILE_H, TILE_STEP, clamp, round, PLOT_X, PLOT_Y, PLOT_H, plotAt, percentOf
+local output, clock, look, at, lineHeight, label, dial, curveXs, curveAt, readShapes, objects, update, MODES, LOW_TIME, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, BLUE, AMBER, RED, UNLIT, EDGE, DARK_INK, TOP, BOTTOM, TILE_X, TILE_Y, TILE_W, TILE_H, TILE_STEP, clamp, round, PLOT_X, PLOT_Y, PLOT_H, plotAt, percentOf
 function output(index)
     local value = getOutputValue(index)
     local ____opt_0 = model.getOutput(index)
@@ -84,6 +84,7 @@ function look(widget)
     view.stick = getValue("thr")
     view.throttle = (output(2) + 1024) / 2048 * 100
     view.degrees = output(5) / 1024 * (widget.options.PitchRange or 12)
+    view.collective = output(5) / 1024 * 100
     view.aileron = getValue("ail")
     view.elevator = getValue("ele")
     local pack = model.getTimer(0)
@@ -313,6 +314,30 @@ function readShapes(widget)
             end
             if shape.level > widget.shapes[top + 1].level then
                 top = index
+            end
+            local ____temp_11
+            if mode.pitch == nil then
+                ____temp_11 = nil
+            else
+                ____temp_11 = curves[mode.pitch]
+            end
+            local pitch = ____temp_11
+            if pitch then
+                local xs = curveXs(pitch)
+                local points = {}
+                do
+                    local point = 0
+                    while point < #xs do
+                        points[#points + 1] = plotAt(xs[point + 1], pitch.y[point + 1])
+                        point = point + 1
+                    end
+                end
+                shape.pitch = points
+            else
+                shape.pitch = {
+                    plotAt(-100, -100),
+                    plotAt(100, 100)
+                }
             end
         end
     )
@@ -552,13 +577,13 @@ function objects(widget)
             stripe = stripe + 1
         end
     end
-    local ____temp_12 = stopY(0) - 23
-    local function ____temp_13()
+    local ____temp_13 = stopY(0) - 23
+    local function ____temp_14()
         return view.hold
     end
-    local ____array_11 = __TS__SparseArrayNew(table.unpack(stripes))
+    local ____array_12 = __TS__SparseArrayNew(table.unpack(stripes))
     __TS__SparseArrayPush(
-        ____array_11,
+        ____array_12,
         {
             type = "rectangle",
             x = 0,
@@ -571,11 +596,11 @@ function objects(widget)
     list[#list + 1] = {
         type = "box",
         x = 34,
-        y = ____temp_12,
+        y = ____temp_13,
         w = 20,
         h = 7,
-        visible = ____temp_13,
-        children = {__TS__SparseArraySpread(____array_11)}
+        visible = ____temp_14,
+        children = {__TS__SparseArraySpread(____array_12)}
     }
     list[#list + 1] = label(
         44,
@@ -674,7 +699,7 @@ function objects(widget)
         DIGITS,
         CENTER
     )
-    local ____array_14 = __TS__SparseArrayNew(table.unpack(dial({
+    local ____array_15 = __TS__SparseArrayNew(table.unpack(dial({
         centerX = 226,
         centerY = 117,
         radius = 72,
@@ -683,7 +708,7 @@ function objects(widget)
         labels = {{0, "E"}, {50, "1/2"}, {100, "F"}}
     })))
     __TS__SparseArrayPush(
-        ____array_14,
+        ____array_15,
         label(
             226,
             147,
@@ -711,7 +736,7 @@ function objects(widget)
     )
     __TS__ArrayPush(
         list,
-        __TS__SparseArraySpread(____array_14)
+        __TS__SparseArraySpread(____array_15)
     )
     local info = model.getInfo()
     if info.bitmap and info.bitmap ~= "" then
@@ -739,6 +764,13 @@ function objects(widget)
             info.name or "",
             BOLD,
             rgb(15856629)
+        ),
+        label(
+            398,
+            72,
+            "1S",
+            SMLSIZE,
+            MUTED
         )
     )
     local function flown()
@@ -749,9 +781,16 @@ function objects(widget)
         label(
             326,
             99,
-            "THROTTLE",
+            "THR",
             TINSIZE,
-            MUTED
+            GREEN
+        ),
+        label(
+            347,
+            99,
+            "PITCH",
+            TINSIZE,
+            BLUE
         ),
         label(
             402,
@@ -769,23 +808,26 @@ function objects(widget)
                 type = "line",
                 thickness = 1,
                 color = DIM,
-                visible = function() return shape.curve ~= nil end,
                 pts = function() return shape.points end
             }
         end
     )
-    __TS__ArrayForEach(
-        shapes,
-        function(____, shape, index)
-            list[#list + 1] = {
-                type = "line",
-                thickness = 2,
-                rounded = true,
-                color = GREEN,
-                visible = function() return view.idle == index + 1 and shape.curve ~= nil end,
-                pts = function() return shape.points end
-            }
-        end
+    __TS__ArrayPush(
+        list,
+        {
+            type = "line",
+            thickness = 2,
+            rounded = true,
+            color = GREEN,
+            pts = function() return flown().points end
+        },
+        {
+            type = "line",
+            thickness = 2,
+            rounded = true,
+            color = BLUE,
+            pts = function() return flown().pitch end
+        }
     )
     __TS__ArrayForEach(
         MODES,
@@ -824,6 +866,15 @@ function objects(widget)
                     curve and curveAt(curve, across) or 0
                 ))
             end
+        },
+        {
+            type = "circle",
+            x = PLOT_X,
+            y = PLOT_Y,
+            radius = 3,
+            filled = true,
+            color = BLUE,
+            pos = function() return table.unpack(plotAt(view.stick / 1024 * 100, view.collective)) end
         },
         label(
             363,
@@ -930,9 +981,10 @@ local name = "K110Cockpit"
 --   against a degree scale.
 -- - The Pack timer (timer 1, counting down from 4:00 as fast as CH9 says: a second a second at 90 % throttle) as the
 --   fuel gauge, the time left in its window and how fast it counts under it; the sortie (timer 2) under the gauge.
--- - The data plate; the throttle curves where the Cockpit draws its pitch curve (the Low RPM ramp, IU2 and IU3, the
---   one SE picks lit, with a dot at the throttle stick); the idle ups as three tiles where the Cockpit has its cell
---   gauge, in SE's order (LOW up, IU2 middle, IU3 down), the one picked lit; the cyclic.
+-- - The data plate; the throttle curves where the Cockpit draws its pitch curve (Low RPM, IU2 and IU3, the one SE
+--   picks lit, with a dot at the throttle stick), and that idle up's pitch curve over them in blue (CPL in Low RPM,
+--   the stick straight in IU2 and IU3), with a dot at the pitch sent; the idle ups as three tiles where the Cockpit
+--   has its cell gauge, in SE's order (LOW up, IU2 middle, IU3 down), the one picked lit; the cyclic.
 -- Built as the Cockpit is, from EdgeTX's LVGL objects over two pictures of what never moves (scripts/cockpit-panel.mjs
 -- draws both widgets' panels at the same positions); the curves are read again once a second, so a change made on the
 -- radio shows.
@@ -943,7 +995,7 @@ local options = {{
     1,
     20
 }}
-MODES = {{word = "LOW", curve = "Low", fallback = 60}, {word = "IU2", curve = "IU2", fallback = 80}, {word = "IU3", curve = "IU3", fallback = 90}}
+MODES = {{word = "LOW", curve = "Low", fallback = 60, pitch = "CPL"}, {word = "IU2", curve = "IU2", fallback = 80}, {word = "IU3", curve = "IU3", fallback = 90}}
 LOW_TIME = 30
 rgb = function(color) return lcd.RGB(color) end
 INK = rgb(15330543)
@@ -952,6 +1004,7 @@ DIM = rgb(7041916)
 LABEL = rgb(13225683)
 DIGITS = rgb(8191922)
 GREEN = rgb(5230987)
+BLUE = rgb(7124223)
 AMBER = 16756768
 RED = 16731471
 UNLIT = rgb(5067351)
@@ -991,6 +1044,7 @@ local function create(zone, options)
         MODES,
         function(____, mode) return {
             points = {},
+            pitch = {},
             labelY = PLOT_Y,
             level = mode.fallback,
             low = mode.fallback,
@@ -1010,6 +1064,7 @@ local function create(zone, options)
             throttle = 0,
             stick = 0,
             degrees = 0,
+            collective = 0,
             aileron = 0,
             elevator = 0,
             left = 240,

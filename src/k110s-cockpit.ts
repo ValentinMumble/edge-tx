@@ -12,9 +12,10 @@ const name = 'K110Cockpit';
  *   against a degree scale.
  * - The Pack timer (timer 1, counting down from 4:00 as fast as CH9 says: a second a second at 90 % throttle) as the
  *   fuel gauge, the time left in its window and how fast it counts under it; the sortie (timer 2) under the gauge.
- * - The data plate; the throttle curves where the Cockpit draws its pitch curve (the Low RPM ramp, IU2 and IU3, the
- *   one SE picks lit, with a dot at the throttle stick); the idle ups as three tiles where the Cockpit has its cell
- *   gauge, in SE's order (LOW up, IU2 middle, IU3 down), the one picked lit; the cyclic.
+ * - The data plate; the throttle curves where the Cockpit draws its pitch curve (Low RPM, IU2 and IU3, the one SE
+ *   picks lit, with a dot at the throttle stick), and that idle up's pitch curve over them in blue (CPL in Low RPM,
+ *   the stick straight in IU2 and IU3), with a dot at the pitch sent; the idle ups as three tiles where the Cockpit
+ *   has its cell gauge, in SE's order (LOW up, IU2 middle, IU3 down), the one picked lit; the cyclic.
  * Built as the Cockpit is, from EdgeTX's LVGL objects over two pictures of what never moves (scripts/cockpit-panel.mjs
  * draws both widgets' panels at the same positions); the curves are read again once a second, so a change made on the
  * radio shows.
@@ -24,12 +25,18 @@ const options: any[] = [['PitchRange', VALUE, 12, 1, 20]];
 type Options = {PitchRange: number};
 type Light = {word: string; on: boolean; color: number; ink: number};
 /** An idle up as SE picks it: its word, the curve its CH3 line flies (by name in the model) and the level if none. */
-type Mode = {word: string; curve: string; fallback: number};
+/**
+ * An idle up: its word, its throttle curve by name (and the throttle drawn when the model has none), and its pitch
+ * curve by name, none for the collective stick straight through (the model's Pitch line on CH6).
+ */
+type Mode = {word: string; curve: string; fallback: number; pitch?: string};
 /** What an idle up's curve gives, worked out when the curves are read: the objects read it. */
 type Shape = {
   curve?: Curve;
   /** The curve across its plot, and where its label sits (y). */
   points: [number, number][];
+  /** Its pitch curve across the same plot (the collective stick across, the pitch up). */
+  pitch: [number, number][];
   labelY: number;
   /** Its throttle (0 to 100 %) at mid stick, and its lowest and highest. */
   level: number;
@@ -47,6 +54,8 @@ type View = {
   /** The throttle stick (-1024 to 1024). */
   stick: number;
   degrees: number;
+  /** The pitch sent (CH6, -100 to 100 %). */
+  collective: number;
   aileron: number;
   elevator: number;
   /** The Pack timer: seconds left (below 0 once past), seconds it starts from, how fast it counts now (0 to 1). */
@@ -66,9 +75,9 @@ type Widget = {
   view: View;
 };
 
-/** SE up, middle, down: the curves are the model's CH3 lines' (k110s_iu1_low.py). */
+/** SE up, middle, down: the curves are the model's CH3 and CH6 lines' (k110s_iu1_low.py). */
 const MODES: Mode[] = [
-  {word: 'LOW', curve: 'Low', fallback: 60},
+  {word: 'LOW', curve: 'Low', fallback: 60, pitch: 'CPL'},
   {word: 'IU2', curve: 'IU2', fallback: 80},
   {word: 'IU3', curve: 'IU3', fallback: 90},
 ];
@@ -82,6 +91,8 @@ const DIM = rgb(0x6b737c);
 const LABEL = rgb(0xc9ced3);
 const DIGITS = rgb(0x7cffb2);
 const GREEN = rgb(0x4fd18b);
+/** The pitch curve and its dot, over the green throttle curves. */
+const BLUE = rgb(0x6cb4ff);
 const AMBER = 0xffb020;
 const RED = 0xff4d4f;
 const UNLIT = rgb(0x4d5257);
@@ -129,6 +140,7 @@ function look(widget: Widget): void {
   view.stick = getValue('thr');
   view.throttle = ((output(2) + 1024) / 2048) * 100;
   view.degrees = (output(5) / 1024) * (widget.options.PitchRange || 12);
+  view.collective = (output(5) / 1024) * 100;
   view.aileron = getValue('ail');
   view.elevator = getValue('ele');
   const pack = model.getTimer(0);
@@ -307,6 +319,15 @@ function readShapes(widget: Widget): void {
       shape.high = percentOf(highest);
     }
     if (shape.level > widget.shapes[top].level) top = index;
+    const pitch = mode.pitch === undefined ? undefined : curves[mode.pitch];
+    if (pitch) {
+      const xs = curveXs(pitch);
+      const points: [number, number][] = [];
+      for (let point = 0; point < xs.length; point++) points.push(plotAt(xs[point], pitch.y[point]));
+      shape.pitch = points;
+    } else {
+      shape.pitch = [plotAt(-100, -100), plotAt(100, 100)];
+    }
   });
   MODES.forEach((mode, index) => {
     const shape = widget.shapes[index];
@@ -497,7 +518,8 @@ function objects(widget: Widget): LvglObject[] {
     label(226, 210, () => `Sortie ${clock(view.sortie)}`, SMLSIZE, LABEL, CENTER),
   );
 
-  // The data plate (the plate, its frame and screws, the picture's box are in the panel picture): no cell count.
+  // The data plate (the plate, its frame and screws, the picture's box are in the panel picture), with the cell count
+  // where the M2 EVO's shows it: fixed, as no telemetry tells it, and the K110S only takes 1S packs.
   const info = model.getInfo();
   if (info.bitmap && info.bitmap !== '') {
     list.push({type: 'image', x: 324, y: 33, w: 66, h: 44, file: `/IMAGES/${info.bitmap}`});
@@ -506,34 +528,45 @@ function objects(widget: Widget): LvglObject[] {
     label(398, 40, 'MODEL', TINSIZE, MUTED),
     // EdgeTX's bold font: on a colour radio BOLD is a size of its own, added to another it makes it bigger.
     label(398, 56, info.name ?? '', BOLD, rgb(0xf1f3f5)),
+    label(398, 72, '1S', SMLSIZE, MUTED),
   );
 
   // The throttle curves, in the Cockpit's pitch curve box: the three idle ups' lines dim, the one SE picks lit over
   // them, each named, a dot at the throttle stick on the one flown, and its lowest to highest throttle under them.
   const flown = () => shapes[view.idle - 1];
   list.push(
-    label(326, 99, 'THROTTLE', TINSIZE, MUTED),
+    label(326, 99, 'THR', TINSIZE, GREEN),
+    label(347, 99, 'PITCH', TINSIZE, BLUE),
     label(402, 99, () => MODES[view.idle - 1].word, TINSIZE, DIGITS, RIGHT),
   );
+  // No line has a `visible` function: EdgeTX 2.12.5 makes a line's object only once it has its points, and a line
+  // hidden when it is built is hidden through that missing object, which crashes the radio (it froze on its splash).
+  // A missing curve draws flat at its idle up's level instead, and the lit line follows SE.
   shapes.forEach(shape => {
     list.push({
       type: 'line',
       thickness: 1,
       color: DIM,
-      visible: () => shape.curve !== undefined,
       pts: () => shape.points,
     });
   });
-  shapes.forEach((shape, index) => {
-    list.push({
+  list.push(
+    {
       type: 'line',
       thickness: 2,
       rounded: true,
       color: GREEN,
-      visible: () => view.idle === index + 1 && shape.curve !== undefined,
-      pts: () => shape.points,
-    });
-  });
+      pts: () => flown().points,
+    },
+    // The pitch curve of the idle up flown, over the throttle's.
+    {
+      type: 'line',
+      thickness: 2,
+      rounded: true,
+      color: BLUE,
+      pts: () => flown().pitch,
+    },
+  );
   MODES.forEach((mode, index) => {
     const shape = shapes[index];
     const word = label(382, shape.labelY, mode.word, TINSIZE, () => (view.idle === index + 1 ? GREEN : MUTED), CENTER);
@@ -553,6 +586,16 @@ function objects(widget: Widget): LvglObject[] {
         const across = (view.stick / 1024) * 100;
         return $multi(...plotAt(across, curve ? curveAt(curve, across) : 0));
       },
+    },
+    // The pitch sent (CH6) at the collective stick: on its curve, off it while the rescue holds it flat or climbs.
+    {
+      type: 'circle',
+      x: PLOT_X,
+      y: PLOT_Y,
+      radius: 3,
+      filled: true,
+      color: BLUE,
+      pos: () => $multi(...plotAt((view.stick / 1024) * 100, view.collective)),
     },
     label(
       363,
@@ -615,6 +658,7 @@ function create(zone: Zone, options: Options): Widget {
   for (let index = 0; index < 6; index++) lights.push({word: '', on: false, color: 0, ink: 0});
   const shapes: Shape[] = MODES.map(mode => ({
     points: [],
+    pitch: [],
     labelY: PLOT_Y,
     level: mode.fallback,
     low: mode.fallback,
@@ -633,6 +677,7 @@ function create(zone: Zone, options: Options): Widget {
       throttle: 0,
       stick: 0,
       degrees: 0,
+      collective: 0,
       aileron: 0,
       elevator: 0,
       left: 240,
