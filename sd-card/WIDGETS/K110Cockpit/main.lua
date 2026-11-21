@@ -5,6 +5,14 @@ local function __TS__ArrayForEach(self, callbackFn, thisArg)
     end
 end
 
+local function __TS__ArrayMap(self, callbackfn, thisArg)
+    local result = {}
+    for i = 1, #self do
+        result[i] = callbackfn(thisArg, self[i], i - 1, self)
+    end
+    return result
+end
+
 local function __TS__ArrayPush(self, ...)
     local items = {...}
     local len = #self
@@ -50,14 +58,6 @@ local function __TS__ObjectAssign(target, ...)
     end
     return target
 end
-
-local function __TS__ArrayMap(self, callbackfn, thisArg)
-    local result = {}
-    for i = 1, #self do
-        result[i] = callbackfn(thisArg, self[i], i - 1, self)
-    end
-    return result
-end
 -- End of Lua Library inline imports
 local ____exports = {}
 local output, clock, look, at, lineHeight, label, dial, curveXs, curveAt, readShapes, objects, update, MODES, LOW_TIME, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, BLUE, AMBER, RED, UNLIT, EDGE, DARK_INK, TOP, BOTTOM, TILE_X, TILE_Y, TILE_W, TILE_H, TILE_STEP, clamp, round, PLOT_X, PLOT_Y, PLOT_H, plotAt, percentOf
@@ -85,8 +85,11 @@ function look(widget)
     view.throttle = (output(2) + 1024) / 2048 * 100
     view.degrees = output(5) / 1024 * (widget.options.PitchRange or 12)
     view.collective = output(5) / 1024 * 100
+    view.practice = getValue("sd") >= 1024
     view.aileron = getValue("ail")
     view.elevator = getValue("ele")
+    view.sentAileron = output(0)
+    view.sentElevator = output(1)
     local pack = model.getTimer(0)
     view.start = (pack and pack.start or 0) > 0 and (pack and pack.start) or 240
     view.left = pack and pack.value or view.start
@@ -341,6 +344,14 @@ function readShapes(widget)
             end
         end
     )
+    local practice = curves.CPP
+    widget.practice = practice and __TS__ArrayMap(
+        curveXs(practice),
+        function(____, across, point) return plotAt(across, practice.y[point + 1]) end
+    ) or ({
+        plotAt(-100, -100),
+        plotAt(100, 100)
+    })
     __TS__ArrayForEach(
         MODES,
         function(____, mode, index)
@@ -826,7 +837,7 @@ function objects(widget)
             thickness = 2,
             rounded = true,
             color = BLUE,
-            pts = function() return flown().pitch end
+            pts = function() return view.practice and view.idle ~= 1 and widget.practice or flown().pitch end
         }
     )
     __TS__ArrayForEach(
@@ -880,6 +891,9 @@ function objects(widget)
             363,
             213,
             function()
+                if view.practice then
+                    return "PRACTICE"
+                end
                 local shape = flown()
                 if not shape.curve then
                     return "no curve"
@@ -887,7 +901,7 @@ function objects(widget)
                 return shape.low == shape.high and tostring(shape.level) .. "%" or ((tostring(shape.low) .. "-") .. tostring(shape.high)) .. "%"
             end,
             TINSIZE,
-            DIGITS,
+            function() return view.practice and BLUE or DIGITS end,
             CENTER
         )
     )
@@ -946,20 +960,38 @@ function objects(widget)
             type = "circle",
             x = 442,
             y = 182,
+            radius = 4,
+            color = MUTED,
+            pos = function() return 442 + math.floor(clamp(view.aileron, -1024, 1024) / 1024 * 20), 182 - math.floor(clamp(view.elevator, -1024, 1024) / 1024 * 20) end
+        },
+        {
+            type = "circle",
+            x = 442,
+            y = 182,
             radius = 3,
             filled = true,
             color = GREEN,
-            pos = function() return 442 + math.floor(clamp(view.aileron, -1024, 1024) / 1024 * 20), 182 - math.floor(clamp(view.elevator, -1024, 1024) / 1024 * 20) end
+            pos = function() return 442 + math.floor(clamp(view.sentAileron, -1024, 1024) / 1024 * 20), 182 - math.floor(clamp(view.sentElevator, -1024, 1024) / 1024 * 20) end
         },
         label(
             442,
             213,
-            function() return (("A" .. percent(view.aileron)) .. " E") .. percent(view.elevator) end,
+            function() return (("A" .. percent(view.sentAileron)) .. " E") .. percent(view.sentElevator) end,
             TINSIZE,
             DIGITS,
             CENTER
         )
     )
+    list[#list + 1] = {
+        type = "rectangle",
+        x = 0,
+        y = 0,
+        w = 480,
+        h = 227,
+        thickness = 3,
+        color = BLUE,
+        visible = function() return view.practice end
+    }
     return list
 end
 function update(widget, options)
@@ -1055,6 +1087,7 @@ local function create(zone, options)
         zone = zone,
         options = options,
         shapes = shapes,
+        practice = {},
         since = getTime(),
         view = {
             live = false,
@@ -1067,11 +1100,14 @@ local function create(zone, options)
             collective = 0,
             aileron = 0,
             elevator = 0,
+            sentAileron = 0,
+            sentElevator = 0,
             left = 240,
             start = 240,
             rate = 0,
             sortie = 0,
-            lights = lights
+            lights = lights,
+            practice = false
         }
     }
     update(widget, options)

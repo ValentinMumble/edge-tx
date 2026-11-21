@@ -30,7 +30,8 @@ out of git (`backups/`, `update-2.12.5/`).
   throttle lines (FM1 to FM3, the governor's head speeds), the one SE picks lit green with what S1 adds, and the pitch
   curve flown over them in blue (the idle up's CP1 to CP3, or CPL while LEVEL is lit), read from the model, with dots at
   the collective stick and the pitch sent, and the most pitch it gives, the average volts
-  a cell as a gauge, and the right stick as a cyclic dot (the timers are in the top bar). The panel turns dark yellow while the motor can
+  a cell as a gauge, and the cyclic: a ring at the right stick, a dot at what is sent after rates and expo (the timers
+  are in the top bar). The panel turns dark yellow while the motor can
   spin, LEVEL lights blue, RESCUE and TELE white on dark red. Built from EdgeTX's LVGL objects, so the radio redraws
   only what changes, and the screen keeps up at 20 frames a second (EdgeTX's most).
 - **K110Cockpit:** the K110S's whole screen, laid out as the Cockpit so nothing moves when switching models: the
@@ -39,7 +40,7 @@ out of git (`backups/`, `update-2.12.5/`).
   left, how fast it counts now, the sortie under it), the data plate (1S), the throttle curves in the pitch curve's box
   (Low RPM, IU2, IU3, the one on SE lit green with a dot at the stick) and that idle up's pitch curve over them in blue
   (CPL in Low RPM, the stick straight in IU2 and IU3) with a dot at the pitch sent, all read from the model, the idle
-  ups as three tiles in SE's order where the cell gauge is, and the cyclic.
+  ups as three tiles in SE's order where the cell gauge is, and the cyclic (the stick's ring, the sent dot).
 - **ArmedModel:** the arming state at a glance: SAFE (grey-green), ARMED (amber, throttle cut) or LIVE (red, the border
   blinking), the SA and SF switches as two lights, the model's picture, and its main rotor seen from above in the
   state's colours: still when safe, spooling up when live (a blur and the rotor disc show as it gains speed), coasting
@@ -99,7 +100,10 @@ when the card has none (`k110s_model.py`), its IU1 made Low RPM and SB freed (`k
 of motor on (`k110s_log.py`), its one cockpit screen (`k110s_screen.py`) and its picture cut out as the M2 EVO's
 (`k110s_picture.py`), the M2 EVO's failsafe cutting the motor on a lost link while the rest holds
 (`m2evo_failsafe.py`), each model's pre-flight checklist, ticked line by line when it loads (`sd-card/MODELS/M2_EVO.txt`
-and `K110S.txt`, `checklists.py`), and the inactivity alarm after 10 minutes untouched (`inactivity_alarm.py`). Then it
+and `K110S.txt`, `checklists.py`), the inactivity alarm after 10 minutes untouched (`inactivity_alarm.py`), and practice
+rates on SD down for soft landings on both models: cyclic 70 %, rudder 80 %, a gentler pitch curve CPP keeping the hover
+pitch where it is (-5° to +9°, Low RPM keeping its own), "low rates" said, a blue frame and PRACTICE on the cockpits
+(`practice_rates.py`). Then it
 copies the
 built widgets and mAhRe from `sd-card/`. It backs up what it changes in `backups/<date>` first, and names any model the
 radio changed since, to copy into `sd-card/MODELS`. A new model

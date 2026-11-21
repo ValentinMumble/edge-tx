@@ -53,11 +53,16 @@ type View = {
   degrees: number;
   /** The pitch sent (CH6, -100 to 100 %). */
   collective: number;
+  /** The right stick, and the aileron and elevator sent (CH1, CH2: after rates and expo), -1024 to 1024. */
   aileron: number;
   elevator: number;
+  sentAileron: number;
+  sentElevator: number;
   packName: string;
   packMah: number;
   lights: Light[];
+  /** Practice rates on (SD down, practice_rates.py): calmer cyclic and rudder, the gentler pitch curve CPP. */
+  practice: boolean;
 };
 type Widget = {
   zone: Zone;
@@ -289,14 +294,18 @@ function look(widget: Widget): void {
   view.packName = plugged.name;
   view.packMah = plugged.mah;
   view.mahLeft = math.floor((plugged.mah * view.left) / 100 + 0.5);
-  // The pitch curve flown: the self-level one while LEVEL is lit (SC), else the idle up's (the model's Coll lines).
-  view.curve = getValue('sc') >= 1024 ? 'CPL' : `CP${view.idle}`;
+  // The pitch curve flown, as the model's pitch lines pick it: the self-level one while LEVEL is lit (SC), else the
+  // practice one while SD is down, else the idle up's (the Coll lines).
+  view.practice = getValue('sd') >= 1024;
+  view.curve = getValue('sc') >= 1024 ? 'CPL' : view.practice ? 'CPP' : `CP${view.idle}`;
   view.stick = getValue('thr');
   view.throttle = ((output(2) + 1024) / 2048) * 100;
   view.degrees = (output(5) / 1024) * (widget.options.PitchRange || 12);
   view.collective = (output(5) / 1024) * 100;
   view.aileron = getValue('ail');
   view.elevator = getValue('ele');
+  view.sentAileron = output(0);
+  view.sentElevator = output(1);
 
   // SAFE lit green while disarmed, ARMED amber; THR ON amber while the throttle is on (out of hold), THR OFF dark in
   // hold; LEVEL blue with white letters, as the flight mode tile in the top bar, while self-level is on.
@@ -723,6 +732,7 @@ function objects(widget: Widget): LvglObject[] {
       363,
       213,
       () => {
+        if (view.practice) return 'PRACTICE';
         const curve = flown();
         if (!curve) return 'no curve';
         let most = 0;
@@ -730,7 +740,7 @@ function objects(widget: Widget): LvglObject[] {
         return `max ${string.format('%.1f', (most / 100) * (widget.options.PitchRange || 12))}°`;
       },
       TINSIZE,
-      DIGITS,
+      () => (view.practice ? BLUE : DIGITS),
       CENTER,
     ),
   );
@@ -750,10 +760,23 @@ function objects(widget: Widget): LvglObject[] {
     label(442, 136, () => (view.powered ? string.format('%.2f', view.cell) : '--'), SMLSIZE, DIGITS, CENTER),
   );
 
-  // The cyclic (the right stick): a dot where aileron and elevator put it, their values under it (its box, cross and
-  // ring are in the panel picture).
+  // The cyclic: a ring where the right stick is, a dot where the aileron and elevator sent put it (after rates and
+  // expo, so in practice the dot trails the ring and stops short of the edge), the values sent under it (its box,
+  // cross and ring are in the panel picture).
   const percent = (value: number) => `${value >= 0 ? '+' : ''}${math.floor((value / 1024) * 100 + 0.5)}`;
   list.push(
+    {
+      type: 'circle',
+      x: 442,
+      y: 182,
+      radius: 4,
+      color: MUTED,
+      pos: () =>
+        $multi(
+          442 + math.floor((clamp(view.aileron, -1024, 1024) / 1024) * 20),
+          182 - math.floor((clamp(view.elevator, -1024, 1024) / 1024) * 20),
+        ),
+    },
     {
       type: 'circle',
       x: 442,
@@ -763,12 +786,14 @@ function objects(widget: Widget): LvglObject[] {
       color: GREEN,
       pos: () =>
         $multi(
-          442 + math.floor((clamp(view.aileron, -1024, 1024) / 1024) * 20),
-          182 - math.floor((clamp(view.elevator, -1024, 1024) / 1024) * 20),
+          442 + math.floor((clamp(view.sentAileron, -1024, 1024) / 1024) * 20),
+          182 - math.floor((clamp(view.sentElevator, -1024, 1024) / 1024) * 20),
         ),
     },
-    label(442, 213, () => `A${percent(view.aileron)} E${percent(view.elevator)}`, TINSIZE, DIGITS, CENTER),
+    label(442, 213, () => `A${percent(view.sentAileron)} E${percent(view.sentElevator)}`, TINSIZE, DIGITS, CENTER),
   );
+  // Practice rates on (SD down): a blue frame round the whole screen.
+  list.push({type: 'rectangle', x: 0, y: 0, w: 480, h: 227, thickness: 3, color: BLUE, visible: () => view.practice});
   return list;
 }
 
@@ -807,9 +832,12 @@ function create(zone: Zone, options: Options): Widget {
       collective: 0,
       aileron: 0,
       elevator: 0,
+      sentAileron: 0,
+      sentElevator: 0,
       packName: '',
       packMah: 0,
       lights,
+      practice: false,
     },
   };
   update(widget, options);

@@ -56,20 +56,27 @@ type View = {
   degrees: number;
   /** The pitch sent (CH6, -100 to 100 %). */
   collective: number;
+  /** The right stick, and the aileron and elevator sent (CH1, CH2: after rates and expo), -1024 to 1024. */
   aileron: number;
   elevator: number;
+  sentAileron: number;
+  sentElevator: number;
   /** The Pack timer: seconds left (below 0 once past), seconds it starts from, how fast it counts now (0 to 1). */
   left: number;
   start: number;
   rate: number;
   sortie: number;
   lights: Light[];
+  /** Practice rates on (SD down, practice_rates.py): calmer cyclic and rudder, the pitch on CPP but in Low RPM. */
+  practice: boolean;
 };
 type Widget = {
   zone: Zone;
   options: Options;
   /** The idle ups' curves, as MODES orders them. */
   shapes: Shape[];
+  /** The practice pitch curve (CPP, SD down in IU2 and IU3) across the plot. */
+  practice: [number, number][];
   /** When the curves were last read (getTime, tens of ms). */
   since: number;
   view: View;
@@ -141,8 +148,11 @@ function look(widget: Widget): void {
   view.throttle = ((output(2) + 1024) / 2048) * 100;
   view.degrees = (output(5) / 1024) * (widget.options.PitchRange || 12);
   view.collective = (output(5) / 1024) * 100;
+  view.practice = getValue('sd') >= 1024;
   view.aileron = getValue('ail');
   view.elevator = getValue('ele');
+  view.sentAileron = output(0);
+  view.sentElevator = output(1);
   const pack = model.getTimer(0);
   view.start = (pack?.start ?? 0) > 0 ? (pack?.start as number) : 240;
   view.left = pack?.value ?? view.start;
@@ -329,6 +339,11 @@ function readShapes(widget: Widget): void {
       shape.pitch = [plotAt(-100, -100), plotAt(100, 100)];
     }
   });
+  // The practice pitch line (SD down): CPP across the plot, else the stick straight.
+  const practice = curves.CPP;
+  widget.practice = practice
+    ? curveXs(practice).map((across, point) => plotAt(across, practice.y[point]))
+    : [plotAt(-100, -100), plotAt(100, 100)];
   MODES.forEach((mode, index) => {
     const shape = widget.shapes[index];
     const [, lineY] = plotAt(50, shape.curve ? curveAt(shape.curve, 50) : mode.fallback * 2 - 100);
@@ -564,7 +579,8 @@ function objects(widget: Widget): LvglObject[] {
       thickness: 2,
       rounded: true,
       color: BLUE,
-      pts: () => flown().pitch,
+      // SD down flies CPP in IU2 and IU3; Low RPM keeps its own curve.
+      pts: () => (view.practice && view.idle !== 1 ? widget.practice : flown().pitch),
     },
   );
   MODES.forEach((mode, index) => {
@@ -601,12 +617,13 @@ function objects(widget: Widget): LvglObject[] {
       363,
       213,
       () => {
+        if (view.practice) return 'PRACTICE';
         const shape = flown();
         if (!shape.curve) return 'no curve';
         return shape.low === shape.high ? `${shape.level}%` : `${shape.low}-${shape.high}%`;
       },
       TINSIZE,
-      DIGITS,
+      () => (view.practice ? BLUE : DIGITS),
       CENTER,
     ),
   );
@@ -631,10 +648,23 @@ function objects(widget: Widget): LvglObject[] {
     );
   });
 
-  // The cyclic (the right stick): a dot where aileron and elevator put it, their values under it (its box, cross and
-  // ring are in the panel picture).
+  // The cyclic: a ring where the right stick is, a dot where the aileron and elevator sent put it (after rates and
+  // expo, so in practice the dot trails the ring and stops short of the edge), the values sent under it (its box,
+  // cross and ring are in the panel picture).
   const percent = (value: number) => `${value >= 0 ? '+' : ''}${round((value / 1024) * 100)}`;
   list.push(
+    {
+      type: 'circle',
+      x: 442,
+      y: 182,
+      radius: 4,
+      color: MUTED,
+      pos: () =>
+        $multi(
+          442 + math.floor((clamp(view.aileron, -1024, 1024) / 1024) * 20),
+          182 - math.floor((clamp(view.elevator, -1024, 1024) / 1024) * 20),
+        ),
+    },
     {
       type: 'circle',
       x: 442,
@@ -644,12 +674,14 @@ function objects(widget: Widget): LvglObject[] {
       color: GREEN,
       pos: () =>
         $multi(
-          442 + math.floor((clamp(view.aileron, -1024, 1024) / 1024) * 20),
-          182 - math.floor((clamp(view.elevator, -1024, 1024) / 1024) * 20),
+          442 + math.floor((clamp(view.sentAileron, -1024, 1024) / 1024) * 20),
+          182 - math.floor((clamp(view.sentElevator, -1024, 1024) / 1024) * 20),
         ),
     },
-    label(442, 213, () => `A${percent(view.aileron)} E${percent(view.elevator)}`, TINSIZE, DIGITS, CENTER),
+    label(442, 213, () => `A${percent(view.sentAileron)} E${percent(view.sentElevator)}`, TINSIZE, DIGITS, CENTER),
   );
+  // Practice rates on (SD down): a blue frame round the whole screen.
+  list.push({type: 'rectangle', x: 0, y: 0, w: 480, h: 227, thickness: 3, color: BLUE, visible: () => view.practice});
   return list;
 }
 
@@ -668,6 +700,7 @@ function create(zone: Zone, options: Options): Widget {
     zone,
     options,
     shapes,
+    practice: [],
     since: getTime(),
     view: {
       live: false,
@@ -680,11 +713,14 @@ function create(zone: Zone, options: Options): Widget {
       collective: 0,
       aileron: 0,
       elevator: 0,
+      sentAileron: 0,
+      sentElevator: 0,
       left: 240,
       start: 240,
       rate: 0,
       sortie: 0,
       lights,
+      practice: false,
     },
   };
   update(widget, options);

@@ -106,13 +106,16 @@ function look(widget)
     view.packName = plugged.name
     view.packMah = plugged.mah
     view.mahLeft = math.floor(plugged.mah * view.left / 100 + 0.5)
-    view.curve = getValue("sc") >= 1024 and "CPL" or "CP" .. tostring(view.idle)
+    view.practice = getValue("sd") >= 1024
+    view.curve = getValue("sc") >= 1024 and "CPL" or (view.practice and "CPP" or "CP" .. tostring(view.idle))
     view.stick = getValue("thr")
     view.throttle = (output(2) + 1024) / 2048 * 100
     view.degrees = output(5) / 1024 * (widget.options.PitchRange or 12)
     view.collective = output(5) / 1024 * 100
     view.aileron = getValue("ail")
     view.elevator = getValue("ele")
+    view.sentAileron = output(0)
+    view.sentElevator = output(1)
     local lights = view.lights
     local function set(index, word, on, color, ink)
         if ink == nil then
@@ -909,6 +912,9 @@ function objects(widget)
             363,
             213,
             function()
+                if view.practice then
+                    return "PRACTICE"
+                end
                 local curve = flown()
                 if not curve then
                     return "no curve"
@@ -923,7 +929,7 @@ function objects(widget)
                 return ("max " .. string.format("%.1f", most / 100 * (widget.options.PitchRange or 12))) .. "°"
             end,
             TINSIZE,
-            DIGITS,
+            function() return view.practice and BLUE or DIGITS end,
             CENTER
         )
     )
@@ -961,20 +967,38 @@ function objects(widget)
             type = "circle",
             x = 442,
             y = 182,
+            radius = 4,
+            color = MUTED,
+            pos = function() return 442 + math.floor(clamp(view.aileron, -1024, 1024) / 1024 * 20), 182 - math.floor(clamp(view.elevator, -1024, 1024) / 1024 * 20) end
+        },
+        {
+            type = "circle",
+            x = 442,
+            y = 182,
             radius = 3,
             filled = true,
             color = GREEN,
-            pos = function() return 442 + math.floor(clamp(view.aileron, -1024, 1024) / 1024 * 20), 182 - math.floor(clamp(view.elevator, -1024, 1024) / 1024 * 20) end
+            pos = function() return 442 + math.floor(clamp(view.sentAileron, -1024, 1024) / 1024 * 20), 182 - math.floor(clamp(view.sentElevator, -1024, 1024) / 1024 * 20) end
         },
         label(
             442,
             213,
-            function() return (("A" .. percent(view.aileron)) .. " E") .. percent(view.elevator) end,
+            function() return (("A" .. percent(view.sentAileron)) .. " E") .. percent(view.sentElevator) end,
             TINSIZE,
             DIGITS,
             CENTER
         )
     )
+    list[#list + 1] = {
+        type = "rectangle",
+        x = 0,
+        y = 0,
+        w = 480,
+        h = 227,
+        thickness = 3,
+        color = BLUE,
+        visible = function() return view.practice end
+    }
     return list
 end
 function update(widget, options)
@@ -1250,9 +1274,12 @@ local function create(zone, options)
             collective = 0,
             aileron = 0,
             elevator = 0,
+            sentAileron = 0,
+            sentElevator = 0,
             packName = "",
             packMah = 0,
-            lights = lights
+            lights = lights,
+            practice = false
         }
     }
     update(widget, options)

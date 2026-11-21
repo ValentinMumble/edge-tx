@@ -256,6 +256,26 @@ mixData:
    flightModes: 000000000
    weight: 100
    offset: 0
+   swtch: "SD2"
+   curve:
+      type: 3
+      value: 5
+   delayUp: 0
+   delayDown: 0
+   speedUp: 0
+   speedDown: 0
+   name: "Prac"
+ -
+   destCh: 5
+   srcRaw: "I2"
+   carryTrim: 0
+   mixWarn: 0
+   mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
+   offset: 0
    swtch: "L1"
    curve:
       type: 3
@@ -386,6 +406,20 @@ expoData:
    scale: 0
    trimSource: 0
    srcRaw: "Ail"
+   weight: 70
+   offset: 0
+   swtch: "SD2"
+   curve:
+      type: 1
+      value: 35
+   chn: 0
+   flightModes: 000000000
+   name: "Prac"
+ -
+   mode: 3
+   scale: 0
+   trimSource: 0
+   srcRaw: "Ail"
    weight: 100
    offset: 0
    swtch: "NONE"
@@ -395,6 +429,20 @@ expoData:
    chn: 0
    flightModes: 000000000
    name: ""
+ -
+   mode: 3
+   scale: 0
+   trimSource: 0
+   srcRaw: "Ele"
+   weight: 70
+   offset: 0
+   swtch: "SD2"
+   curve:
+      type: 1
+      value: 35
+   chn: 1
+   flightModes: 000000000
+   name: "Prac"
  -
    mode: 3
    scale: 0
@@ -420,6 +468,20 @@ expoData:
    chn: 2
    flightModes: 000000000
    name: ""
+ -
+   mode: 3
+   scale: 0
+   trimSource: 0
+   srcRaw: "Rud"
+   weight: 80
+   offset: 0
+   swtch: "SD2"
+   curve:
+      type: 1
+      value: 30
+   chn: 3
+   flightModes: 000000000
+   name: "Prac"
  -
    mode: 3
    scale: 0
@@ -455,6 +517,11 @@ curves:
       smooth: 0
       points: -3
       name: "CPL"
+   4:
+      type: 0
+      smooth: 0
+      points: 0
+      name: "CPP"
 points:
    0:
       val: 30
@@ -490,6 +557,16 @@ points:
       val: -25
    16:
       val: 100
+   17:
+      val: -40
+   18:
+      val: -15
+   19:
+      val: 11
+   20:
+      val: 43
+   21:
+      val: 75
 logicalSw:
    0:
       func: FUNC_VNEG
@@ -608,6 +685,10 @@ customFn:
       swtch: "L8"
       func: LOGS
       def: "2,1"
+   11:
+      swtch: "SD2"
+      func: PLAY_TRACK
+      def: "ratlow,1,1x"
 flightModeData:
    0:
       name: ""
