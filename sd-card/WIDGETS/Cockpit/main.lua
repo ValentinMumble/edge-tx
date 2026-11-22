@@ -1,4 +1,24 @@
 -- Lua Library inline imports
+local function __TS__ObjectAssign(target, ...)
+    local sources = {...}
+    for i = 1, #sources do
+        local source = sources[i]
+        for key in pairs(source) do
+            target[key] = source[key]
+        end
+    end
+    return target
+end
+
+local function __TS__ArrayPushArray(self, items)
+    local len = #self
+    for i = 1, #items do
+        len = len + 1
+        self[len] = items[i]
+    end
+    return len
+end
+
 local function __TS__ArrayPush(self, ...)
     local items = {...}
     local len = #self
@@ -39,29 +59,9 @@ local function __TS__SparseArraySpread(sparseArray)
     local _unpack = unpack or table.unpack
     return _unpack(sparseArray, 1, sparseArray.sparseLength)
 end
-
-local function __TS__ArrayPushArray(self, items)
-    local len = #self
-    for i = 1, #items do
-        len = len + 1
-        self[len] = items[i]
-    end
-    return len
-end
-
-local function __TS__ObjectAssign(target, ...)
-    local sources = {...}
-    for i = 1, #sources do
-        local source = sources[i]
-        for key in pairs(source) do
-            target[key] = source[key]
-        end
-    end
-    return target
-end
 -- End of Lua Library inline imports
 local ____exports = {}
-local output, button, pack, cells, fuelLeft, look, at, lineHeight, label, dial, curveXs, curveAt, readCurves, objects, update, PACKS, LOW_FUEL, ALARM_EVERY, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, BLUE, AMBER, RED, UNLIT, EDGE, TOP, BOTTOM, clamp, PLOT_X, PLOT_Y, plotAt
+local output, button, pack, cells, fuelLeft, look, at, lineHeight, swing, armSwitch, label, dial, curveXs, curveAt, readCurves, objects, update, practiceRate, PACKS, TELE_LIGHT, LOW_FUEL, ALARM_EVERY, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, BLUE, AMBER, RED, UNLIT, EDGE, TOP, BOTTOM, clamp, GUARD_SWING, GUARD_TURN, GUARD_LONG, HINGE, LEVER_FLIP, LEVER_LONG, NUT, ease, toward, PLOT_X, PLOT_Y, plotAt
 function output(index)
     local value = getOutputValue(index)
     local ____opt_0 = model.getOutput(index)
@@ -107,6 +107,7 @@ function look(widget)
     view.packMah = plugged.mah
     view.mahLeft = math.floor(plugged.mah * view.left / 100 + 0.5)
     view.practice = getValue("sd") >= 1024
+    view.practiceRate = view.practice and practiceRate() or 0
     view.curve = getValue("sc") >= 1024 and "CPL" or (view.practice and "CPP" or "CP" .. tostring(view.idle))
     view.stick = getValue("thr")
     view.throttle = (output(2) + 1024) / 2048 * 100
@@ -116,6 +117,8 @@ function look(widget)
     view.elevator = getValue("ele")
     view.sentAileron = output(0)
     view.sentElevator = output(1)
+    view.rudder = getValue("rud")
+    view.sentRudder = output(3)
     local lights = view.lights
     local function set(index, word, on, color, ink)
         if ink == nil then
@@ -155,12 +158,13 @@ function look(widget)
         set(4, "LOW BATT", view.powered and view.left < LOW_FUEL, RED)
     end
     set(
-        5,
+        TELE_LIGHT,
         "TELE",
         getValue("RSSI") <= 0,
         9051168,
         16777215
     )
+    swing(view, armed)
 end
 function at(centerX, centerY, radius, angle)
     local radians = angle * math.pi / 180
@@ -171,6 +175,493 @@ function at(centerX, centerY, radius, angle)
 end
 function lineHeight(font)
     return font == TINSIZE and 12 or (font == SMLSIZE and 17 or (font == BOLD and 20 or 21))
+end
+function swing(view, armed)
+    local now = getTime()
+    local guard = armed and 1 or 0
+    local lever = view.lights[2].on and 1 or -1
+    local seconds = (now - view.swung) / 100
+    if view.swung < 0 or seconds > 0.5 then
+        view.guard = guard
+        view.lever = lever
+    else
+        view.guard = toward(view.guard, guard, seconds / GUARD_SWING)
+        view.lever = toward(view.lever, lever, 2 * seconds / LEVER_FLIP)
+    end
+    view.swung = now
+end
+function armSwitch(view)
+    local lights = view.lights
+    local function armed()
+        return lights[1].word == "ARMED"
+    end
+    local function live()
+        return armed() and lights[2].on
+    end
+    local function safeOn()
+        return not armed() and lights[2].on
+    end
+    local x = 40
+    local outline = rgb(2764080)
+    local chrome = rgb(13225683)
+    local shine = rgb(16054008)
+    local pivot = rgb(12172995)
+    local edge = rgb(3999754)
+    local inside = rgb(7213075)
+    local function closed()
+        return view.guard <= 0.02
+    end
+    local function open()
+        return view.guard >= 0.98
+    end
+    local function turn()
+        return ease(view.guard) * GUARD_TURN
+    end
+    local function reach()
+        return GUARD_LONG * math.cos(turn())
+    end
+    local function facing()
+        return not closed() and not open() and reach() >= 0
+    end
+    local function flipped()
+        return not closed() and not open() and reach() < 0
+    end
+    local function seen()
+        return math.max(
+            2,
+            math.floor(math.abs(reach()) + 0.5)
+        )
+    end
+    local function face()
+        local light = 0.55 + 0.45 * math.cos(turn())
+        return lcd.RGB(
+            math.floor(200 * light),
+            math.floor(38 * light),
+            math.floor(43 * light)
+        )
+    end
+    local function tip()
+        return math.floor(NUT - LEVER_LONG * (ease((view.lever + 1) / 2) * 2 - 1) + 0.5)
+    end
+    local function top()
+        return math.min(
+            tip(),
+            NUT
+        )
+    end
+    local function length()
+        return math.abs(tip() - NUT)
+    end
+    return {
+        {
+            type = "rectangle",
+            x = 16,
+            y = 5,
+            w = 146,
+            h = 31,
+            filled = true,
+            color = function() return rgb(live() and 14034990 or ((armed() or safeOn()) and AMBER or 3450963)) end
+        },
+        {
+            type = "rectangle",
+            x = 16,
+            y = 5,
+            w = 146,
+            h = 31,
+            color = EDGE
+        },
+        {
+            type = "rectangle",
+            x = 29,
+            y = 5,
+            w = 23,
+            h = 8,
+            filled = true,
+            color = inside,
+            visible = open
+        },
+        {
+            type = "rectangle",
+            x = 31,
+            y = 6,
+            w = 19,
+            h = 5,
+            filled = true,
+            color = rgb(9378078),
+            visible = open
+        },
+        {
+            type = "rectangle",
+            x = 29,
+            y = 5,
+            w = 23,
+            h = 1,
+            filled = true,
+            color = rgb(15495798),
+            visible = open
+        },
+        {
+            type = "rectangle",
+            x = 29,
+            y = 5,
+            w = 23,
+            h = 8,
+            color = edge,
+            visible = open
+        },
+        {
+            type = "rectangle",
+            x = 29,
+            y = HINGE - 7,
+            w = 23,
+            h = 8,
+            filled = true,
+            color = inside,
+            pos = function() return 29, HINGE - seen() end,
+            size = function() return 23, seen() + 1 end,
+            visible = flipped
+        },
+        {
+            type = "rectangle",
+            x = 29,
+            y = HINGE - 7,
+            w = 23,
+            h = 8,
+            color = edge,
+            pos = function() return 29, HINGE - seen() end,
+            size = function() return 23, seen() + 1 end,
+            visible = flipped
+        },
+        {
+            type = "circle",
+            x = 31,
+            y = HINGE,
+            radius = 2,
+            filled = true,
+            color = pivot,
+            visible = function() return open() or flipped() end
+        },
+        {
+            type = "circle",
+            x = 49,
+            y = HINGE,
+            radius = 2,
+            filled = true,
+            color = pivot,
+            visible = function() return open() or flipped() end
+        },
+        {
+            type = "rectangle",
+            x = 30,
+            y = 13,
+            w = 21,
+            h = 21,
+            filled = true,
+            color = rgb(1382427)
+        },
+        {
+            type = "rectangle",
+            x = 30,
+            y = 13,
+            w = 21,
+            h = 21,
+            color = rgb(3817026)
+        },
+        {
+            type = "circle",
+            x = x,
+            y = NUT,
+            radius = 6,
+            filled = true,
+            color = outline
+        },
+        {
+            type = "circle",
+            x = x,
+            y = NUT,
+            radius = 5,
+            filled = true,
+            color = rgb(12172995)
+        },
+        {
+            type = "circle",
+            x = x,
+            y = NUT,
+            radius = 3,
+            filled = true,
+            color = rgb(6120040)
+        },
+        {
+            type = "circle",
+            x = x - 2,
+            y = NUT - 2,
+            radius = 1,
+            filled = true,
+            color = shine
+        },
+        {
+            type = "rectangle",
+            x = x - 3,
+            y = NUT - 1,
+            w = 6,
+            h = LEVER_LONG + 2,
+            filled = true,
+            color = outline,
+            pos = function() return x - 3, top() - 1 end,
+            size = function() return 6, length() + 2 end,
+            visible = function() return length() >= 1 end
+        },
+        {
+            type = "rectangle",
+            x = x - 2,
+            y = NUT,
+            w = 4,
+            h = LEVER_LONG,
+            filled = true,
+            color = chrome,
+            pos = function() return x - 2, top() end,
+            size = function() return 4, length() end,
+            visible = function() return length() >= 1 end
+        },
+        {
+            type = "rectangle",
+            x = x - 1,
+            y = NUT + 2,
+            w = 1,
+            h = LEVER_LONG - 4,
+            filled = true,
+            color = shine,
+            pos = function() return x - 1, top() + 2 end,
+            size = function() return 1, length() - 4 end,
+            visible = function() return length() > 4 end
+        },
+        {
+            type = "circle",
+            x = x,
+            y = NUT + LEVER_LONG,
+            radius = 4,
+            filled = true,
+            color = outline,
+            pos = function() return x, tip() end
+        },
+        {
+            type = "circle",
+            x = x,
+            y = NUT + LEVER_LONG,
+            radius = 3,
+            filled = true,
+            color = rgb(14672871),
+            pos = function() return x, tip() end
+        },
+        {
+            type = "circle",
+            x = x - 1,
+            y = NUT + LEVER_LONG - 1,
+            radius = 1,
+            filled = true,
+            color = rgb(16777215),
+            pos = function() return x - 1, tip() - 1 end
+        },
+        {
+            type = "rectangle",
+            x = 29,
+            y = 9,
+            w = 23,
+            h = 25,
+            filled = true,
+            color = rgb(13116971),
+            visible = closed
+        },
+        {
+            type = "rectangle",
+            x = 29,
+            y = 9,
+            w = 23,
+            h = 4,
+            filled = true,
+            color = rgb(8197144),
+            visible = closed
+        },
+        {
+            type = "circle",
+            x = 31,
+            y = 11,
+            radius = 2,
+            filled = true,
+            color = pivot,
+            visible = closed
+        },
+        {
+            type = "circle",
+            x = 49,
+            y = 11,
+            radius = 2,
+            filled = true,
+            color = pivot,
+            visible = closed
+        },
+        {
+            type = "rectangle",
+            x = 38,
+            y = 14,
+            w = 5,
+            h = 18,
+            filled = true,
+            color = rgb(10689826),
+            visible = closed
+        },
+        {
+            type = "rectangle",
+            x = 39,
+            y = 14,
+            w = 3,
+            h = 18,
+            filled = true,
+            color = rgb(14170173),
+            visible = closed
+        },
+        {
+            type = "rectangle",
+            x = 31,
+            y = 14,
+            w = 2,
+            h = 18,
+            filled = true,
+            color = rgb(15696004),
+            visible = closed
+        },
+        {
+            type = "rectangle",
+            x = 29,
+            y = 32,
+            w = 23,
+            h = 2,
+            filled = true,
+            color = rgb(9378078),
+            visible = closed
+        },
+        {
+            type = "rectangle",
+            x = 29,
+            y = 9,
+            w = 23,
+            h = 25,
+            color = edge,
+            visible = closed
+        },
+        {
+            type = "rectangle",
+            x = 29,
+            y = HINGE - 2,
+            w = 23,
+            h = GUARD_LONG + 2,
+            filled = true,
+            color = face,
+            size = function() return 23, seen() + 2 end,
+            visible = facing
+        },
+        {
+            type = "rectangle",
+            x = 29,
+            y = HINGE - 2,
+            w = 23,
+            h = 3,
+            filled = true,
+            color = rgb(8197144),
+            visible = facing
+        },
+        {
+            type = "rectangle",
+            x = 29,
+            y = HINGE - 2,
+            w = 23,
+            h = GUARD_LONG + 2,
+            color = edge,
+            size = function() return 23, seen() + 2 end,
+            visible = facing
+        },
+        {
+            type = "circle",
+            x = 31,
+            y = HINGE,
+            radius = 2,
+            filled = true,
+            color = pivot,
+            visible = facing
+        },
+        {
+            type = "circle",
+            x = 49,
+            y = HINGE,
+            radius = 2,
+            filled = true,
+            color = pivot,
+            visible = facing
+        },
+        {
+            type = "circle",
+            x = x,
+            y = 9,
+            radius = 4,
+            filled = true,
+            color = outline,
+            visible = function() return closed() and view.lever > 0 end
+        },
+        {
+            type = "circle",
+            x = x,
+            y = 9,
+            radius = 3,
+            filled = true,
+            color = rgb(14672871),
+            visible = function() return closed() and view.lever > 0 end
+        },
+        {
+            type = "circle",
+            x = x - 1,
+            y = 8,
+            radius = 1,
+            filled = true,
+            color = rgb(16777215),
+            visible = function() return closed() and view.lever > 0 end
+        },
+        __TS__ObjectAssign(
+            {},
+            label(
+                106,
+                21,
+                function() return live() and "THR ON" or (armed() and "ARMED" or "SAFE") end,
+                BOLD,
+                function() return rgb(live() and 16777215 or 858642) end,
+                CENTER
+            ),
+            {visible = function() return not safeOn() end}
+        ),
+        __TS__ObjectAssign(
+            {},
+            label(
+                106,
+                16,
+                "UNARMED",
+                BOLD,
+                rgb(858642),
+                CENTER
+            ),
+            {visible = safeOn}
+        ),
+        __TS__ObjectAssign(
+            {},
+            label(
+                106,
+                29,
+                "THR ON",
+                TINSIZE,
+                rgb(858642),
+                CENTER
+            ),
+            {visible = safeOn}
+        )
+    }
 end
 function label(x, y, text, font, color, align)
     if align == nil then
@@ -326,10 +817,25 @@ function objects(widget)
             visible = function() return view.live end
         }
     }
+    __TS__ArrayPushArray(
+        list,
+        armSwitch(view)
+    )
     __TS__ArrayForEach(
         view.lights,
         function(____, light, index)
+            if index < 2 then
+                return
+            end
             local x = 16 + index * 75
+            local word = label(
+                x + 35,
+                13,
+                function() return light.word end,
+                SMLSIZE,
+                function() return light.on and rgb(light.ink) or UNLIT end,
+                CENTER
+            )
             __TS__ArrayPush(
                 list,
                 {
@@ -350,15 +856,40 @@ function objects(widget)
                     h = 17,
                     color = EDGE,
                     visible = function() return light.on end
-                },
-                label(
-                    x + 35,
-                    13,
-                    function() return light.word end,
-                    SMLSIZE,
-                    function() return light.on and rgb(light.ink) or UNLIT end,
-                    CENTER
-                )
+                }
+            )
+            if index ~= TELE_LIGHT then
+                list[#list + 1] = word
+                return
+            end
+            __TS__ArrayPush(
+                list,
+                __TS__ObjectAssign(
+                    {},
+                    word,
+                    {visible = function() return light.on end}
+                ),
+                __TS__ObjectAssign(
+                    {},
+                    label(
+                        x + 30,
+                        13,
+                        function() return light.word end,
+                        SMLSIZE,
+                        UNLIT,
+                        CENTER
+                    ),
+                    {visible = function() return not light.on end}
+                ),
+                {
+                    type = "circle",
+                    x = x + 55,
+                    y = 12,
+                    radius = 2,
+                    filled = true,
+                    color = rgb(5230987),
+                    visible = function() return not light.on end
+                }
             )
         end
     )
@@ -390,7 +921,7 @@ function objects(widget)
         list,
         label(
             44,
-            34,
+            47,
             "THROTTLE",
             TINSIZE,
             LABEL,
@@ -398,7 +929,7 @@ function objects(widget)
         ),
         label(
             108,
-            34,
+            47,
             "PITCH",
             TINSIZE,
             LABEL,
@@ -913,7 +1444,7 @@ function objects(widget)
             213,
             function()
                 if view.practice then
-                    return "PRACTICE"
+                    return view.practiceRate > 0 and ("PRACTICE " .. tostring(view.practiceRate)) .. "%" or "PRACTICE"
                 end
                 local curve = flown()
                 if not curve then
@@ -961,32 +1492,54 @@ function objects(widget)
     local function percent(value)
         return (value >= 0 and "+" or "") .. tostring(math.floor(value / 1024 * 100 + 0.5))
     end
+    local function across(value)
+        return math.floor(clamp(value, -1024, 1024) / 1024 * 18)
+    end
     __TS__ArrayPush(
         list,
         {
             type = "circle",
             x = 442,
-            y = 182,
+            y = 175,
             radius = 4,
             color = MUTED,
-            pos = function() return 442 + math.floor(clamp(view.aileron, -1024, 1024) / 1024 * 20), 182 - math.floor(clamp(view.elevator, -1024, 1024) / 1024 * 20) end
+            pos = function() return 442 + across(view.aileron), 175 - across(view.elevator) end
         },
         {
             type = "circle",
             x = 442,
-            y = 182,
+            y = 175,
             radius = 3,
             filled = true,
             color = GREEN,
-            pos = function() return 442 + math.floor(clamp(view.sentAileron, -1024, 1024) / 1024 * 20), 182 - math.floor(clamp(view.sentElevator, -1024, 1024) / 1024 * 20) end
+            pos = function() return 442 + across(view.sentAileron), 175 - across(view.sentElevator) end
+        },
+        {
+            type = "rectangle",
+            x = 441,
+            y = 197,
+            w = 3,
+            h = 10,
+            color = MUTED,
+            pos = function() return 441 + across(view.rudder), 197 end
+        },
+        {
+            type = "rectangle",
+            x = 441,
+            y = 200,
+            w = 3,
+            h = 4,
+            filled = true,
+            color = GREEN,
+            pos = function() return 441 + across(view.sentRudder), 200 end
         },
         label(
-            442,
+            464,
             213,
-            function() return (("A" .. percent(view.sentAileron)) .. " E") .. percent(view.sentElevator) end,
+            function() return (((("A" .. percent(view.sentAileron)) .. " E") .. percent(view.sentElevator)) .. " R") .. percent(view.sentRudder) end,
             TINSIZE,
             DIGITS,
-            CENTER
+            RIGHT
         )
     )
     list[#list + 1] = {
@@ -1008,11 +1561,28 @@ function update(widget, options)
     lvgl.clear()
     lvgl.build(objects(widget))
 end
+function practiceRate()
+    local lines = model.getInputsCount(0)
+    do
+        local line = 0
+        while line < lines do
+            local found = model.getInput(0, line)
+            if found ~= nil and found.name == "Prac" then
+                return found.weight
+            end
+            line = line + 1
+        end
+    end
+    return 0
+end
 local name = "Cockpit"
 --- The whole screen as a heli's instrument panel (480 × 227, under the top bar):
--- - warning lights across the top: SAFE (green) or ARMED (SA down), THR ON or OFF (SF), LEVEL (SC, self-level),
+-- - across the top: arming (SA) and the throttle (SF) as one guarded toggle in its box (the guard closed
+--   while SAFE, flipped up once ARMED, the lever up for THR ON, the box lit green, amber or red), then the warning lights:
+--   LEVEL (SC, self-level),
 --   RESCUE (SH), LOW BATT (LOW VOLT while the low-cell alarm is on, NOT FULL when the pack was not full when plugged
---   in), TELE (no telemetry); the panel turns dark yellow while the motor can spin;
+--   in), TELE (no telemetry, a green dot in its box while it comes in); the panel turns dark red while the motor
+--   can spin;
 -- - the throttle as a quadrant: a detent per idle up evenly up the gate, CUT at its foot guarded in hold, the lever at
 --   the motor output (CH3), what S1 adds to it on its knob; the pitch as a collective lever against a degree scale,
 --   at CH6;
@@ -1025,7 +1595,7 @@ local name = "Cockpit"
 --   throttle lines (FM1 to FM3, the governor's head speeds), the one SE picks lit green with what S1 adds, and over
 --   them the pitch curve flown in blue (the idle up's, CP1 to CP3, or the self-level one, CPL, while LEVEL is lit),
 --   a dot at the collective stick on the throttle and at the pitch sent, read from the model; volts a cell as a gauge;
---   and the cyclic: where the right stick is, to check it. The timers (this pack's, the sortie's) are in the top bar
+--   and the cyclic and the rudder: where the sticks are and what is sent, to check them. The timers (this pack's, the sortie's) are in the top bar
 --   (the Timers widget); this one starts the sortie's again each day.
 -- It is built from EdgeTX's LVGL objects (useLvgl): the radio keeps them on the screen and redraws only what changes,
 -- where a widget drawing with lcd calls redraws the whole screen 20 times a second. Everything that never moves is two
@@ -1066,6 +1636,7 @@ PACKS = {
 }
 --- A new pack: its voltage back after none with the mAh count at 0 (see Session).
 local NEW_PACK_MAH = 5
+TELE_LIGHT = 5
 --- Under this a cell is not full when plugged in (mAhRe's level), and the % left that lights LOW BATT.
 local FULL_CELL = 4
 LOW_FUEL = 25
@@ -1098,12 +1669,21 @@ AMBER = 16756768
 RED = 16731471
 UNLIT = rgb(5067351)
 EDGE = rgb(3816768)
-TOP = 42
+TOP = 55
 BOTTOM = 198
 clamp = function(value, low, high) return math.max(
     low,
     math.min(high, value)
 ) end
+GUARD_SWING = 0.3
+GUARD_TURN = 108.5 * math.pi / 180
+GUARD_LONG = 22
+HINGE = 12
+LEVER_FLIP = 0.15
+LEVER_LONG = 9
+NUT = 23
+ease = function(share) return share * share * (3 - 2 * share) end
+toward = function(from, to, step) return from < to and math.min(to, from + step) or math.max(to, from - step) end
 --- A LiPo cell's charge (%) at rest by its voltage: the usual table, read between its points.
 local CHARGE = {
     {3.3, 0},
@@ -1276,10 +1856,16 @@ local function create(zone, options)
             elevator = 0,
             sentAileron = 0,
             sentElevator = 0,
+            rudder = 0,
+            sentRudder = 0,
             packName = "",
             packMah = 0,
             lights = lights,
-            practice = false
+            practice = false,
+            practiceRate = 0,
+            guard = 0,
+            lever = -1,
+            swung = -1
         }
     }
     update(widget, options)

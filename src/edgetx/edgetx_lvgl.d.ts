@@ -14,6 +14,8 @@ declare interface LvglObject {
   color?: LvglValue<number>;
   /** Where the object is now (x, y): the centre for a circle. */
   pos?: () => LuaMultiReturn<[number, number]>;
+  /** Its size now (w, h). */
+  size?: () => LuaMultiReturn<[number, number]>;
   visible?: () => boolean;
   /** A label's text, font (TINSIZE, SMLSIZE...) and alignment in its box (CENTER, RIGHT, which need `w`). */
   text?: LvglValue<string>;

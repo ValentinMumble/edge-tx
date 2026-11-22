@@ -9,8 +9,10 @@ declare module model {
   function deleteFlightModes(): void;
   function getFlightMode(): void;
   function setFlightMode(): void;
-  function getInputsCount(): void;
-  function getInput(): void;
+  /** How many lines an input has. */
+  function getInputsCount(input: number): number;
+  /** One line of an input (both from 0), or nil past its last. */
+  function getInput(input: number, line: number): InputLine | undefined;
   function insertInput(): void;
   function deleteInput(): void;
   function deleteInputs(): void;
@@ -32,6 +34,13 @@ declare module model {
   function setGlobalVariable(gv: number, fm: number, value: number): void;
   function getSensor(): void;
   function resetSensor(): void;
+}
+
+/** An input line as model.getInput gives it: the part the widgets read. */
+declare interface InputLine {
+  name: string;
+  /** % of the source, -100 to 100. */
+  weight: number;
 }
 
 /** A curve as model.getCurve gives it: y (and a custom curve's x, ends included) from -100 to 100, from 1 in Lua. */

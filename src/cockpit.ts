@@ -2,9 +2,12 @@ const name = 'Cockpit';
 
 /**
  * The whole screen as a heli's instrument panel (480 × 227, under the top bar):
- * - warning lights across the top: SAFE (green) or ARMED (SA down), THR ON or OFF (SF), LEVEL (SC, self-level),
+ * - across the top: arming (SA) and the throttle (SF) as one guarded toggle in its box (the guard closed
+ *   while SAFE, flipped up once ARMED, the lever up for THR ON, the box lit green, amber or red), then the warning lights:
+ *   LEVEL (SC, self-level),
  *   RESCUE (SH), LOW BATT (LOW VOLT while the low-cell alarm is on, NOT FULL when the pack was not full when plugged
- *   in), TELE (no telemetry); the panel turns dark yellow while the motor can spin;
+ *   in), TELE (no telemetry, a green dot in its box while it comes in); the panel turns dark red while the motor
+ *   can spin;
  * - the throttle as a quadrant: a detent per idle up evenly up the gate, CUT at its foot guarded in hold, the lever at
  *   the motor output (CH3), what S1 adds to it on its knob; the pitch as a collective lever against a degree scale,
  *   at CH6;
@@ -17,7 +20,7 @@ const name = 'Cockpit';
  *   throttle lines (FM1 to FM3, the governor's head speeds), the one SE picks lit green with what S1 adds, and over
  *   them the pitch curve flown in blue (the idle up's, CP1 to CP3, or the self-level one, CPL, while LEVEL is lit),
  *   a dot at the collective stick on the throttle and at the pitch sent, read from the model; volts a cell as a gauge;
- *   and the cyclic: where the right stick is, to check it. The timers (this pack's, the sortie's) are in the top bar
+ *   and the cyclic and the rudder: where the sticks are and what is sent, to check them. The timers (this pack's, the sortie's) are in the top bar
  *   (the Timers widget); this one starts the sortie's again each day.
  * It is built from EdgeTX's LVGL objects (useLvgl): the radio keeps them on the screen and redraws only what changes,
  * where a widget drawing with lcd calls redraws the whole screen 20 times a second. Everything that never moves is two
@@ -53,16 +56,30 @@ type View = {
   degrees: number;
   /** The pitch sent (CH6, -100 to 100 %). */
   collective: number;
-  /** The right stick, and the aileron and elevator sent (CH1, CH2: after rates and expo), -1024 to 1024. */
+  /**
+   * The right stick and the left one across, and the aileron, elevator and rudder sent (CH1, CH2, CH4: after rates and
+   * expo), -1024 to 1024.
+   */
   aileron: number;
   elevator: number;
+  rudder: number;
   sentAileron: number;
   sentElevator: number;
+  sentRudder: number;
   packName: string;
   packMah: number;
   lights: Light[];
   /** Practice rates on (SD down, practice_rates.py): calmer cyclic and rudder, the gentler pitch curve CPP. */
   practice: boolean;
+  /** The practice rates' share of the cyclic, %, while they are on (0 when the model does not say). */
+  practiceRate: number;
+  /**
+   * The arming switch as drawn, moving towards what SA and SF say (swing): its guard from closed (0) to open (1), its
+   * lever from down (-1) to up (1), and when they last moved (getTime, -1 before the first look).
+   */
+  guard: number;
+  lever: number;
+  swung: number;
 };
 type Widget = {
   zone: Zone;
@@ -101,6 +118,8 @@ const PACKS = [
 ];
 /** A new pack: its voltage back after none with the mAh count at 0 (see Session). */
 const NEW_PACK_MAH = 5;
+/** The warning light that is TELE, from 0. */
+const TELE_LIGHT = 5;
 /** Under this a cell is not full when plugged in (mAhRe's level), and the % left that lights LOW BATT. */
 const FULL_CELL = 4.0;
 const LOW_FUEL = 25;
@@ -139,7 +158,7 @@ const UNLIT = rgb(0x4d5257);
 const EDGE = rgb(0x3a3d40);
 
 /** The lever gates run from y 42 (top) to 198 (bottom), as in the panel picture. */
-const TOP = 42;
+const TOP = 55;
 const BOTTOM = 198;
 
 /**
@@ -151,6 +170,24 @@ function output(index: number): number {
   return model.getOutput(index)?.revert === 1 ? -value : value;
 }
 const clamp = (value: number, low: number, high: number) => math.max(low, math.min(high, value));
+
+/**
+ * The arming switch's moves (swing, armSwitch): the guard swings open or shut in GUARD_SWING s, turning GUARD_TURN
+ * radians on its hinge (y HINGE), GUARD_LONG px long; the lever flips in LEVER_FLIP s, its ball LEVER_LONG px from the
+ * nut's centre (y NUT).
+ */
+const GUARD_SWING = 0.3;
+const GUARD_TURN = (108.5 * math.pi) / 180;
+const GUARD_LONG = 22;
+const HINGE = 12;
+const LEVER_FLIP = 0.15;
+const LEVER_LONG = 9;
+const NUT = 23;
+/** Slow in, slow out: a share of a move (0 to 1) as drawn. */
+const ease = (share: number) => share * share * (3 - 2 * share);
+/** A step from `from` towards `to`, at most `step`. */
+const toward = (from: number, to: number, step: number) =>
+  from < to ? math.min(to, from + step) : math.max(to, from - step);
 
 /** The 6-position button pressed (1 to 6): the buttons read -1024 to 1024 in six steps. */
 function button(): number {
@@ -297,6 +334,7 @@ function look(widget: Widget): void {
   // The pitch curve flown, as the model's pitch lines pick it: the self-level one while LEVEL is lit (SC), else the
   // practice one while SD is down, else the idle up's (the Coll lines).
   view.practice = getValue('sd') >= 1024;
+  view.practiceRate = view.practice ? practiceRate() : 0;
   view.curve = getValue('sc') >= 1024 ? 'CPL' : view.practice ? 'CPP' : `CP${view.idle}`;
   view.stick = getValue('thr');
   view.throttle = ((output(2) + 1024) / 2048) * 100;
@@ -306,6 +344,8 @@ function look(widget: Widget): void {
   view.elevator = getValue('ele');
   view.sentAileron = output(0);
   view.sentElevator = output(1);
+  view.rudder = getValue('rud');
+  view.sentRudder = output(3);
 
   // SAFE lit green while disarmed, ARMED amber; THR ON amber while the throttle is on (out of hold), THR OFF dark in
   // hold; LEVEL blue with white letters, as the flight mode tile in the top bar, while self-level is on.
@@ -327,7 +367,8 @@ function look(widget: Widget): void {
   if (view.powered && getTime() - widget.sagAt < ALARM_EVERY) set(4, 'LOW VOLT', true, RED);
   else if (widget.notFull && view.left >= LOW_FUEL) set(4, 'NOT FULL', true, AMBER);
   else set(4, 'LOW BATT', view.powered && view.left < LOW_FUEL, RED);
-  set(5, 'TELE', getValue('RSSI') <= 0, 0x8a1c20, 0xffffff);
+  set(TELE_LIGHT, 'TELE', getValue('RSSI') <= 0, 0x8a1c20, 0xffffff);
+  swing(view, armed);
 }
 
 /** A point at `radius` from a centre, at `angle` degrees clockwise from 12 o'clock. */
@@ -342,6 +383,243 @@ function at(centerX: number, centerY: number, radius: number, angle: number): [n
 /** EdgeTX's line heights on the TX16S (its fonts' line_height): a label's box is this tall. */
 function lineHeight(font: number): number {
   return font === TINSIZE ? 12 : font === SMLSIZE ? 17 : font === BOLD ? 20 : 21;
+}
+
+/**
+ * Moves the arming switch as drawn towards what SA and SF say, by the time since the last look: the guard open while
+ * armed, the lever up while the throttle is on. At once on the first look, or after a gap (the screen hidden): it
+ * opens as things are, not replaying a move.
+ */
+function swing(view: View, armed: boolean): void {
+  const now = getTime();
+  const guard = armed ? 1 : 0;
+  const lever = view.lights[1].on ? 1 : -1;
+  const seconds = (now - view.swung) / 100;
+  if (view.swung < 0 || seconds > 0.5) {
+    view.guard = guard;
+    view.lever = lever;
+  } else {
+    view.guard = toward(view.guard, guard, seconds / GUARD_SWING);
+    view.lever = toward(view.lever, lever, (2 * seconds) / LEVER_FLIP);
+  }
+  view.swung = now;
+}
+
+/**
+ * Arming (SA) and the throttle (SF) as one guarded toggle switch, as on an aircraft's switch panel, in its box across
+ * the top left, the box lit as a warning light: green SAFE, amber ARMED, red THR ON (the motor can spin). On a black
+ * plate, a chrome bat lever on its nut, up ON (throttle on), down OFF; the red guard closed over it while SAFE (its
+ * hinge bar and pivots on top, a ridge down its middle), flipped up off it once ARMED; disarmed with the throttle on,
+ * UNARMED with THR ON small under it, in amber, not safe, the lever's ball peeking over the closed guard. The word
+ * after it. The guard swings and the lever flips (swing): the guard turns on its hinge towards the eye, its face
+ * shortening and darkening, edge-on halfway, then its inside rising above the hinge; the lever's bat shortens into the
+ * nut and grows out of its other side. Only rectangles, circles and labels, shown, hidden, moved and sized.
+ */
+function armSwitch(view: View): LvglObject[] {
+  const lights = view.lights;
+  const armed = () => lights[0].word === 'ARMED';
+  const live = () => armed() && lights[1].on;
+  const safeOn = () => !armed() && lights[1].on;
+  const x = 40;
+  const outline = rgb(0x2a2d30);
+  const chrome = rgb(0xc9ced3);
+  const shine = rgb(0xf4f6f8);
+  const pivot = rgb(0xb9bec3);
+  const edge = rgb(0x3d080a);
+  const inside = rgb(0x6e1013);
+  // The guard as drawn: closed, open, or on its way, facing the eye (before edge-on) or flipped (past it), so many px
+  // of it seen.
+  const closed = () => view.guard <= 0.02;
+  const open = () => view.guard >= 0.98;
+  const turn = () => ease(view.guard) * GUARD_TURN;
+  const reach = () => GUARD_LONG * math.cos(turn());
+  const facing = () => !closed() && !open() && reach() >= 0;
+  const flipped = () => !closed() && !open() && reach() < 0;
+  const seen = () => math.max(2, math.floor(math.abs(reach()) + 0.5));
+  // Its face darkens as it turns from the light.
+  const face = () => {
+    const light = 0.55 + 0.45 * math.cos(turn());
+    return lcd.RGB(math.floor(0xc8 * light), math.floor(0x26 * light), math.floor(0x2b * light));
+  };
+  // The lever's ball, under the nut (down) to over it (up), through it as it flips; its bat between.
+  const tip = () => math.floor(NUT - LEVER_LONG * (ease((view.lever + 1) / 2) * 2 - 1) + 0.5);
+  const top = () => math.min(tip(), NUT);
+  const length = () => math.abs(tip() - NUT);
+  return [
+    {
+      type: 'rectangle',
+      x: 16,
+      y: 5,
+      w: 146,
+      h: 31,
+      filled: true,
+      // Annunciator colours: a true green, the panel's amber, a deep red.
+      color: () => rgb(live() ? 0xd6282e : armed() || safeOn() ? AMBER : 0x34a853),
+    },
+    {type: 'rectangle', x: 16, y: 5, w: 146, h: 31, color: EDGE},
+    // The guard flipped up off the switch, its inside seen, hinged at the plate's top.
+    {type: 'rectangle', x: 29, y: 5, w: 23, h: 8, filled: true, color: inside, visible: open},
+    {type: 'rectangle', x: 31, y: 6, w: 19, h: 5, filled: true, color: rgb(0x8f191e), visible: open},
+    {type: 'rectangle', x: 29, y: 5, w: 23, h: 1, filled: true, color: rgb(0xec7276), visible: open},
+    {type: 'rectangle', x: 29, y: 5, w: 23, h: 8, color: edge, visible: open},
+    // Swinging, past edge-on: its inside, rising above the hinge, behind the lever as when open.
+    {
+      type: 'rectangle',
+      x: 29,
+      y: HINGE - 7,
+      w: 23,
+      h: 8,
+      filled: true,
+      color: inside,
+      pos: () => $multi(29, HINGE - seen()),
+      size: () => $multi(23, seen() + 1),
+      visible: flipped,
+    },
+    {
+      type: 'rectangle',
+      x: 29,
+      y: HINGE - 7,
+      w: 23,
+      h: 8,
+      color: edge,
+      pos: () => $multi(29, HINGE - seen()),
+      size: () => $multi(23, seen() + 1),
+      visible: flipped,
+    },
+    {type: 'circle', x: 31, y: HINGE, radius: 2, filled: true, color: pivot, visible: () => open() || flipped()},
+    {type: 'circle', x: 49, y: HINGE, radius: 2, filled: true, color: pivot, visible: () => open() || flipped()},
+    // The black plate, the nut, the lever.
+    {type: 'rectangle', x: 30, y: 13, w: 21, h: 21, filled: true, color: rgb(0x15181b)},
+    {type: 'rectangle', x: 30, y: 13, w: 21, h: 21, color: rgb(0x3a3e42)},
+    {type: 'circle', x, y: NUT, radius: 6, filled: true, color: outline},
+    {type: 'circle', x, y: NUT, radius: 5, filled: true, color: rgb(0xb9bec3)},
+    {type: 'circle', x, y: NUT, radius: 3, filled: true, color: rgb(0x5d6268)},
+    {type: 'circle', x: x - 2, y: NUT - 2, radius: 1, filled: true, color: shine},
+    {
+      type: 'rectangle',
+      x: x - 3,
+      y: NUT - 1,
+      w: 6,
+      h: LEVER_LONG + 2,
+      filled: true,
+      color: outline,
+      pos: () => $multi(x - 3, top() - 1),
+      size: () => $multi(6, length() + 2),
+      visible: () => length() >= 1,
+    },
+    {
+      type: 'rectangle',
+      x: x - 2,
+      y: NUT,
+      w: 4,
+      h: LEVER_LONG,
+      filled: true,
+      color: chrome,
+      pos: () => $multi(x - 2, top()),
+      size: () => $multi(4, length()),
+      visible: () => length() >= 1,
+    },
+    {
+      type: 'rectangle',
+      x: x - 1,
+      y: NUT + 2,
+      w: 1,
+      h: LEVER_LONG - 4,
+      filled: true,
+      color: shine,
+      pos: () => $multi(x - 1, top() + 2),
+      size: () => $multi(1, length() - 4),
+      visible: () => length() > 4,
+    },
+    {type: 'circle', x, y: NUT + LEVER_LONG, radius: 4, filled: true, color: outline, pos: () => $multi(x, tip())},
+    {
+      type: 'circle',
+      x,
+      y: NUT + LEVER_LONG,
+      radius: 3,
+      filled: true,
+      color: rgb(0xdfe3e7),
+      pos: () => $multi(x, tip()),
+    },
+    {
+      type: 'circle',
+      x: x - 1,
+      y: NUT + LEVER_LONG - 1,
+      radius: 1,
+      filled: true,
+      color: rgb(0xffffff),
+      pos: () => $multi(x - 1, tip() - 1),
+    },
+    // The guard closed over it all: a red cap, its hinge bar and pivots, a ridge, a shine, a lip.
+    {type: 'rectangle', x: 29, y: 9, w: 23, h: 25, filled: true, color: rgb(0xc8262b), visible: closed},
+    {type: 'rectangle', x: 29, y: 9, w: 23, h: 4, filled: true, color: rgb(0x7d1418), visible: closed},
+    {type: 'circle', x: 31, y: 11, radius: 2, filled: true, color: pivot, visible: closed},
+    {type: 'circle', x: 49, y: 11, radius: 2, filled: true, color: pivot, visible: closed},
+    {type: 'rectangle', x: 38, y: 14, w: 5, h: 18, filled: true, color: rgb(0xa31d22), visible: closed},
+    {type: 'rectangle', x: 39, y: 14, w: 3, h: 18, filled: true, color: rgb(0xd8383d), visible: closed},
+    {type: 'rectangle', x: 31, y: 14, w: 2, h: 18, filled: true, color: rgb(0xef8084), visible: closed},
+    {type: 'rectangle', x: 29, y: 32, w: 23, h: 2, filled: true, color: rgb(0x8f191e), visible: closed},
+    {type: 'rectangle', x: 29, y: 9, w: 23, h: 25, color: edge, visible: closed},
+    // Swinging, before edge-on: its face, shortening and darkening, over the lever, its hinge bar and pivots on top.
+    {
+      type: 'rectangle',
+      x: 29,
+      y: HINGE - 2,
+      w: 23,
+      h: GUARD_LONG + 2,
+      filled: true,
+      color: face,
+      size: () => $multi(23, seen() + 2),
+      visible: facing,
+    },
+    {type: 'rectangle', x: 29, y: HINGE - 2, w: 23, h: 3, filled: true, color: rgb(0x7d1418), visible: facing},
+    {
+      type: 'rectangle',
+      x: 29,
+      y: HINGE - 2,
+      w: 23,
+      h: GUARD_LONG + 2,
+      color: edge,
+      size: () => $multi(23, seen() + 2),
+      visible: facing,
+    },
+    {type: 'circle', x: 31, y: HINGE, radius: 2, filled: true, color: pivot, visible: facing},
+    {type: 'circle', x: 49, y: HINGE, radius: 2, filled: true, color: pivot, visible: facing},
+    // Closed with the lever up (disarmed, throttle on): not safe, the lever's ball peeking over the guard.
+    {type: 'circle', x, y: 9, radius: 4, filled: true, color: outline, visible: () => closed() && view.lever > 0},
+    {
+      type: 'circle',
+      x,
+      y: 9,
+      radius: 3,
+      filled: true,
+      color: rgb(0xdfe3e7),
+      visible: () => closed() && view.lever > 0,
+    },
+    {
+      type: 'circle',
+      x: x - 1,
+      y: 8,
+      radius: 1,
+      filled: true,
+      color: rgb(0xffffff),
+      visible: () => closed() && view.lever > 0,
+    },
+    {
+      ...label(
+        106,
+        21,
+        () => (live() ? 'THR ON' : armed() ? 'ARMED' : 'SAFE'),
+        BOLD,
+        () => rgb(live() ? 0xffffff : 0x0d1a12),
+        CENTER,
+      ),
+      visible: () => !safeOn(),
+    },
+    // UNARMED, and THR ON small under it.
+    {...label(106, 16, 'UNARMED', BOLD, rgb(0x0d1a12), CENTER), visible: safeOn},
+    {...label(106, 29, 'THR ON', TINSIZE, rgb(0x0d1a12), CENTER), visible: safeOn},
+  ];
 }
 
 /**
@@ -459,25 +737,39 @@ function readCurves(): Record<string, Curve> {
 function objects(widget: Widget): LvglObject[] {
   const view = widget.view;
   const list: LvglObject[] = [
-    // The panel's fixed parts, grey, or dark yellow while live (armed, throttle on: the motor can spin).
+    // The panel's fixed parts, grey, or dark red while live (armed, throttle on: the motor can spin).
     {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/Cockpit/panel.png'},
     {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/Cockpit/panel-live.png', visible: () => view.live},
   ];
 
   // The warning lights: their boxes are in the panel picture, dark; a lit light fills its own.
+  // TELE's box holds a green dot while telemetry comes in (its light dark then): the word and the dot centred
+  // together, the word alone centred once it lights.
+  // Arming and the throttle: one guarded switch across the first two lights' boxes.
+  list.push(...armSwitch(view));
   view.lights.forEach((light, index) => {
+    if (index < 2) return;
     const x = 16 + index * 75;
+    const word = label(
+      x + 35,
+      13,
+      () => light.word,
+      SMLSIZE,
+      () => (light.on ? rgb(light.ink) : UNLIT),
+      CENTER,
+    );
     list.push(
       {type: 'rectangle', x, y: 5, w: 71, h: 17, filled: true, color: () => rgb(light.color), visible: () => light.on},
       {type: 'rectangle', x, y: 5, w: 71, h: 17, color: EDGE, visible: () => light.on},
-      label(
-        x + 35,
-        13,
-        () => light.word,
-        SMLSIZE,
-        () => (light.on ? rgb(light.ink) : UNLIT),
-        CENTER,
-      ),
+    );
+    if (index !== TELE_LIGHT) {
+      list.push(word);
+      return;
+    }
+    list.push(
+      {...word, visible: () => light.on},
+      {...label(x + 30, 13, () => light.word, SMLSIZE, UNLIT, CENTER), visible: () => !light.on},
+      {type: 'circle', x: x + 55, y: 12, radius: 2, filled: true, color: rgb(0x4fd18b), visible: () => !light.on},
     );
   });
 
@@ -497,8 +789,8 @@ function objects(widget: Widget): LvglObject[] {
     return BOTTOM;
   };
   list.push(
-    label(44, 34, 'THROTTLE', TINSIZE, LABEL, CENTER),
-    label(108, 34, 'PITCH', TINSIZE, LABEL, CENTER),
+    label(44, 47, 'THROTTLE', TINSIZE, LABEL, CENTER),
+    label(108, 47, 'PITCH', TINSIZE, LABEL, CENTER),
     label(26, stopY(0) - 5, 'CUT', TINSIZE, rgb(RED), RIGHT),
   );
   idles.forEach((level, index) => {
@@ -732,7 +1024,7 @@ function objects(widget: Widget): LvglObject[] {
       363,
       213,
       () => {
-        if (view.practice) return 'PRACTICE';
+        if (view.practice) return view.practiceRate > 0 ? `PRACTICE ${view.practiceRate}%` : 'PRACTICE';
         const curve = flown();
         if (!curve) return 'no curve';
         let most = 0;
@@ -761,36 +1053,50 @@ function objects(widget: Widget): LvglObject[] {
   );
 
   // The cyclic: a ring where the right stick is, a dot where the aileron and elevator sent put it (after rates and
-  // expo, so in practice the dot trails the ring and stops short of the edge), the values sent under it (its box,
-  // cross and ring are in the panel picture).
+  // expo, so in practice the dot trails the ring and stops short of the edge). The rudder under it, the same way
+  // across its track: a mark where the left stick is, a bar where the rudder sent puts it. The values sent under them
+  // (the box, its cross and ring, and the rudder's track are in the panel picture).
   const percent = (value: number) => `${value >= 0 ? '+' : ''}${math.floor((value / 1024) * 100 + 0.5)}`;
+  // A stick's travel from the middle, px: the box is 42 px square, its centre at (442, 175).
+  const across = (value: number) => math.floor((clamp(value, -1024, 1024) / 1024) * 18);
   list.push(
     {
       type: 'circle',
       x: 442,
-      y: 182,
+      y: 175,
       radius: 4,
       color: MUTED,
-      pos: () =>
-        $multi(
-          442 + math.floor((clamp(view.aileron, -1024, 1024) / 1024) * 20),
-          182 - math.floor((clamp(view.elevator, -1024, 1024) / 1024) * 20),
-        ),
+      pos: () => $multi(442 + across(view.aileron), 175 - across(view.elevator)),
     },
     {
       type: 'circle',
       x: 442,
-      y: 182,
+      y: 175,
       radius: 3,
       filled: true,
       color: GREEN,
-      pos: () =>
-        $multi(
-          442 + math.floor((clamp(view.sentAileron, -1024, 1024) / 1024) * 20),
-          182 - math.floor((clamp(view.sentElevator, -1024, 1024) / 1024) * 20),
-        ),
+      pos: () => $multi(442 + across(view.sentAileron), 175 - across(view.sentElevator)),
     },
-    label(442, 213, () => `A${percent(view.sentAileron)} E${percent(view.sentElevator)}`, TINSIZE, DIGITS, CENTER),
+    {type: 'rectangle', x: 441, y: 197, w: 3, h: 10, color: MUTED, pos: () => $multi(441 + across(view.rudder), 197)},
+    {
+      type: 'rectangle',
+      x: 441,
+      y: 200,
+      w: 3,
+      h: 4,
+      filled: true,
+      color: GREEN,
+      pos: () => $multi(441 + across(view.sentRudder), 200),
+    },
+    // Ending at the box's right edge, so a long line grows left, away from the corner screw.
+    label(
+      464,
+      213,
+      () => `A${percent(view.sentAileron)} E${percent(view.sentElevator)} R${percent(view.sentRudder)}`,
+      TINSIZE,
+      DIGITS,
+      RIGHT,
+    ),
   );
   // Practice rates on (SD down): a blue frame round the whole screen.
   list.push({type: 'rectangle', x: 0, y: 0, w: 480, h: 227, thickness: 3, color: BLUE, visible: () => view.practice});
@@ -834,10 +1140,16 @@ function create(zone: Zone, options: Options): Widget {
       elevator: 0,
       sentAileron: 0,
       sentElevator: 0,
+      rudder: 0,
+      sentRudder: 0,
       packName: '',
       packMah: 0,
       lights,
       practice: false,
+      practiceRate: 0,
+      guard: 0,
+      lever: -1,
+      swung: -1,
     },
   };
   update(widget, options);
@@ -855,6 +1167,19 @@ function update(widget: Widget, options: Options): void {
 
 function background(widget: Widget): void {
   follow(widget);
+}
+
+/**
+ * The practice rates' share of the cyclic, %: the weight of the aileron input's practice line (practice_rates.py names
+ * it Prac), else 0. Read while practice is on: the sim changes it with its own rates.
+ */
+function practiceRate() {
+  const lines = model.getInputsCount(0);
+  for (let line = 0; line < lines; line++) {
+    const found = model.getInput(0, line);
+    if (found !== undefined && found.name === 'Prac') return found.weight;
+  }
+  return 0;
 }
 
 function refresh(widget: Widget): void {

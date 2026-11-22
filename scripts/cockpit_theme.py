@@ -5,7 +5,8 @@ EdgeTX draws the top bar in the theme's SECONDARY1 with PRIMARY2 text, and every
 way round: PRIMARY2 with SECONDARY1 text. Concrete is a light grey bar with dark text, so its menus are dark with light
 text, and a dark bar alone left them near black on dark grey. Cockpit takes Concrete's greys in the arrangement of FM2M
 Vineyard (a dark top bar with light text, light controls with dark text, dark pages): SECONDARY1 near black, PRIMARY2
-light grey. What sits on PRIMARY2's light text needs to be dark in turn: the focused control (blue), a value being
+light grey. What sits on PRIMARY2's light text needs to be dark in turn: the focused control and the EdgeTX logo in
+the top bar (a muted orange, 4.3:1 with the light text), a value being
 edited (dark red), a row that is on, a sensor receiving data say (dark green, Concrete's was light grey under light
 text).
 
@@ -35,7 +36,7 @@ colors:
  SECONDARY1: 0x161616
  SECONDARY2: 0x505050
  SECONDARY3: 0x303030
- FOCUS:      0x2F5F8F
+ FOCUS:      0x804B17
  EDIT:       0x7A2E2E
  ACTIVE:     0x1F4A2C
  WARNING:    0x404040

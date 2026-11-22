@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
  * The Cockpit widget's panel: everything on it that never moves, drawn once here into two full-screen pictures the
- * widget pastes each frame, grey, and dark yellow while the motor can spin. Pasting one picture costs the radio far
+ * widget pastes each frame, grey, and dark red while the motor can spin. Pasting one picture costs the radio far
  * less than drawing these hundred-odd shapes 20 times a second: the panel and its screws, the warning lights' boxes, the
  * lever gates with their notches and the pitch scale's ticks, the gauges' faces (rim, coloured bands, ticks) and
- * windows, the digital windows' frames, the data plate and the cyclic box. The widget draws what moves, and all the
+ * windows, the digital windows' frames, the data plate, the cyclic box and the rudder's track. The widget draws what moves, and all the
  * text, in the radio's own font.
  *
  * The K110S's cockpit (src/k110s-cockpit.ts) is the same panel, so nothing moves when switching models, with two
@@ -94,7 +94,7 @@ const PANELS = [
 ];
 
 /** The lever gates run from y 42 (top) to 198 (bottom): five throttle stops and nine pitch ticks, evenly spaced. */
-const TOP = 42;
+const TOP = 55;
 const BOTTOM = 198;
 const stopY = index => Math.floor(BOTTOM - (index / 4) * (BOTTOM - TOP));
 const tickY = index => Math.floor(BOTTOM - (index / 8) * (BOTTOM - TOP));
@@ -288,15 +288,18 @@ function draw(inside, {gauges, tiles}) {
   ])
     screw(panel, x, y);
 
-  // The six warning lights' boxes, dark: the widget fills a lit one.
-  for (let index = 0; index < 6; index += 1) {
+  // The arming switch's box across the first two lights' places: the widget lights it and draws the switch.
+  panel.fill(16, 5, 146, 31, 0x0e0f10);
+  panel.frame(16, 5, 146, 31, EDGE);
+  // The other warning lights' boxes, dark: the widget fills a lit one.
+  for (let index = 2; index < 6; index += 1) {
     panel.fill(16 + index * 75, 5, 71, 17, 0x0e0f10);
     panel.frame(16 + index * 75, 5, 71, 17, EDGE);
   }
 
   // The levers' box, the throttle's slot with CUT at its foot and a notch per idle up, the pitch's slot and scale.
-  panel.fill(12, 27, 128, 194, 0x08090a);
-  panel.frame(12, 27, 128, 194, 0x2a2d30);
+  panel.fill(12, 40, 128, 181, 0x08090a);
+  panel.frame(12, 40, 128, 181, 0x2a2d30);
   panel.fill(40, TOP, 8, BOTTOM - TOP, SLOT);
   panel.frame(39, TOP - 1, 10, BOTTOM - TOP + 2, EDGE);
   panel.fill(40, stopY(0) - 14, 8, 14, 0x5c1a1f);
@@ -337,12 +340,16 @@ function draw(inside, {gauges, tiles}) {
   panel.dotted(325, 157, 401, 157, EDGE);
   panel.dotted(363, 113, 363, 201, EDGE);
 
-  // The cyclic's box: its cross, dotted, and the ring at the stick's centre.
-  panel.fill(418, 158, 48, 48, SLOT);
-  panel.frame(418, 158, 48, 48, EDGE);
-  panel.dotted(442, 160, 442, 204, EDGE);
-  panel.dotted(420, 182, 464, 182, EDGE);
-  panel.ring(442, 182, 10, 0x2a2d30);
+  // The cyclic's box: its cross, dotted, and the ring at the stick's centre. The rudder's track under it, its middle
+  // marked.
+  panel.fill(421, 154, 42, 42, SLOT);
+  panel.frame(421, 154, 42, 42, EDGE);
+  panel.dotted(442, 156, 442, 194, EDGE);
+  panel.dotted(423, 175, 461, 175, EDGE);
+  panel.ring(442, 175, 9, 0x2a2d30);
+  panel.fill(421, 199, 42, 6, SLOT);
+  panel.frame(421, 199, 42, 6, EDGE);
+  panel.fill(442, 200, 1, 4, EDGE);
   return panel;
 }
 
@@ -381,10 +388,10 @@ const widgets = join(dirname(fileURLToPath(import.meta.url)), '..', 'sd-card', '
 for (const spec of PANELS) {
   const folder = join(widgets, spec.folder);
   mkdirSync(folder, {recursive: true});
-  // The panel grey, and dark yellow while live (armed, throttle on), as ARMED and THR ON.
+  // The panel grey, and dark red while live (armed, throttle on), as the switch's THR ON.
   for (const [file, inside] of [
     ['panel', 0x0c0d0e],
-    ['panel-live', 0x3a2c06],
+    ['panel-live', 0x3d0c0f],
   ]) {
     writeFileSync(join(folder, `${file}.png`), png(draw(inside, spec).rgb565()));
   }
