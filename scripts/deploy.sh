@@ -62,6 +62,7 @@ python3 -I "$here/k110s_picture.py" "$card" "$backup/IMAGES"
 python3 -I "$here/m2evo_failsafe.py" "$card/MODELS/model20.yml"
 cp -X "$repo/sd-card/MODELS/M2_EVO.txt" "$repo/sd-card/MODELS/K110S.txt" "$card/MODELS/"
 python3 -I "$here/checklists.py" "$card"
+python3 -I "$here/checklists_off.py" "$card"
 python3 -I "$here/inactivity_alarm.py" "$card"
 python3 -I "$here/practice_rates.py" "$card"
 

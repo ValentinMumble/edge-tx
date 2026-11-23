@@ -22,7 +22,7 @@ timers:
    1:
       start: 0
       swtch: "!L10"
-      value: 991
+      value: 996
       mode: ON
       countdownBeep: 0
       minuteBeep: 0
@@ -38,14 +38,14 @@ displayTrims: 0
 ignoreSensorIds: 0
 trimInc: 1
 disableThrottleWarning: 1
-displayChecklist: 1
+displayChecklist: 0
 extendedLimits: 1
 extendedTrims: 0
 throttleReversed: 0
 enableCustomThrottleWarning: 0
 disableTelemetryWarning: 0
 showInstanceIds: 0
-checklistInteractive: 1
+checklistInteractive: 0
 customThrottleWarningPosition: 0
 beepANACenter: 0
 mixData:
@@ -1103,9 +1103,6 @@ inputNames:
    5:
       val: "Coll"
 potsWarnEnabled: 1
-potsWarnPosition:
-   0:
-      val: 0
 telemetrySensors:
    0:
       id1:
@@ -1299,6 +1296,10 @@ topbarData:
                   type: Source
                   value:
                      source: ch(4)
+               2:
+                  type: Source
+                  value:
+                     source: NONE
                3:
                   type: Source
                   value:

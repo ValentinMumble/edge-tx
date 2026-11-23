@@ -102,8 +102,8 @@ speeds (`idle_ups.py`: FM1 8, FM2 20, FM3 50 % on CH3), the K110S model
 when the card has none (`k110s_model.py`), its IU1 made Low RPM and SB freed (`k110s_iu1_low.py`), its log from 3 s
 of motor on (`k110s_log.py`), its one cockpit screen (`k110s_screen.py`) and its picture cut out as the M2 EVO's
 (`k110s_picture.py`), the M2 EVO's failsafe cutting the motor on a lost link while the rest holds
-(`m2evo_failsafe.py`), each model's pre-flight checklist, ticked line by line when it loads (`sd-card/MODELS/M2_EVO.txt`
-and `K110S.txt`, `checklists.py`; the M2 EVO's also holds the sim's calibration flight plan, for now), the inactivity alarm after 10 minutes untouched (`inactivity_alarm.py`), and practice
+(`m2evo_failsafe.py`), each model's pre-flight checklist as its notes, no longer shown when it loads (`sd-card/MODELS/M2_EVO.txt`
+and `K110S.txt`, `checklists.py` then `checklists_off.py`; the M2 EVO's also holds the sim's calibration flight plan, for now), the inactivity alarm after 10 minutes untouched (`inactivity_alarm.py`), and practice
 rates on SD down for soft landings on both models: cyclic 70 %, rudder 80 %, a gentler pitch curve CPP keeping the hover
 pitch where it is (-5° to +9°, Low RPM keeping its own), "low rates" said, a blue frame and PRACTICE with its rate (the Prac lines' weight) on the cockpits
 (`practice_rates.py`). Then it
