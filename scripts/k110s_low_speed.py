@@ -11,6 +11,8 @@ import sys
 from pathlib import Path
 
 LOW = [30, 20, 20, 20, 30]
+# What k110s_low_lower.py makes of it after: 55 %.
+LATER = [20, 10, 10, 10, 20]
 
 model = Path(sys.argv[1])
 raw = model.read_bytes().decode('utf-8')
@@ -49,8 +51,8 @@ entries = re.findall(r'^   (\d+): *\n      val: (-?\d+) *\n', block, re.M)
 assert len(entries) == block.count('val:'), 'a point the script cannot read'
 points = {int(index): int(value) for index, value in entries}
 now = [points.get(first + step, 0) for step in range(5)]
-if now == LOW:
-    print(f'{model}: Low RPM is already a steady 60 %')
+if now == LOW or now == LATER:
+    print(f'{model}: Low RPM is already a steady 60 % (or lower)')
     sys.exit(0)
 for step, value in enumerate(LOW):
     points[first + step] = value

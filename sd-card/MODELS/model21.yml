@@ -1,17 +1,17 @@
 semver: 2.12.5
-header:
+header: 
    name: "K110S"
-   modelId:
+   modelId: 
       0:
-         val: 4
+         val: 1
    bitmap: "K110S.png"
    labels: "Favorites"
-timers:
+timers: 
    0:
       start: 240
       swtch: "!L10"
       value: 0
-      mode: THR_REL
+      mode: ON
       countdownBeep: 2
       minuteBeep: 1
       persistent: 0
@@ -48,7 +48,7 @@ showInstanceIds: 0
 checklistInteractive: 0
 customThrottleWarningPosition: 0
 beepANACenter: 0
-mixData:
+mixData: 
  -
    destCh: 0
    srcRaw: "I0"
@@ -95,7 +95,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L1"
-   curve:
+   curve: 
       type: 3
       value: 1
    delayUp: 0
@@ -115,7 +115,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L2"
-   curve:
+   curve: 
       type: 3
       value: 2
    delayUp: 0
@@ -135,7 +135,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L3"
-   curve:
+   curve: 
       type: 3
       value: 3
    delayUp: 0
@@ -256,8 +256,48 @@ mixData:
    flightModes: 000000000
    weight: 100
    offset: 0
-   swtch: "SD2"
-   curve:
+   swtch: "L2"
+   curve: 
+      type: 3
+      value: 6
+   delayUp: 0
+   delayDown: 0
+   speedUp: 0
+   speedDown: 0
+   name: "PitIU2"
+ -
+   destCh: 5
+   srcRaw: "I2"
+   carryTrim: 0
+   mixWarn: 0
+   mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
+   offset: 0
+   swtch: "L3"
+   curve: 
+      type: 3
+      value: 7
+   delayUp: 0
+   delayDown: 0
+   speedUp: 0
+   speedDown: 0
+   name: "PitIU3"
+ -
+   destCh: 5
+   srcRaw: "I2"
+   carryTrim: 0
+   mixWarn: 0
+   mltpx: REPL
+   delayPrec: 0
+   speedPrec: 0
+   flightModes: 000000000
+   weight: 100
+   offset: 0
+   swtch: "SG2"
+   curve: 
       type: 3
       value: 5
    delayUp: 0
@@ -277,7 +317,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L1"
-   curve:
+   curve: 
       type: 3
       value: 4
    delayUp: 0
@@ -336,7 +376,7 @@ mixData:
    speedUp: 0
    speedDown: 0
    name: "Drain"
-limitData:
+limitData: 
    0:
       min: 0
       max: 0
@@ -400,7 +440,7 @@ limitData:
       revert: 0
       curve: 0
       name: "Drain"
-expoData:
+expoData: 
  -
    mode: 3
    scale: 0
@@ -408,8 +448,8 @@ expoData:
    srcRaw: "Ail"
    weight: 70
    offset: 0
-   swtch: "SD2"
-   curve:
+   swtch: "SG2"
+   curve: 
       type: 1
       value: 35
    chn: 0
@@ -423,7 +463,7 @@ expoData:
    weight: 100
    offset: 0
    swtch: "NONE"
-   curve:
+   curve: 
       type: 1
       value: 20
    chn: 0
@@ -436,8 +476,8 @@ expoData:
    srcRaw: "Ele"
    weight: 70
    offset: 0
-   swtch: "SD2"
-   curve:
+   swtch: "SG2"
+   curve: 
       type: 1
       value: 35
    chn: 1
@@ -451,7 +491,7 @@ expoData:
    weight: 100
    offset: 0
    swtch: "NONE"
-   curve:
+   curve: 
       type: 1
       value: 20
    chn: 1
@@ -475,8 +515,8 @@ expoData:
    srcRaw: "Rud"
    weight: 80
    offset: 0
-   swtch: "SD2"
-   curve:
+   swtch: "SG2"
+   curve: 
       type: 1
       value: 30
    chn: 3
@@ -490,13 +530,13 @@ expoData:
    weight: 100
    offset: 0
    swtch: "NONE"
-   curve:
+   curve: 
       type: 1
       value: 20
    chn: 3
    flightModes: 000000000
    name: ""
-curves:
+curves: 
    0:
       type: 0
       smooth: 0
@@ -515,34 +555,44 @@ curves:
    3:
       type: 0
       smooth: 0
-      points: -3
+      points: 0
       name: "CPL"
    4:
       type: 0
       smooth: 0
       points: 0
       name: "CPP"
-points:
-   0:
-      val: 30
-   1:
-      val: 20
-   2:
-      val: 20
-   3:
-      val: 20
-   4:
-      val: 30
    5:
-      val: 70
+      type: 0
+      smooth: 0
+      points: 0
+      name: "CP2"
    6:
-      val: 60
+      type: 0
+      smooth: 0
+      points: 0
+      name: "CP3"
+points: 
+   0:
+      val: 20
+   1:
+      val: 10
+   2:
+      val: 10
+   3:
+      val: 10
+   4:
+      val: 20
+   5:
+      val: 50
+   6:
+      val: 40
    7:
-      val: 60
+      val: 40
    8:
-      val: 60
+      val: 40
    9:
-      val: 70
+      val: 50
    10:
       val: 90
    11:
@@ -554,20 +604,46 @@ points:
    14:
       val: 90
    15:
-      val: -25
+      val: -80
    16:
-      val: 100
+      val: -12
    17:
-      val: -40
+      val: 15
    18:
-      val: -15
+      val: 35
    19:
-      val: 11
+      val: 48
    20:
-      val: 43
+      val: -40
    21:
+      val: -15
+   22:
+      val: 11
+   23:
+      val: 43
+   24:
       val: 75
-logicalSw:
+   25:
+      val: -70
+   26:
+      val: -20
+   27:
+      val: 10
+   28:
+      val: 40
+   29:
+      val: 70
+   30:
+      val: -90
+   31:
+      val: -35
+   32:
+      val: 5
+   33:
+      val: 45
+   34:
+      val: 90
+logicalSw: 
    0:
       func: FUNC_VNEG
       def: "SE,0"
@@ -640,7 +716,7 @@ logicalSw:
       lsState: 0
       delay: 0
       duration: 0
-customFn:
+customFn: 
    0:
       swtch: "L5"
       func: RESET
@@ -686,11 +762,11 @@ customFn:
       func: LOGS
       def: "2,1"
    11:
-      swtch: "SD2"
+      swtch: "SG2"
       func: PLAY_TRACK
       def: "ratlow,1,1x"
 thrTraceSrc: ch(8)
-switchWarning:
+switchWarning: 
    SA:
       pos: up
    SC:
@@ -700,13 +776,13 @@ switchWarning:
    SF:
       pos: down
 rssiSource: none
-rfAlarms:
+rfAlarms: 
    warning: 45
    critical: 42
 thrTrimSw: 0
 potsWarnMode: WARN_OFF
 jitterFilter: GLOBAL
-moduleData:
+moduleData: 
    0:
       type: TYPE_MULTIMODULE
       antennaMode: MODE_PER_MODEL
@@ -714,23 +790,23 @@ moduleData:
       channelsStart: 0
       channelsCount: 16
       failsafeMode: NOPULSES
-      mod:
-         multi:
+      mod: 
+         multi: 
             disableTelemetry: 0
             disableMapping: 0
             autoBindMode: 0
             lowPowerMode: 0
             receiverTelemetryOff: 0
             receiverHigherChannels: 0
-            optionValue: 0
-trainerData:
+            optionValue: 34
+trainerData: 
    mode: MASTER_TRAINER_JACK
    channelsStart: 0
    channelsCount: -8
    frameLength: 0
    delay: 0
    pulsePol: 0
-inputNames:
+inputNames: 
    0:
       val: "Ail"
    1:
@@ -740,90 +816,90 @@ inputNames:
    3:
       val: "Rud"
 potsWarnEnabled: 0
-screenData:
+screenData: 
    0:
       LayoutId: Layout1x1
-      layoutData:
-         zones:
+      layoutData: 
+         zones: 
             0:
                widgetName: "K110Cockpit"
-               widgetData:
-                  options:
+               widgetData: 
+                  options: 
                      0:
                         type: Signed
-                        value:
+                        value: 
                            signedValue: 12
-         options:
+         options: 
             0:
                type: Bool
-               value:
+               value: 
                   boolValue: 1
             1:
                type: Bool
-               value:
+               value: 
                   boolValue: 0
             2:
                type: Bool
-               value:
+               value: 
                   boolValue: 0
             3:
                type: Bool
-               value:
+               value: 
                   boolValue: 0
             4:
                type: Bool
-               value:
+               value: 
                   boolValue: 0
-topbarData:
-   zones:
+topbarData: 
+   zones: 
       0:
          widgetName: "FMStatus"
-         widgetData:
-            options:
+         widgetData: 
+            options: 
                0:
                   type: Source
-                  value:
+                  value: 
                      source: SE
                1:
                   type: Source
-                  value:
+                  value: 
                      source: SC
                2:
                   type: Source
-                  value:
+                  value: 
                      source: ls(1)
                3:
                   type: Source
-                  value:
+                  value: 
                      source: NONE
       1:
          widgetName: "Timers"
-         widgetData:
+         widgetData: 
       4:
          widgetName: "Radio Info"
-         widgetData:
-            options:
+         widgetData: 
+            options: 
                0:
                   type: Color
-                  value:
+                  value: 
                      color: 0xF04030
                1:
                   type: Color
-                  value:
+                  value: 
                      color: 0xF8C000
                2:
                   type: Color
-                  value:
+                  value: 
                      color: 0x48AC50
       5:
          widgetName: "Date Time"
-         widgetData:
-            options:
+         widgetData: 
+            options: 
                0:
                   type: Color
-                  value:
+                  value: 
                      color: COLIDX1
-topbarWidgetWidth:
+topbarWidgetWidth: 
    0:
       val: 1
    1:

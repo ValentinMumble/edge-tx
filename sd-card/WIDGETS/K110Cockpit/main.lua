@@ -94,7 +94,7 @@ function look(widget)
     view.throttle = (output(2) + 1024) / 2048 * 100
     view.degrees = output(5) / 1024 * (widget.options.PitchRange or 12)
     view.collective = output(5) / 1024 * 100
-    view.practice = getValue("sd") >= 1024
+    view.practice = getValue("sg") >= 1024
     view.practiceRate = view.practice and practiceRate() or 0
     view.aileron = getValue("ail")
     view.elevator = getValue("ele")
@@ -1570,7 +1570,7 @@ local options = {{
     1,
     20
 }}
-MODES = {{word = "LOW", curve = "Low", fallback = 60, pitch = "CPL"}, {word = "IU2", curve = "IU2", fallback = 80}, {word = "IU3", curve = "IU3", fallback = 90}}
+MODES = {{word = "LOW", curve = "Low", fallback = 55, pitch = "CPL"}, {word = "IU2", curve = "IU2", fallback = 70, pitch = "CP2"}, {word = "IU3", curve = "IU3", fallback = 90, pitch = "CP3"}}
 LOW_TIME = 30
 rgb = function(color) return lcd.RGB(color) end
 INK = rgb(15330543)

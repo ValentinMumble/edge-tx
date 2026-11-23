@@ -106,7 +106,7 @@ function look(widget)
     view.packName = plugged.name
     view.packMah = plugged.mah
     view.mahLeft = math.floor(plugged.mah * view.left / 100 + 0.5)
-    view.practice = getValue("sd") >= 1024
+    view.practice = getValue("sg") >= 1024
     view.practiceRate = view.practice and practiceRate() or 0
     view.curve = getValue("sc") >= 1024 and "CPL" or (view.practice and "CPP" or "CP" .. tostring(view.idle))
     view.stick = getValue("thr")

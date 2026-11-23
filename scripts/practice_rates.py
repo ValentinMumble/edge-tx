@@ -12,8 +12,8 @@ SD up and in the middle fly as before.
   65 % stick until its logs say otherwise.
 - "Low rates" said when SD goes down (ratlow.wav, from the card's sounds).
 
-The radio writes the file with a space after a key that opens a block, the repo without: both are read, and it is
-written back without them (EdgeTX reads both). Skips a model already changed (deploy.sh runs every script on the radio
+The radio writes the file with a space after a key that opens a block, the repo sometimes without: both are read, and
+it is written back with them where the file had them (the other scripts look for the radio's way). Skips a model already changed (deploy.sh runs every script on the radio
 each time). Backs the files up first.
 Usage: practice_rates.py <card folder> [<backup folder>]"""
 import re
@@ -165,6 +165,11 @@ for filename, practice in PRACTICE.items():
     start, end = section(text, 'customFn')
     index = max(int(found) for found in re.findall(r'^   (\d+):', text[start:end], re.M)) + 1
     text = text[:end] + f'   {index}:\n      swtch: "{SWITCH}"\n      func: PLAY_TRACK\n      def: "{SOUND}"\n' + text[end:]
+
+    # The lines that had a space after their key keep it (the radio's way, which the scripts run before this one on the
+    # radio look for), the new ones like them too.
+    spaced = {line.rstrip(' ') for line in raw.replace('\r\n', '\n').split('\n') if line.endswith(': ')}
+    text = '\n'.join(f'{line} ' if line in spaced else line for line in text.split('\n'))
 
     if backup:
         (backup / 'MODELS').mkdir(parents=True, exist_ok=True)

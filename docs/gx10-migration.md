@@ -47,6 +47,7 @@ Both radios run EdgeTX 2.12 with the same Lua API, and the GX10 has a vibration 
 | SF hold                           | None   | 3 positions on the GX10: use its two ends                                             |
 | Arming on SA                      | Small  | SA is a momentary on the GX10: arm on SB (model, sounds, switch warning, widgets)     |
 | K110S Low RPM on SB               | Small  | SB arms on the GX10: Low RPM moves to a SW button                                     |
+| Practice rates on SG              | Small  | SG is a momentary at the back on the GX10: practice rates move to a SW button         |
 | The link                          | Small  | Internal module off, Multi FrSky X2 LBT (EU) on the external module                   |
 | Pack buttons (`6pos`, P2 in logs) | Medium | SW1 to SW6 as one group: widgets, logs and Flightdown's log import read them          |
 | Cockpit widget                    | Big    | Drawn for 480 × 227 with fixed panel pictures: a new layout for 320 × 240             |
@@ -78,7 +79,9 @@ When the radio arrives:
 - [ ] Deploy, then set SW1 to SW6 as one group, one always on.
 - [ ] Bind the M2 EVO: the R-XSR's button held while the pack goes in, then bind from the radio; its blue LED steady
       (SBUS mode).
-- [ ] Bind the K110S on Futaba S-FHSS.
+- [ ] Bind the K110S on Futaba S-FHSS: radio on, pack in, then the button on the heli's board (its light goes off; the
+      radio's Bind does nothing on S-FHSS). If it won't bind, sweep Freq tune in steps of 5 while it listens, then set
+      the middle of the range it flies in (the TX16S's module bound at 15, flew from -24 to 92, set at 34).
 - [ ] Discover the sensors, then `sensor_ids.py` so VFAS, Curr and mAh are back in their slots.
 - [ ] On the bench, blades off: arming, hold, idle ups, gyro, rescue, failsafe (no pulses), the low battery buzz, the
       logs.

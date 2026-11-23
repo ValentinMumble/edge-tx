@@ -72,7 +72,7 @@ type View = {
   rate: number;
   sortie: number;
   lights: Light[];
-  /** Practice rates on (SD down, practice_rates.py): calmer cyclic and rudder, the pitch on CPP but in Low RPM. */
+  /** Practice rates on (SG down, practice_rates.py): calmer cyclic and rudder, the pitch on CPP but in Low RPM. */
   practice: boolean;
   /** The practice rates' share of the cyclic, %, while they are on (0 when the model does not say). */
   practiceRate: number;
@@ -89,18 +89,18 @@ type Widget = {
   options: Options;
   /** The idle ups' curves, as MODES orders them. */
   shapes: Shape[];
-  /** The practice pitch curve (CPP, SD down in IU2 and IU3) across the plot. */
+  /** The practice pitch curve (CPP, SG down in IU2 and IU3) across the plot. */
   practice: [number, number][];
   /** When the curves were last read (getTime, tens of ms). */
   since: number;
   view: View;
 };
 
-/** SE up, middle, down: the curves are the model's CH3 and CH6 lines' (k110s_iu1_low.py). */
+/** SE up, middle, down: the curves are the model's CH3 and CH6 lines' (k110s_iu1_low.py, k110s_idle_pitch.py). */
 const MODES: Mode[] = [
-  {word: 'LOW', curve: 'Low', fallback: 60, pitch: 'CPL'},
-  {word: 'IU2', curve: 'IU2', fallback: 80},
-  {word: 'IU3', curve: 'IU3', fallback: 90},
+  {word: 'LOW', curve: 'Low', fallback: 55, pitch: 'CPL'},
+  {word: 'IU2', curve: 'IU2', fallback: 70, pitch: 'CP2'},
+  {word: 'IU3', curve: 'IU3', fallback: 90, pitch: 'CP3'},
 ];
 /** Under this many seconds left on the Pack timer, LOW BATT lights (it has no telemetry to tell). */
 const LOW_TIME = 30;
@@ -180,7 +180,7 @@ function look(widget: Widget): void {
   view.throttle = ((output(2) + 1024) / 2048) * 100;
   view.degrees = (output(5) / 1024) * (widget.options.PitchRange || 12);
   view.collective = (output(5) / 1024) * 100;
-  view.practice = getValue('sd') >= 1024;
+  view.practice = getValue('sg') >= 1024;
   view.practiceRate = view.practice ? practiceRate() : 0;
   view.aileron = getValue('ail');
   view.elevator = getValue('ele');
@@ -612,7 +612,7 @@ function readShapes(widget: Widget): void {
       shape.pitch = [plotAt(-100, -100), plotAt(100, 100)];
     }
   });
-  // The practice pitch line (SD down): CPP across the plot, else the stick straight.
+  // The practice pitch line (SG down): CPP across the plot, else the stick straight.
   const practice = curves.CPP;
   widget.practice = practice
     ? curveXs(practice).map((across, point) => plotAt(across, practice.y[point]))
@@ -677,7 +677,7 @@ function objects(widget: Widget): LvglObject[] {
   MODES.forEach((mode, index) => {
     const y = stopY(index + 1);
     const current = () => view.idle === index + 1 && !view.motorOff;
-    // The gate's notch is in the panel picture, its edges lit green at the idle up flown; its placard: IU2 / 80.
+    // The gate's notch is in the panel picture, its edges lit green at the idle up flown; its placard: IU2 / 70.
     list.push(
       {type: 'hline', x: 33, y: y - 3, w: 7, h: 1, color: GREEN, visible: current},
       {type: 'hline', x: 33, y: y + 3, w: 7, h: 1, color: GREEN, visible: current},
@@ -855,7 +855,7 @@ function objects(widget: Widget): LvglObject[] {
       thickness: 2,
       rounded: true,
       color: BLUE,
-      // SD down flies CPP in IU2 and IU3; Low RPM keeps its own curve.
+      // SG down flies CPP in IU2 and IU3; Low RPM keeps its own curve.
       pts: () => (view.practice && view.idle !== 1 ? widget.practice : flown().pitch),
     },
   );
@@ -970,7 +970,7 @@ function objects(widget: Widget): LvglObject[] {
       RIGHT,
     ),
   );
-  // Practice rates on (SD down): a blue frame round the whole screen.
+  // Practice rates on (SG down): a blue frame round the whole screen.
   list.push({type: 'rectangle', x: 0, y: 0, w: 480, h: 227, thickness: 3, color: BLUE, visible: () => view.practice});
   return list;
 }

@@ -10,7 +10,7 @@ M2 EVO, before flying
 CALIBRATION FLIGHT, for the sim
 SB down starts a mark, SB up ends it.
 Gone wrong: SB down-up twice, redo it.
-Before each pack: S1 mid, SD SC SB up.
+Before each pack: S1 mid, SG SC SB up.
 
 PACK 1: IU2, tail-in, hover at 1.5 m
 1 IU1, add collective, wait 3 s

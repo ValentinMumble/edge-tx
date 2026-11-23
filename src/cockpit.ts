@@ -69,7 +69,7 @@ type View = {
   packName: string;
   packMah: number;
   lights: Light[];
-  /** Practice rates on (SD down, practice_rates.py): calmer cyclic and rudder, the gentler pitch curve CPP. */
+  /** Practice rates on (SG down, practice_rates.py): calmer cyclic and rudder, the gentler pitch curve CPP. */
   practice: boolean;
   /** The practice rates' share of the cyclic, %, while they are on (0 when the model does not say). */
   practiceRate: number;
@@ -332,8 +332,8 @@ function look(widget: Widget): void {
   view.packMah = plugged.mah;
   view.mahLeft = math.floor((plugged.mah * view.left) / 100 + 0.5);
   // The pitch curve flown, as the model's pitch lines pick it: the self-level one while LEVEL is lit (SC), else the
-  // practice one while SD is down, else the idle up's (the Coll lines).
-  view.practice = getValue('sd') >= 1024;
+  // practice one while SG is down, else the idle up's (the Coll lines).
+  view.practice = getValue('sg') >= 1024;
   view.practiceRate = view.practice ? practiceRate() : 0;
   view.curve = getValue('sc') >= 1024 ? 'CPL' : view.practice ? 'CPP' : `CP${view.idle}`;
   view.stick = getValue('thr');
@@ -1098,7 +1098,7 @@ function objects(widget: Widget): LvglObject[] {
       RIGHT,
     ),
   );
-  // Practice rates on (SD down): a blue frame round the whole screen.
+  // Practice rates on (SG down): a blue frame round the whole screen.
   list.push({type: 'rectangle', x: 0, y: 0, w: 480, h: 227, thickness: 3, color: BLUE, visible: () => view.practice});
   return list;
 }

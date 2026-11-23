@@ -1,12 +1,12 @@
 semver: 2.12.5
-header:
+header: 
    name: "M2 EVO"
-   modelId:
+   modelId: 
       0:
          val: 3
    bitmap: "M2_EVO_o.png"
    labels: "Favorites"
-timers:
+timers: 
    0:
       start: 0
       swtch: "!L10"
@@ -48,7 +48,7 @@ showInstanceIds: 0
 checklistInteractive: 0
 customThrottleWarningPosition: 0
 beepANACenter: 0
-mixData:
+mixData: 
  -
    destCh: 0
    srcRaw: "I0"
@@ -61,7 +61,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "NONE"
-   curve:
+   curve: 
       type: 1
       value: 0
    delayUp: 0
@@ -98,7 +98,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "NONE"
-   curve:
+   curve: 
       type: 1
       value: 0
    delayUp: 0
@@ -135,7 +135,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L3"
-   curve:
+   curve: 
       type: 3
       value: 4
    delayUp: 0
@@ -155,7 +155,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L2"
-   curve:
+   curve: 
       type: 3
       value: 3
    delayUp: 0
@@ -175,7 +175,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L1"
-   curve:
+   curve: 
       type: 3
       value: 14
    delayUp: 0
@@ -229,7 +229,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L10"
-   curve:
+   curve: 
       type: 3
       value: 1
    delayUp: 0
@@ -249,7 +249,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "NONE"
-   curve:
+   curve: 
       type: 1
       value: 30
    delayUp: 0
@@ -320,7 +320,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L1"
-   curve:
+   curve: 
       type: 3
       value: 5
    delayUp: 0
@@ -340,7 +340,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L2"
-   curve:
+   curve: 
       type: 3
       value: 6
    delayUp: 0
@@ -360,7 +360,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L3"
-   curve:
+   curve: 
       type: 3
       value: 7
    delayUp: 0
@@ -379,8 +379,8 @@ mixData:
    flightModes: 000000000
    weight: 100
    offset: 0
-   swtch: "SD2"
-   curve:
+   swtch: "SG2"
+   curve: 
       type: 3
       value: 17
    delayUp: 0
@@ -400,7 +400,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L7"
-   curve:
+   curve: 
       type: 3
       value: 13
    delayUp: 0
@@ -420,7 +420,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L6"
-   curve:
+   curve: 
       type: 3
       value: 8
    delayUp: 0
@@ -440,7 +440,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L11"
-   curve:
+   curve: 
       type: 3
       value: 9
    delayUp: 1
@@ -460,7 +460,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L12"
-   curve:
+   curve: 
       type: 3
       value: 10
    delayUp: 1
@@ -480,7 +480,7 @@ mixData:
    weight: 100
    offset: 0
    swtch: "L13"
-   curve:
+   curve: 
       type: 3
       value: 11
    delayUp: 1
@@ -488,7 +488,7 @@ mixData:
    speedUp: 0
    speedDown: 0
    name: "Resq3"
-limitData:
+limitData: 
    1:
       min: 0
       max: 0
@@ -516,7 +516,7 @@ limitData:
       revert: 1
       curve: 0
       name: ""
-expoData:
+expoData: 
  -
    mode: 3
    scale: 0
@@ -524,8 +524,8 @@ expoData:
    srcRaw: "Ail"
    weight: 70
    offset: 0
-   swtch: "SD2"
-   curve:
+   swtch: "SG2"
+   curve: 
       type: 3
       value: 12
    chn: 0
@@ -539,7 +539,7 @@ expoData:
    weight: 100
    offset: 0
    swtch: "NONE"
-   curve:
+   curve: 
       type: 3
       value: 12
    chn: 0
@@ -552,8 +552,8 @@ expoData:
    srcRaw: "Ele"
    weight: 70
    offset: 0
-   swtch: "SD2"
-   curve:
+   swtch: "SG2"
+   curve: 
       type: 3
       value: 12
    chn: 1
@@ -567,7 +567,7 @@ expoData:
    weight: 100
    offset: 0
    swtch: "NONE"
-   curve:
+   curve: 
       type: 3
       value: 12
    chn: 1
@@ -591,8 +591,8 @@ expoData:
    srcRaw: "Rud"
    weight: 80
    offset: 0
-   swtch: "SD2"
-   curve:
+   swtch: "SG2"
+   curve: 
       type: 1
       value: 30
    chn: 3
@@ -606,7 +606,7 @@ expoData:
    weight: 100
    offset: 0
    swtch: "NONE"
-   curve:
+   curve: 
       type: 1
       value: 0
    chn: 3
@@ -620,7 +620,7 @@ expoData:
    weight: 100
    offset: 0
    swtch: "NONE"
-   curve:
+   curve: 
       type: 1
       value: 0
    chn: 4
@@ -637,7 +637,7 @@ expoData:
    chn: 5
    flightModes: 000000000
    name: ""
-curves:
+curves: 
    0:
       type: 0
       smooth: 0
@@ -713,7 +713,7 @@ curves:
       smooth: 0
       points: 0
       name: "CPP"
-points:
+points: 
    0:
       val: -100
    1:
@@ -800,7 +800,7 @@ points:
       val: 41
    57:
       val: 75
-logicalSw:
+logicalSw: 
    0:
       func: FUNC_VNEG
       def: "SE,0"
@@ -921,7 +921,7 @@ logicalSw:
       lsState: 0
       delay: 0
       duration: 0
-customFn:
+customFn: 
    0:
       swtch: "L16"
       func: RESET
@@ -987,16 +987,16 @@ customFn:
       func: LOGS
       def: "2,1"
    17:
-      swtch: "SD2"
+      swtch: "SG2"
       func: PLAY_TRACK
       def: "ratlow,1,1x"
-flightModeData:
+flightModeData: 
    0:
       name: ""
       swtch: "NONE"
       fadeIn: 0
       fadeOut: 0
-      gvars:
+      gvars: 
          0:
             val: 324
          1:
@@ -1016,7 +1016,7 @@ flightModeData:
          8:
             val: 324
 thrTraceSrc: Thr
-switchWarning:
+switchWarning: 
    SA:
       pos: up
    SC:
@@ -1026,13 +1026,13 @@ switchWarning:
    SF:
       pos: down
 rssiSource: none
-rfAlarms:
+rfAlarms: 
    warning: 45
    critical: 42
 thrTrimSw: 0
 potsWarnMode: WARN_MANUAL
 jitterFilter: GLOBAL
-moduleData:
+moduleData: 
    0:
       type: TYPE_MULTIMODULE
       antennaMode: MODE_PER_MODEL
@@ -1040,8 +1040,8 @@ moduleData:
       channelsStart: 0
       channelsCount: 16
       failsafeMode: CUSTOM
-      mod:
-         multi:
+      mod: 
+         multi: 
             disableTelemetry: 0
             disableMapping: 0
             autoBindMode: 0
@@ -1082,14 +1082,14 @@ failsafeChannels:
       val: 2000
    15:
       val: 2000
-trainerData:
+trainerData: 
    mode: MASTER_TRAINER_JACK
    channelsStart: 0
    channelsCount: -8
    frameLength: 0
    delay: 0
    pulsePol: 0
-inputNames:
+inputNames: 
    0:
       val: "Ail"
    1:
@@ -1103,11 +1103,11 @@ inputNames:
    5:
       val: "Coll"
 potsWarnEnabled: 1
-telemetrySensors:
+telemetrySensors: 
    0:
-      id1:
+      id1: 
          id: 61697
-      id2:
+      id2: 
          instance: 24
       label: "RSSI"
       subId: 0
@@ -1119,14 +1119,14 @@ telemetrySensors:
       logs: 1
       persistent: 0
       onlyPositive: 0
-      cfg:
-         custom:
+      cfg: 
+         custom: 
             ratio: 0
             offset: 0
    1:
-      id1:
+      id1: 
          id: 65534
-      id2:
+      id2: 
          instance: 248
       label: "TRSS"
       subId: 0
@@ -1138,14 +1138,14 @@ telemetrySensors:
       logs: 1
       persistent: 0
       onlyPositive: 0
-      cfg:
-         custom:
+      cfg: 
+         custom: 
             ratio: 0
             offset: 0
    2:
-      id1:
+      id1: 
          id: 65533
-      id2:
+      id2: 
          instance: 248
       label: "TQly"
       subId: 0
@@ -1157,14 +1157,14 @@ telemetrySensors:
       logs: 1
       persistent: 0
       onlyPositive: 0
-      cfg:
-         custom:
+      cfg: 
+         custom: 
             ratio: 0
             offset: 0
    3:
-      id1:
+      id1: 
          id: 61700
-      id2:
+      id2: 
          instance: 24
       label: "RxBt"
       subId: 0
@@ -1176,14 +1176,14 @@ telemetrySensors:
       logs: 1
       persistent: 0
       onlyPositive: 0
-      cfg:
-         custom:
+      cfg: 
+         custom: 
             ratio: 132
             offset: 0
    4:
-      id1:
+      id1: 
          id: 512
-      id2:
+      id2: 
          instance: 2
       label: "Curr"
       subId: 0
@@ -1195,14 +1195,14 @@ telemetrySensors:
       logs: 1
       persistent: 0
       onlyPositive: 1
-      cfg:
-         custom:
+      cfg: 
+         custom: 
             ratio: 0
             offset: 0
    5:
-      id1:
+      id1: 
          id: 528
-      id2:
+      id2: 
          instance: 2
       label: "VFAS"
       subId: 0
@@ -1214,14 +1214,14 @@ telemetrySensors:
       logs: 1
       persistent: 0
       onlyPositive: 0
-      cfg:
-         custom:
+      cfg: 
+         custom: 
             ratio: 0
             offset: 0
    6:
-      id1:
+      id1: 
          id: 0
-      id2:
+      id2: 
          formula: FORMULA_CONSUMPTION
       label: "mAh"
       subId: 0
@@ -1233,111 +1233,111 @@ telemetrySensors:
       logs: 1
       persistent: 0
       onlyPositive: 0
-      cfg:
-         consumption:
+      cfg: 
+         consumption: 
             source: 5
-screenData:
+screenData: 
    0:
       LayoutId: Layout1x1
-      layoutData:
-         zones:
+      layoutData: 
+         zones: 
             0:
                widgetName: "Cockpit"
-               widgetData:
-                  options:
+               widgetData: 
+                  options: 
                      0:
                         type: Signed
-                        value:
+                        value: 
                            signedValue: 54
                      1:
                         type: Signed
-                        value:
+                        value: 
                            signedValue: 60
                      2:
                         type: Signed
-                        value:
+                        value: 
                            signedValue: 75
                      3:
                         type: Signed
-                        value:
+                        value: 
                            signedValue: 12
-         options:
+         options: 
             0:
                type: Bool
-               value:
+               value: 
                   boolValue: 1
             1:
                type: Bool
-               value:
+               value: 
                   boolValue: 0
             2:
                type: Bool
-               value:
+               value: 
                   boolValue: 0
             3:
                type: Bool
-               value:
+               value: 
                   boolValue: 0
             4:
                type: Bool
-               value:
+               value: 
                   boolValue: 0
-topbarData:
-   zones:
+topbarData: 
+   zones: 
       0:
          widgetName: "FMStatus"
-         widgetData:
-            options:
+         widgetData: 
+            options: 
                0:
                   type: Source
-                  value:
+                  value: 
                      source: SE
                1:
                   type: Source
-                  value:
+                  value: 
                      source: ch(4)
                2:
                   type: Source
-                  value:
+                  value: 
                      source: NONE
                3:
                   type: Source
-                  value:
+                  value: 
                      source: P1
       1:
          widgetName: "Session"
-         widgetData:
+         widgetData: 
       2:
          widgetName: "Link"
-         widgetData:
+         widgetData: 
       3:
          widgetName: "Timers"
-         widgetData:
+         widgetData: 
       4:
          widgetName: "Radio Info"
-         widgetData:
-            options:
+         widgetData: 
+            options: 
                0:
                   type: Color
-                  value:
+                  value: 
                      color: 0xF04030
                1:
                   type: Color
-                  value:
+                  value: 
                      color: 0xF8C000
                2:
                   type: Color
-                  value:
+                  value: 
                      color: 0x48AC50
       5:
          widgetName: "Date Time"
-         widgetData:
-            options:
+         widgetData: 
+            options: 
                0:
                   type: Color
-                  value:
+                  value: 
                      color: COLIDX1
-topbarWidgetWidth:
+topbarWidgetWidth: 
    0:
       val: 1
    1:
