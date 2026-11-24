@@ -22,7 +22,7 @@ timers:
    1:
       start: 0
       swtch: "!L10"
-      value: 996
+      value: 895
       mode: ON
       countdownBeep: 0
       minuteBeep: 0
@@ -522,7 +522,7 @@ expoData:
    scale: 0
    trimSource: 0
    srcRaw: "Ail"
-   weight: 70
+   weight: 55
    offset: 0
    swtch: "SG2"
    curve: 
@@ -550,7 +550,7 @@ expoData:
    scale: 0
    trimSource: 0
    srcRaw: "Ele"
-   weight: 70
+   weight: 55
    offset: 0
    swtch: "SG2"
    curve: 
@@ -589,7 +589,7 @@ expoData:
    scale: 0
    trimSource: 0
    srcRaw: "Rud"
-   weight: 80
+   weight: 65
    offset: 0
    swtch: "SG2"
    curve: 
@@ -921,6 +921,14 @@ logicalSw:
       lsState: 0
       delay: 0
       duration: 0
+   17:
+      func: FUNC_AND
+      def: "SA2,SG2"
+      andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
+      delay: 0
+      duration: 0
 customFn: 
    0:
       swtch: "L16"
@@ -987,7 +995,7 @@ customFn:
       func: LOGS
       def: "2,1"
    17:
-      swtch: "SG2"
+      swtch: "L18"
       func: PLAY_TRACK
       def: "ratlow,1,1x"
 flightModeData: 
@@ -998,9 +1006,9 @@ flightModeData:
       fadeOut: 0
       gvars: 
          0:
-            val: 324
+            val: 328
          1:
-            val: 8
+            val: 5
          2:
             val: 0
          3:
@@ -1014,7 +1022,7 @@ flightModeData:
          7:
             val: 0
          8:
-            val: 324
+            val: 328
 thrTraceSrc: Thr
 switchWarning: 
    SA:
@@ -1051,7 +1059,7 @@ moduleData:
             receiverTelemetryOff: 0
             receiverHigherChannels: 0
             optionValue: 0
-failsafeChannels:
+failsafeChannels: 
    0:
       val: 2000
    1:

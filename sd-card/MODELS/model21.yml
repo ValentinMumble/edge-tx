@@ -446,7 +446,7 @@ expoData:
    scale: 0
    trimSource: 0
    srcRaw: "Ail"
-   weight: 70
+   weight: 55
    offset: 0
    swtch: "SG2"
    curve: 
@@ -474,7 +474,7 @@ expoData:
    scale: 0
    trimSource: 0
    srcRaw: "Ele"
-   weight: 70
+   weight: 55
    offset: 0
    swtch: "SG2"
    curve: 
@@ -513,7 +513,7 @@ expoData:
    scale: 0
    trimSource: 0
    srcRaw: "Rud"
-   weight: 80
+   weight: 65
    offset: 0
    swtch: "SG2"
    curve: 
@@ -716,6 +716,14 @@ logicalSw:
       lsState: 0
       delay: 0
       duration: 0
+   10:
+      func: FUNC_AND
+      def: "SA2,SG2"
+      andsw: "NONE"
+      lsPersist: 0
+      lsState: 0
+      delay: 0
+      duration: 0
 customFn: 
    0:
       swtch: "L5"
@@ -762,7 +770,7 @@ customFn:
       func: LOGS
       def: "2,1"
    11:
-      swtch: "SG2"
+      swtch: "L11"
       func: PLAY_TRACK
       def: "ratlow,1,1x"
 thrTraceSrc: ch(8)

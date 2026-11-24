@@ -104,7 +104,7 @@ of motor on (`k110s_log.py`), its one cockpit screen (`k110s_screen.py`) and its
 (`k110s_picture.py`), the M2 EVO's failsafe cutting the motor on a lost link while the rest holds
 (`m2evo_failsafe.py`), each model's pre-flight checklist as its notes, no longer shown when it loads (`sd-card/MODELS/M2_EVO.txt`
 and `K110S.txt`, `checklists.py` then `checklists_off.py`; the M2 EVO's also holds the sim's calibration flight plan, for now), the inactivity alarm after 10 minutes untouched (`inactivity_alarm.py`), and practice
-rates on SG down (moved from SD, `practice_on_sg.py`; SG wanted up at start-up, `sg_warning.py`) for soft landings on both models: cyclic 70 %, rudder 80 %, a gentler pitch curve CPP keeping the hover
+rates on SG down (moved from SD, `practice_on_sg.py`; SG wanted up at start-up, `sg_warning.py`; "low rates" said on arming with SG down, `practice_arm_warning.py`) for soft landings on both models: cyclic 55 %, rudder 65 % (`practice_lower.py`, from 70 and 80), a gentler pitch curve CPP keeping the hover
 pitch where it is (-5° to +9°, Low RPM keeping its own), "low rates" said, a blue frame and PRACTICE with its rate (the Prac lines' weight) on the cockpits
 (`practice_rates.py`), and the K110S's Low RPM pitch hovering at mid stick, 30 % gentler (`k110s_low_pitch.py`). Then it
 copies the

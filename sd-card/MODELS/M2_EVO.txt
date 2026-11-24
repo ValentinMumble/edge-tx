@@ -7,32 +7,21 @@ M2 EVO, before flying
 =SA safe, SF on hold
 =Tilt it: the swash fights back
 
-CALIBRATION FLIGHT, for the sim
+CALIBRATION FLIGHT, the missing steps
 SB down starts a mark, SB up ends it.
 Gone wrong: SB down-up twice, redo it.
-Before each pack: S1 mid, SG SC SB up.
+A full 700 or 750 mAh pack.
+Before: S1 mid, SG SC SB up.
 
-PACK 1: IU2, tail-in, hover at 1.5 m
-1 IU1, add collective, wait 3 s
-2 SB down, hover 10 s, SB up
+PACK 3: tail-in, hover at 1.5 m
+1 IU3, wait 3 s
+2 SB down, hover 10 s, keep the
+  height still, SB up
 3 IU2, wait 3 s
-4 SB down, hover 10 s, SB up
-5 IU3, wait 3 s
-6 SB down, hover 10 s, SB up
-7 IU2, wait 3 s
-8 SB down, full collective 1 s,
-  back to hover at 1.5 m, SB up
-9 Step 8 again, twice
-10 SB down, full right rudder,
+4 SB down, full right rudder,
   two turns, tail stopped, SB up
-11 Step 10 with left rudder
-12 Land
-
-PACK 2: IU2, 5 m or higher, no speed
-13 SB down, back flip, full stick,
+5 Step 4 with left rudder
+6 Climb to 5 m or higher, no speed
+7 SB down, back flip, half stick,
   level again, SB up. Three times.
-14 Front flips, full stick, three
-15 Left rolls, full stick, three
-16 Right rolls, full stick, three
-17 Back flips, half stick, three
-18 Land
+8 Land
