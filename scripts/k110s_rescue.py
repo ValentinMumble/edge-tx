@@ -31,8 +31,10 @@ def line(channel: int, weight: int, name: str, delay: int = 0) -> str:
 RESCUE = line(4, 100, 'Rescue')
 FLAT = line(5, 0, 'Flat')
 CLIMB = line(5, 60, 'Climb', delay=1)
+# The softer climb k110s_rescue_softer.py makes of it after.
+SOFTER = line(5, 40, 'Climb', delay=1)
 
-if HELD in text and RESCUE in text and FLAT + CLIMB in text:
+if HELD in text and RESCUE in text and (FLAT + CLIMB in text or FLAT + SOFTER in text):
     print(f'{model}: the rescue on SH is already there')
     sys.exit(0)
 assert '\n   name: "Rescue"\n' not in text and '\n   8:\n      func:' not in text.split('\ncustomFn:')[0], (

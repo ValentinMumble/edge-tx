@@ -351,7 +351,7 @@ mixData:
    delayPrec: 0
    speedPrec: 0
    flightModes: 000000000
-   weight: 60
+   weight: 40
    offset: 0
    swtch: "L9"
    delayUp: 1
@@ -606,11 +606,11 @@ points:
    15:
       val: -80
    16:
-      val: -12
+      val: -4
    17:
-      val: 15
+      val: 23
    18:
-      val: 35
+      val: 40
    19:
       val: 48
    20:
@@ -775,6 +775,8 @@ switchWarning:
       pos: up
    SF:
       pos: down
+   SG:
+      pos: up
 rssiSource: none
 rfAlarms: 
    warning: 45

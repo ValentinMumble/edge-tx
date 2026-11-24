@@ -73,10 +73,10 @@ models reset that count only when telemetry stops while disarmed, so a telemetry
 
 **The K110S** (`model21.yml`, Futaba S-FHSS, no telemetry), switched as the M2 EVO: SA down arms, SF holds, SC down
 is 6G (self-level, else 3D), SE picks the idle up: IU1 (up) Low RPM (a steady 55%, 60 at the stick's ends; soft pitch,
-CPL, -80% to +48%), IU2 70% (pitch CP2, ±70%), IU3 90% (pitch CP3, ±90%), each throttle a gentle V and every idle up
+CPL, -80% to +48%, hovering at about +12% stick), IU2 70% (pitch CP2, ±70%), IU3 90% (pitch CP3, ±90%), each throttle a gentle V and every idle up
 hovering at about +25% stick (`k110s_low_speed.py`, `k110s_low_pitch.py`, `k110s_low_inverted.py`, `k110s_low_hover.py`,
-`k110s_low_softer.py`, `k110s_iu2_power.py`, `k110s_iu2_lower.py`, `k110s_low_lower.py`, `k110s_idle_pitch.py`). SB does nothing. SH held is a rescue, built
-as the M2 EVO's: 6G, the pitch flat, then +60% after 0.1 s (`k110s_rescue.py`). Its failsafe: No pulses (`k110s_failsafe.py`). Its Pack timer counts down 4:00 of
+`k110s_low_softer.py`, `k110s_low_centre.py`, `k110s_iu2_power.py`, `k110s_iu2_lower.py`, `k110s_low_lower.py`, `k110s_idle_pitch.py`). SB does nothing. SH held is a rescue, built
+as the M2 EVO's: 6G, the pitch flat, then +40% after 0.1 s (`k110s_rescue.py`, `k110s_rescue_softer.py`). Its failsafe: No pulses (`k110s_failsafe.py`). Its Pack timer counts down 4:00 of
 real flying time (`k110s_timer_real.py`; it counted by throttle before, on CH9, which stays unused) and stops in hold; it starts again while disarmed. Its screen: the K110Cockpit under the top bar. It logs to the
 card once the motor may run (armed, out of hold) for 3 s in a row, a line every 0.2 s (sticks, switches, outputs; no
 battery, as it has no telemetry): S-FHSS is one-way, so the radio cannot tell the heli is on, and switches flipped on
@@ -104,7 +104,7 @@ of motor on (`k110s_log.py`), its one cockpit screen (`k110s_screen.py`) and its
 (`k110s_picture.py`), the M2 EVO's failsafe cutting the motor on a lost link while the rest holds
 (`m2evo_failsafe.py`), each model's pre-flight checklist as its notes, no longer shown when it loads (`sd-card/MODELS/M2_EVO.txt`
 and `K110S.txt`, `checklists.py` then `checklists_off.py`; the M2 EVO's also holds the sim's calibration flight plan, for now), the inactivity alarm after 10 minutes untouched (`inactivity_alarm.py`), and practice
-rates on SG down (moved from SD, `practice_on_sg.py`) for soft landings on both models: cyclic 70 %, rudder 80 %, a gentler pitch curve CPP keeping the hover
+rates on SG down (moved from SD, `practice_on_sg.py`; SG wanted up at start-up, `sg_warning.py`) for soft landings on both models: cyclic 70 %, rudder 80 %, a gentler pitch curve CPP keeping the hover
 pitch where it is (-5° to +9°, Low RPM keeping its own), "low rates" said, a blue frame and PRACTICE with its rate (the Prac lines' weight) on the cockpits
 (`practice_rates.py`), and the K110S's Low RPM pitch hovering at mid stick, 30 % gentler (`k110s_low_pitch.py`). Then it
 copies the

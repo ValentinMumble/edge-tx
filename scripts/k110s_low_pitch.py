@@ -15,8 +15,8 @@ from pathlib import Path
 OLD = [-25, 100]
 NEW = [-20, 68]
 # What the scripts after it make of it: 5 points, -60 % at the bottom (k110s_low_inverted.py), then slid up the stick
-# (k110s_low_hover.py), then softer (k110s_low_softer.py).
-LATER = [[-60, 2, 24, 46, 68], [-60, -7, 15, 37, 59], [-80, -12, 15, 35, 48]]
+# (k110s_low_hover.py), then softer (k110s_low_softer.py), then centred (k110s_low_centre.py).
+LATER = [[-60, 2, 24, 46, 68], [-60, -7, 15, 37, 59], [-80, -12, 15, 35, 48], [-80, -4, 23, 40, 48]]
 
 model = Path(sys.argv[1])
 raw = model.read_bytes().decode('utf-8')

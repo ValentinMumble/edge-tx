@@ -12,8 +12,8 @@ from pathlib import Path
 
 OLD = [-60, 2, 24, 46, 68]
 NEW = [-60, -7, 15, 37, 59]
-# What k110s_low_softer.py makes of it after.
-LATER = [-80, -12, 15, 35, 48]
+# What k110s_low_softer.py and k110s_low_centre.py make of it after.
+LATER = [[-80, -12, 15, 35, 48], [-80, -4, 23, 40, 48]]
 
 model = Path(sys.argv[1])
 raw = model.read_bytes().decode('utf-8')
@@ -52,7 +52,7 @@ entries = re.findall(r'^   (\d+): *\n      val: (-?\d+) *\n', block, re.M)
 assert len(entries) == block.count('val:'), 'a point the script cannot read'
 points = {int(index): int(value) for index, value in entries}
 now = [points.get(first + step, 0) for step in range(5)]
-if now == NEW or now == LATER:
+if now == NEW or now in LATER:
     print(f'{model}: the Low RPM pitch already hovers at +21 % stick')
     sys.exit(0)
 assert now == OLD, f'CPL is {now}, not the {OLD} this script expects'

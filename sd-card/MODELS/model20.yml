@@ -1025,6 +1025,8 @@ switchWarning:
       pos: up
    SF:
       pos: down
+   SG:
+      pos: up
 rssiSource: none
 rfAlarms: 
    warning: 45
