@@ -13,8 +13,8 @@
  *
  * Every position here is one src/cockpit.ts and src/k110s-cockpit.ts draw the rest against: change them together. The
  * radio keeps a picture without transparency at 16 bits a pixel (RGB565), so colours are snapped to that here, and
- * Flightdown shows what the radio shows. Writes panel.png and panel-live.png in sd-card/WIDGETS/Cockpit and
- * sd-card/WIDGETS/K110Cockpit.
+ * Flightdown shows what the radio shows. Writes panel.png, panel-live.png and panel-practice.png in
+ * sd-card/WIDGETS/Cockpit and sd-card/WIDGETS/K110Cockpit.
  */
 import {mkdirSync, writeFileSync} from 'node:fs';
 import {dirname, join} from 'node:path';
@@ -388,12 +388,13 @@ const widgets = join(dirname(fileURLToPath(import.meta.url)), '..', 'sd-card', '
 for (const spec of PANELS) {
   const folder = join(widgets, spec.folder);
   mkdirSync(folder, {recursive: true});
-  // The panel grey, and dark red while live (armed, throttle on), as the switch's THR ON.
+  // The panel grey, dark red while live (armed, throttle on), as the switch's THR ON, and dark blue on practice rates.
   for (const [file, inside] of [
     ['panel', 0x0c0d0e],
     ['panel-live', 0x3d0c0f],
+    ['panel-practice', 0x0d1d3d],
   ]) {
     writeFileSync(join(folder, `${file}.png`), png(draw(inside, spec).rgb565()));
   }
 }
-console.log(`Cockpit panels: panel.png, panel-live.png in ${PANELS.map(spec => spec.folder).join(', ')}`);
+console.log(`Cockpit panels: panel.png, panel-live.png, panel-practice.png in ${PANELS.map(spec => spec.folder).join(', ')}`);

@@ -883,7 +883,16 @@ function objects(widget)
             w = 480,
             h = 227,
             file = "/WIDGETS/K110Cockpit/panel-live.png",
-            visible = function() return view.live end
+            visible = function() return view.live and not view.practice end
+        },
+        {
+            type = "image",
+            x = 0,
+            y = 0,
+            w = 480,
+            h = 227,
+            file = "/WIDGETS/K110Cockpit/panel-practice.png",
+            visible = function() return view.practice end
         }
     }
     __TS__ArrayPushArray(

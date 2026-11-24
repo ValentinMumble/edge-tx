@@ -13,7 +13,7 @@ Gone wrong: SB down-up twice, redo it.
 A full 700 or 750 mAh pack.
 Before: S1 mid, SG SC SB up.
 
-PACK 3: tail-in, hover at 1.5 m
+PACK 3: tail-in, hover at about 7 m
 1 IU3, wait 3 s
 2 SB down, hover 10 s, keep the
   height still, SB up
@@ -21,7 +21,7 @@ PACK 3: tail-in, hover at 1.5 m
 4 SB down, full right rudder,
   two turns, tail stopped, SB up
 5 Step 4 with left rudder
-6 Climb to 5 m or higher, no speed
+6 No speed, 7 m or higher
 7 SB down, back flip, half stick,
   level again, SB up. Three times.
 8 Land

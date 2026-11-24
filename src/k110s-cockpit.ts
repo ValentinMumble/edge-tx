@@ -629,9 +629,11 @@ function objects(widget: Widget): LvglObject[] {
   const view = widget.view;
   const shapes = widget.shapes;
   const list: LvglObject[] = [
-    // The panel's fixed parts, grey, or dark red while live (armed, throttle on: the motor can spin).
+    // The panel's fixed parts, grey, or dark red while live (armed, throttle on: the motor can spin), on full rates.
     {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/K110Cockpit/panel.png'},
-    {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/K110Cockpit/panel-live.png', visible: () => view.live},
+    {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/K110Cockpit/panel-live.png', visible: () => view.live && !view.practice},
+    // Dark blue on practice rates (SG down), live or not: the whole screen says which rates fly.
+    {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/K110Cockpit/panel-practice.png', visible: () => view.practice},
   ];
 
   // The warning lights: their boxes are in the panel picture, dark; a lit light fills its own.
