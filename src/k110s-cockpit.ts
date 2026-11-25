@@ -72,7 +72,7 @@ type View = {
   rate: number;
   sortie: number;
   lights: Light[];
-  /** Practice rates on (SG down, practice_rates.py): calmer cyclic and rudder, the pitch on CPP but in Low RPM. */
+  /** Practice rates on (SG up, practice_rates.py): calmer cyclic and rudder, the pitch on CPP but in Low RPM. */
   practice: boolean;
   /** The practice rates' share of the cyclic, %, while they are on (0 when the model does not say). */
   practiceRate: number;
@@ -89,7 +89,7 @@ type Widget = {
   options: Options;
   /** The idle ups' curves, as MODES orders them. */
   shapes: Shape[];
-  /** The practice pitch curve (CPP, SG down in IU2 and IU3) across the plot. */
+  /** The practice pitch curve (CPP, SG up in IU2 and IU3) across the plot. */
   practice: [number, number][];
   /** When the curves were last read (getTime, tens of ms). */
   since: number;
@@ -180,7 +180,7 @@ function look(widget: Widget): void {
   view.throttle = ((output(2) + 1024) / 2048) * 100;
   view.degrees = (output(5) / 1024) * (widget.options.PitchRange || 12);
   view.collective = (output(5) / 1024) * 100;
-  view.practice = getValue('sg') >= 1024;
+  view.practice = getValue('sg') <= -1024;
   view.practiceRate = view.practice ? practiceRate() : 0;
   view.aileron = getValue('ail');
   view.elevator = getValue('ele');
@@ -612,7 +612,7 @@ function readShapes(widget: Widget): void {
       shape.pitch = [plotAt(-100, -100), plotAt(100, 100)];
     }
   });
-  // The practice pitch line (SG down): CPP across the plot, else the stick straight.
+  // The practice pitch line (SG up): CPP across the plot, else the stick straight.
   const practice = curves.CPP;
   widget.practice = practice
     ? curveXs(practice).map((across, point) => plotAt(across, practice.y[point]))
@@ -632,7 +632,7 @@ function objects(widget: Widget): LvglObject[] {
     // The panel's fixed parts, grey, or dark red while live (armed, throttle on: the motor can spin), on full rates.
     {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/K110Cockpit/panel.png'},
     {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/K110Cockpit/panel-live.png', visible: () => view.live && !view.practice},
-    // Dark blue on practice rates (SG down), live or not: the whole screen says which rates fly.
+    // Dark blue on practice rates (SG up), live or not: the whole screen says which rates fly.
     {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/K110Cockpit/panel-practice.png', visible: () => view.practice},
   ];
 
@@ -857,7 +857,7 @@ function objects(widget: Widget): LvglObject[] {
       thickness: 2,
       rounded: true,
       color: BLUE,
-      // SG down flies CPP in IU2 and IU3; Low RPM keeps its own curve.
+      // SG up flies CPP in IU2 and IU3; Low RPM keeps its own curve.
       pts: () => (view.practice && view.idle !== 1 ? widget.practice : flown().pitch),
     },
   );
@@ -972,7 +972,7 @@ function objects(widget: Widget): LvglObject[] {
       RIGHT,
     ),
   );
-  // Practice rates on (SG down): a blue frame round the whole screen.
+  // Practice rates on (SG up): a blue frame round the whole screen.
   list.push({type: 'rectangle', x: 0, y: 0, w: 480, h: 227, thickness: 3, color: BLUE, visible: () => view.practice});
   return list;
 }

@@ -17,8 +17,9 @@ for name in ['model20.yml', 'model21.yml']:
     raw = model.read_bytes().decode('utf-8')
     newline = '\r\n' if '\r\n' in raw else '\n'
     text = raw.replace('\r\n', '\n')
-    # Done: no SD2 left (practice_arm_warning.py moves the sound off SG2 after, so SG2 may count one less).
-    if '"SD2"' not in text and '"SG2"' in text:
+    # Done: no SD2 left (practice_arm_warning.py moves the sound off SG2 after, so SG2 may count one less, and
+    # practice_sg_up.py moves them all to SG0).
+    if '"SD2"' not in text and ('"SG2"' in text or '"SG0"' in text):
         print(f'{name}: the practice rates are already on SG')
         continue
     assert text.count('"SD2"') == LINES, f'{name}: not the {LINES} practice lines on SD2 this script expects'

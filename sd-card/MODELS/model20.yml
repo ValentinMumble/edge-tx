@@ -22,7 +22,7 @@ timers:
    1:
       start: 0
       swtch: "!L10"
-      value: 1081
+      value: 995
       mode: ON
       countdownBeep: 0
       minuteBeep: 0
@@ -379,7 +379,7 @@ mixData:
    flightModes: 000000000
    weight: 100
    offset: 0
-   swtch: "SG2"
+   swtch: "SG0"
    curve: 
       type: 3
       value: 17
@@ -592,7 +592,7 @@ expoData:
    srcRaw: "Ail"
    weight: 55
    offset: 0
-   swtch: "SG2"
+   swtch: "SG0"
    curve: 
       type: 3
       value: 12
@@ -620,7 +620,7 @@ expoData:
    srcRaw: "Ele"
    weight: 55
    offset: 0
-   swtch: "SG2"
+   swtch: "SG0"
    curve: 
       type: 3
       value: 12
@@ -659,7 +659,7 @@ expoData:
    srcRaw: "Rud"
    weight: 65
    offset: 0
-   swtch: "SG2"
+   swtch: "SG0"
    curve: 
       type: 1
       value: 30
@@ -859,15 +859,15 @@ points:
    52:
       val: -76
    53:
-      val: -40
+      val: -23
    54:
-      val: -16
+      val: -5
    55:
-      val: 8
+      val: 13
    56:
-      val: 41
+      val: 38
    57:
-      val: 75
+      val: 63
 logicalSw: 
    0:
       func: FUNC_VNEG
@@ -991,7 +991,7 @@ logicalSw:
       duration: 0
    17:
       func: FUNC_AND
-      def: "SA2,SG2"
+      def: "SA2,SG0"
       andsw: "NONE"
       lsPersist: 0
       lsState: 0
@@ -1074,7 +1074,7 @@ flightModeData:
       fadeOut: 0
       gvars: 
          0:
-            val: 328
+            val: 329
          1:
             val: 5
          2:
@@ -1090,7 +1090,7 @@ flightModeData:
          7:
             val: 0
          8:
-            val: 328
+            val: 329
 thrTraceSrc: Thr
 switchWarning: 
    SA:
@@ -1102,7 +1102,7 @@ switchWarning:
    SF:
       pos: down
    SG:
-      pos: up
+      pos: down
 rssiSource: none
 rfAlarms: 
    warning: 45

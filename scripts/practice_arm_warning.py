@@ -27,7 +27,10 @@ for name in ['model20.yml', 'model21.yml']:
     sound = re.search(r'^   (\d+): *\n      swtch: "([^"]*)" *\n      func: PLAY_TRACK *\n      def: "ratlow,1,1x" *\n', functions.group(1), re.M)
     assert sound, f'{name}: no "low rates" sound'
 
-    found = re.search(rf'^   (\d+): *\n      func: FUNC_AND *\n      def: "{CONDITION}" *\n', switches.group(1), re.M)
+    # practice_sg_up.py later puts it on SG up.
+    found = re.search(
+        rf'^   (\d+): *\n      func: FUNC_AND *\n      def: "(?:{CONDITION}|SA2,SG0)" *\n', switches.group(1), re.M
+    )
     if found and sound.group(2) == f'L{int(found.group(1)) + 1}':
         print(f'{name}: "low rates" is already said on arming with practice rates')
         continue

@@ -296,7 +296,7 @@ mixData:
    flightModes: 000000000
    weight: 100
    offset: 0
-   swtch: "SG2"
+   swtch: "SG0"
    curve: 
       type: 3
       value: 5
@@ -516,7 +516,7 @@ expoData:
    srcRaw: "Ail"
    weight: 55
    offset: 0
-   swtch: "SG2"
+   swtch: "SG0"
    curve: 
       type: 1
       value: 35
@@ -544,7 +544,7 @@ expoData:
    srcRaw: "Ele"
    weight: 55
    offset: 0
-   swtch: "SG2"
+   swtch: "SG0"
    curve: 
       type: 1
       value: 35
@@ -583,7 +583,7 @@ expoData:
    srcRaw: "Rud"
    weight: 65
    offset: 0
-   swtch: "SG2"
+   swtch: "SG0"
    curve: 
       type: 1
       value: 30
@@ -682,15 +682,15 @@ points:
    19:
       val: 48
    20:
-      val: -40
+      val: -22
    21:
-      val: -15
+      val: -4
    22:
-      val: 11
+      val: 16
    23:
-      val: 43
+      val: 40
    24:
-      val: 75
+      val: 64
    25:
       val: -70
    26:
@@ -786,7 +786,7 @@ logicalSw:
       duration: 0
    10:
       func: FUNC_AND
-      def: "SA2,SG2"
+      def: "SA2,SG0"
       andsw: "NONE"
       lsPersist: 0
       lsState: 0
@@ -852,7 +852,7 @@ switchWarning:
    SF:
       pos: down
    SG:
-      pos: up
+      pos: down
 rssiSource: none
 rfAlarms: 
    warning: 45

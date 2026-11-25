@@ -94,7 +94,7 @@ function look(widget)
     view.throttle = (output(2) + 1024) / 2048 * 100
     view.degrees = output(5) / 1024 * (widget.options.PitchRange or 12)
     view.collective = output(5) / 1024 * 100
-    view.practice = getValue("sg") >= 1024
+    view.practice = getValue("sg") <= -1024
     view.practiceRate = view.practice and practiceRate() or 0
     view.aileron = getValue("ail")
     view.elevator = getValue("ele")
