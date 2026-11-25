@@ -5,13 +5,14 @@ const name = 'K110Cockpit';
  * when switching models: each place shows the same thing, or the K110S's nearest one, as it has no telemetry.
  * - The warning lights in the Cockpit's slots: SAFE (green) or ARMED (SA down), THR ON or OFF (SF), LEVEL (SC down,
  *   6G self-level), RESCUE while SH is held (k110s_rescue.py: 6G, then a climb), TELE always dark (it has no
- *   telemetry), LOW BATT once the Pack timer has under 30 s left;
+ *   telemetry), LOW BATT once the Pack timer has under 30 s left; "battery 50 %" and two buzzes once it is past half;
  *   the panel turns dark red while the motor can spin.
  * - The throttle as a quadrant: a detent per idle up (LOW, IU2, IU3, at the throttle each gives at mid stick, from the
  *   model's curves), CUT at its foot guarded in hold, the lever at the motor output (CH3); the collective at CH6
  *   against a degree scale.
  * - The Pack timer (timer 1, counting down from 4:00 as fast as CH9 says: a second a second at 90 % throttle) as the
- *   fuel gauge, the time left in its window and how fast it counts under it; the sortie (timer 2) under the gauge.
+ *   fuel gauge, the time left in its window and how fast it counts under it; the pack the 6-position buttons pick
+ *   under the gauge, as on the Cockpit (the sortie's time is in the top bar).
  * - The data plate; the throttle curves where the Cockpit draws its pitch curve (Low RPM, IU2 and IU3, the one SE
  *   picks lit, with a dot at the throttle stick), and that idle up's pitch curve over them in blue (CPL in Low RPM,
  *   the stick straight in IU2 and IU3), with a dot at the pitch sent; the idle ups as three tiles where the Cockpit
@@ -70,7 +71,8 @@ type View = {
   left: number;
   start: number;
   rate: number;
-  sortie: number;
+  /** The 6-position button pressed, 1 to 6: the pack plugged in (PACKS). */
+  button: number;
   lights: Light[];
   /** Practice rates on (SG up, practice_rates.py): calmer cyclic and rudder, the pitch on CPP but in Low RPM. */
   practice: boolean;
@@ -93,6 +95,8 @@ type Widget = {
   practice: [number, number][];
   /** When the curves were last read (getTime, tens of ms). */
   since: number;
+  /** "Battery 50 %" said on this pack: said once the Pack timer is past half, again after it is reset. */
+  halfSaid: boolean;
   view: View;
 };
 
@@ -102,6 +106,11 @@ const MODES: Mode[] = [
   {word: 'IU2', curve: 'IU2', fallback: 70, pitch: 'CP2'},
   {word: 'IU3', curve: 'IU3', fallback: 90, pitch: 'CP3'},
 ];
+/** The packs by 6-position button, as Flightdown has them for the K110S: the three XK 1S 450 mAh on 1, 2 and 3. */
+const PACKS = ['XK 1', 'XK 2', 'XK 3'];
+const PACK_MAH = 450;
+/** mAhRe's battery calls, as the Cockpit says them on the M2 EVO: "battery 50 %" once the Pack timer is past half. */
+const HALF_SOUND = '/WIDGETS/mAhRe/sounds/Bat50L.wav';
 /** Under this many seconds left on the Pack timer, LOW BATT lights (it has no telemetry to tell). */
 const LOW_TIME = 30;
 
@@ -191,7 +200,8 @@ function look(widget: Widget): void {
   const pack = model.getTimer(0);
   view.start = (pack?.start ?? 0) > 0 ? (pack?.start as number) : 240;
   view.left = pack?.value ?? view.start;
-  view.sortie = model.getTimer(1)?.value ?? 0;
+  // EdgeTX 2.12.5 names the TX16S's buttons "6pos" in Lua ("P2" in its logs), exactly.
+  view.button = clamp(math.floor((getValue('6pos') + 1024) / 409.6 + 0.5) + 1, 1, 6);
   // The Pack timer counts relative to CH9 (THR_REL): from nothing at -100 % to a second a second at 100 %, only while
   // the motor may run (its switch, !L10). The radio reads CH9 after its reversal, as getOutputValue gives it.
   view.rate = view.live ? clamp((getOutputValue(8) + 1024) / 2048, 0, 1) : 0;
@@ -631,9 +641,25 @@ function objects(widget: Widget): LvglObject[] {
   const list: LvglObject[] = [
     // The panel's fixed parts, grey, or dark red while live (armed, throttle on: the motor can spin), on full rates.
     {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/K110Cockpit/panel.png'},
-    {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/K110Cockpit/panel-live.png', visible: () => view.live && !view.practice},
+    {
+      type: 'image',
+      x: 0,
+      y: 0,
+      w: 480,
+      h: 227,
+      file: '/WIDGETS/K110Cockpit/panel-live.png',
+      visible: () => view.live && !view.practice,
+    },
     // Dark blue on practice rates (SG up), live or not: the whole screen says which rates fly.
-    {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/K110Cockpit/panel-practice.png', visible: () => view.practice},
+    {
+      type: 'image',
+      x: 0,
+      y: 0,
+      w: 480,
+      h: 227,
+      file: '/WIDGETS/K110Cockpit/panel-practice.png',
+      visible: () => view.practice,
+    },
   ];
 
   // The warning lights: their boxes are in the panel picture, dark; a lit light fills its own.
@@ -807,8 +833,18 @@ function objects(widget: Widget): LvglObject[] {
       () => (view.live ? DIGITS : MUTED),
       CENTER,
     ),
-    // Under it, where the Cockpit names the pack: the sortie's time (timer 2).
-    label(226, 210, () => `Sortie ${clock(view.sortie)}`, SMLSIZE, LABEL, CENTER),
+    // Under it, as on the Cockpit, the pack the buttons pick; a button with no pack on it says so, dimmed.
+    label(
+      226,
+      210,
+      () => {
+        const pack = PACKS[view.button - 1];
+        return pack ? `${pack}, ${PACK_MAH} mAh` : `Button ${view.button}: no pack`;
+      },
+      SMLSIZE,
+      () => (PACKS[view.button - 1] ? LABEL : MUTED),
+      CENTER,
+    ),
   );
 
   // The data plate (the plate, its frame and screws, the picture's box are in the panel picture), with the cell count
@@ -994,6 +1030,7 @@ function create(zone: Zone, options: Options): Widget {
     shapes,
     practice: [],
     since: getTime(),
+    halfSaid: false,
     view: {
       live: false,
       motorOff: true,
@@ -1012,7 +1049,7 @@ function create(zone: Zone, options: Options): Widget {
       left: 240,
       start: 240,
       rate: 0,
-      sortie: 0,
+      button: 1,
       lights,
       practice: false,
       practiceRate: 0,
@@ -1047,7 +1084,29 @@ function practiceRate() {
   return 0;
 }
 
+/**
+ * What runs whether the screen shows or not: once the Pack timer is past half its time, "battery 50 %" and two
+ * buzzes, as on the Cockpit; a reset timer (disarmed: a new pack) says it again.
+ */
+function follow(widget: Widget): void {
+  const pack = model.getTimer(0);
+  const start = (pack?.start ?? 0) > 0 ? (pack?.start as number) : 240;
+  const left = pack?.value ?? start;
+  if (left > start / 2) {
+    widget.halfSaid = false;
+  } else if (!widget.halfSaid) {
+    widget.halfSaid = true;
+    playFile(HALF_SOUND);
+    for (let index = 0; index < 2; index++) playHaptic(15, 10);
+  }
+}
+
+function background(widget: Widget): void {
+  follow(widget);
+}
+
 function refresh(widget: Widget): void {
+  follow(widget);
   look(widget);
   const now = getTime();
   if (now - widget.since >= 100) {
@@ -1059,4 +1118,4 @@ function refresh(widget: Widget): void {
 
 const useLvgl = true;
 
-export {refresh, name, create, update, options, useLvgl};
+export {refresh, background, name, create, update, options, useLvgl};

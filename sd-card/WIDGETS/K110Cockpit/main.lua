@@ -69,7 +69,7 @@ local function __TS__SparseArraySpread(sparseArray)
 end
 -- End of Lua Library inline imports
 local ____exports = {}
-local output, clock, look, at, lineHeight, swing, armSwitch, label, dial, curveXs, curveAt, readShapes, objects, update, practiceRate, MODES, LOW_TIME, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, BLUE, AMBER, RED, UNLIT, EDGE, DARK_INK, TOP, BOTTOM, TILE_X, TILE_Y, TILE_W, TILE_H, TILE_STEP, clamp, GUARD_SWING, GUARD_TURN, GUARD_LONG, HINGE, LEVER_FLIP, LEVER_LONG, NUT, ease, toward, round, PLOT_X, PLOT_Y, PLOT_H, plotAt, percentOf
+local output, clock, look, at, lineHeight, swing, armSwitch, label, dial, curveXs, curveAt, readShapes, objects, update, practiceRate, MODES, PACKS, PACK_MAH, LOW_TIME, rgb, INK, MUTED, DIM, LABEL, DIGITS, GREEN, BLUE, AMBER, RED, UNLIT, EDGE, DARK_INK, TOP, BOTTOM, TILE_X, TILE_Y, TILE_W, TILE_H, TILE_STEP, clamp, GUARD_SWING, GUARD_TURN, GUARD_LONG, HINGE, LEVER_FLIP, LEVER_LONG, NUT, ease, toward, round, PLOT_X, PLOT_Y, PLOT_H, plotAt, percentOf
 function output(index)
     local value = getOutputValue(index)
     local ____opt_0 = model.getOutput(index)
@@ -105,8 +105,11 @@ function look(widget)
     local pack = model.getTimer(0)
     view.start = (pack and pack.start or 0) > 0 and (pack and pack.start) or 240
     view.left = pack and pack.value or view.start
-    local ____opt_8 = model.getTimer(1)
-    view.sortie = ____opt_8 and ____opt_8.value or 0
+    view.button = clamp(
+        math.floor((getValue("6pos") + 1024) / 409.6 + 0.5) + 1,
+        1,
+        6
+    )
     view.rate = view.live and clamp(
         (getOutputValue(8) + 1024) / 2048,
         0,
@@ -677,10 +680,10 @@ function label(x, y, text, font, color, align)
     return object
 end
 function dial(spec)
-    local ____spec_10 = spec
-    local x = ____spec_10.centerX
-    local y = ____spec_10.centerY
-    local radius = ____spec_10.radius
+    local ____spec_8 = spec
+    local x = ____spec_8.centerX
+    local y = ____spec_8.centerY
+    local radius = ____spec_8.radius
     local function angle(value)
         return -135 + clamp(value, 0, 100) / 100 * 270
     end
@@ -818,13 +821,13 @@ function readShapes(widget)
             if shape.level > widget.shapes[top + 1].level then
                 top = index
             end
-            local ____temp_11
+            local ____temp_9
             if mode.pitch == nil then
-                ____temp_11 = nil
+                ____temp_9 = nil
             else
-                ____temp_11 = curves[mode.pitch]
+                ____temp_9 = curves[mode.pitch]
             end
-            local pitch = ____temp_11
+            local pitch = ____temp_9
             if pitch then
                 local xs = curveXs(pitch)
                 local points = {}
@@ -1104,13 +1107,13 @@ function objects(widget)
             stripe = stripe + 1
         end
     end
-    local ____temp_13 = stopY(0) - 23
-    local function ____temp_14()
+    local ____temp_11 = stopY(0) - 23
+    local function ____temp_12()
         return view.hold
     end
-    local ____array_12 = __TS__SparseArrayNew(table.unpack(stripes))
+    local ____array_10 = __TS__SparseArrayNew(table.unpack(stripes))
     __TS__SparseArrayPush(
-        ____array_12,
+        ____array_10,
         {
             type = "rectangle",
             x = 0,
@@ -1123,11 +1126,11 @@ function objects(widget)
     list[#list + 1] = {
         type = "box",
         x = 34,
-        y = ____temp_13,
+        y = ____temp_11,
         w = 20,
         h = 7,
-        visible = ____temp_14,
-        children = {__TS__SparseArraySpread(____array_12)}
+        visible = ____temp_12,
+        children = {__TS__SparseArraySpread(____array_10)}
     }
     list[#list + 1] = label(
         44,
@@ -1226,7 +1229,7 @@ function objects(widget)
         DIGITS,
         CENTER
     )
-    local ____array_15 = __TS__SparseArrayNew(table.unpack(dial({
+    local ____array_13 = __TS__SparseArrayNew(table.unpack(dial({
         centerX = 226,
         centerY = 117,
         radius = 72,
@@ -1235,7 +1238,7 @@ function objects(widget)
         labels = {{0, "E"}, {50, "1/2"}, {100, "F"}}
     })))
     __TS__SparseArrayPush(
-        ____array_15,
+        ____array_13,
         label(
             226,
             147,
@@ -1255,15 +1258,18 @@ function objects(widget)
         label(
             226,
             210,
-            function() return "Sortie " .. clock(view.sortie) end,
+            function()
+                local pack = PACKS[view.button]
+                return pack and ((pack .. ", ") .. tostring(PACK_MAH)) .. " mAh" or ("Button " .. tostring(view.button)) .. ": no pack"
+            end,
             SMLSIZE,
-            LABEL,
+            function() return PACKS[view.button] and LABEL or MUTED end,
             CENTER
         )
     )
     __TS__ArrayPush(
         list,
-        __TS__SparseArraySpread(____array_15)
+        __TS__SparseArraySpread(____array_13)
     )
     local info = model.getInfo()
     if info.bitmap and info.bitmap ~= "" then
@@ -1558,13 +1564,14 @@ local name = "K110Cockpit"
 -- when switching models: each place shows the same thing, or the K110S's nearest one, as it has no telemetry.
 -- - The warning lights in the Cockpit's slots: SAFE (green) or ARMED (SA down), THR ON or OFF (SF), LEVEL (SC down,
 --   6G self-level), RESCUE while SH is held (k110s_rescue.py: 6G, then a climb), TELE always dark (it has no
---   telemetry), LOW BATT once the Pack timer has under 30 s left;
+--   telemetry), LOW BATT once the Pack timer has under 30 s left; "battery 50 %" and two buzzes once it is past half;
 --   the panel turns dark red while the motor can spin.
 -- - The throttle as a quadrant: a detent per idle up (LOW, IU2, IU3, at the throttle each gives at mid stick, from the
 --   model's curves), CUT at its foot guarded in hold, the lever at the motor output (CH3); the collective at CH6
 --   against a degree scale.
 -- - The Pack timer (timer 1, counting down from 4:00 as fast as CH9 says: a second a second at 90 % throttle) as the
---   fuel gauge, the time left in its window and how fast it counts under it; the sortie (timer 2) under the gauge.
+--   fuel gauge, the time left in its window and how fast it counts under it; the pack the 6-position buttons pick
+--   under the gauge, as on the Cockpit (the sortie's time is in the top bar).
 -- - The data plate; the throttle curves where the Cockpit draws its pitch curve (Low RPM, IU2 and IU3, the one SE
 --   picks lit, with a dot at the throttle stick), and that idle up's pitch curve over them in blue (CPL in Low RPM,
 --   the stick straight in IU2 and IU3), with a dot at the pitch sent; the idle ups as three tiles where the Cockpit
@@ -1580,6 +1587,10 @@ local options = {{
     20
 }}
 MODES = {{word = "LOW", curve = "Low", fallback = 55, pitch = "CPL"}, {word = "IU2", curve = "IU2", fallback = 70, pitch = "CP2"}, {word = "IU3", curve = "IU3", fallback = 90, pitch = "CP3"}}
+PACKS = {"XK 1", "XK 2", "XK 3"}
+PACK_MAH = 450
+--- mAhRe's battery calls, as the Cockpit says them on the M2 EVO: "battery 50 %" once the Pack timer is past half.
+local HALF_SOUND = "/WIDGETS/mAhRe/sounds/Bat50L.wav"
 LOW_TIME = 30
 rgb = function(color) return lcd.RGB(color) end
 INK = rgb(15330543)
@@ -1650,6 +1661,7 @@ local function create(zone, options)
         shapes = shapes,
         practice = {},
         since = getTime(),
+        halfSaid = false,
         view = {
             live = false,
             motorOff = true,
@@ -1668,7 +1680,7 @@ local function create(zone, options)
             left = 240,
             start = 240,
             rate = 0,
-            sortie = 0,
+            button = 1,
             lights = lights,
             practice = false,
             practiceRate = 0,
@@ -1680,7 +1692,31 @@ local function create(zone, options)
     update(widget, options)
     return widget
 end
+--- What runs whether the screen shows or not: once the Pack timer is past half its time, "battery 50 %" and two
+-- buzzes, as on the Cockpit; a reset timer (disarmed: a new pack) says it again.
+local function follow(widget)
+    local pack = model.getTimer(0)
+    local start = (pack and pack.start or 0) > 0 and (pack and pack.start) or 240
+    local left = pack and pack.value or start
+    if left > start / 2 then
+        widget.halfSaid = false
+    elseif not widget.halfSaid then
+        widget.halfSaid = true
+        playFile(HALF_SOUND)
+        do
+            local index = 0
+            while index < 2 do
+                playHaptic(15, 10)
+                index = index + 1
+            end
+        end
+    end
+end
+local function background(widget)
+    follow(widget)
+end
 local function refresh(widget)
+    follow(widget)
     look(widget)
     local now = getTime()
     if now - widget.since >= 100 then
@@ -1690,6 +1726,7 @@ local function refresh(widget)
 end
 local useLvgl = true
 ____exports.refresh = refresh
+____exports.background = background
 ____exports.name = name
 ____exports.create = create
 ____exports.update = update

@@ -25,7 +25,7 @@ out of git (`backups/`, `update-2.12.5/`).
   disarmed with the throttle on;
   LEVEL, RESCUE, LOW BATT, LOW VOLT or NOT FULL, TELE), the throttle as a quadrant (a detent per idle up, evenly spaced, CUT
   guarded in hold, what S1 adds on the lever's knob) and the pitch as a collective against a degree scale, the battery as a fuel gauge (from the charge a
-  pack had when plugged in, by its volts a cell, less the mAh used; the mAh left under the %, the % said every 10% with
+  pack had when plugged in, by its volts a cell, less the mAh used; the mAh left under the %, the % said every 10% (50% with two buzzes) with
   mAhRe's sounds, the pack the 6-position buttons pick under it; three buzzes every 15 s under 25% with the motor on;
   "low battery" and two buzzes once a cell has spent about 2 s under 3.30 V under load, counted over the last few
   seconds, so short dips add up), the model's data plate, the curves as the K110Cockpit draws them: the idle ups' flat
@@ -38,9 +38,9 @@ out of git (`backups/`, `update-2.12.5/`).
   spin, LEVEL lights blue, RESCUE and TELE white on dark red, a green dot in TELE's box while telemetry comes in. Built from EdgeTX's LVGL objects, so the radio redraws
   only what changes, and the screen keeps up at 20 frames a second (EdgeTX's most).
 - **K110Cockpit:** the K110S's whole screen, laid out as the Cockpit so nothing moves when switching models: the
-  same lights (LEVEL in 6G; RESCUE while SH is held; TELE stays dark; LOW BATT under 30 s left on the Pack timer), quadrant
+  same lights (LEVEL in 6G; RESCUE while SH is held; TELE stays dark; LOW BATT under 30 s left on the Pack timer; "battery 50 %" and two buzzes past half of it), quadrant
   (detents LOW, IU2, IU3 at their curves' mid stick throttle) and collective, the Pack timer as the fuel gauge (the time
-  left, how fast it counts now, the sortie under it), the data plate (1S), the throttle curves in the pitch curve's box
+  left, how fast it counts now, the XK pack the 6-position buttons pick under it), the data plate (1S), the throttle curves in the pitch curve's box
   (Low RPM, IU2, IU3, the one on SE lit green with a dot at the stick) and that idle up's pitch curve over them in blue
   (CPL in Low RPM, the stick straight in IU2 and IU3) with a dot at the pitch sent, all read from the model, the idle
   ups as three tiles in SE's order where the cell gauge is, and the cyclic and rudder (the stick's mark, what is sent).

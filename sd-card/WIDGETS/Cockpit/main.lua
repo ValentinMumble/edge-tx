@@ -1649,6 +1649,8 @@ TELE_LIGHT = 5
 --- Under this a cell is not full when plugged in (mAhRe's level), and the % left that lights LOW BATT.
 local FULL_CELL = 4
 LOW_FUEL = 25
+--- The % left said with two buzzes: half the pack is gone.
+local HALF = 50
 --- The low-cell alarm, in place of the model's (L15, now off): a 3S pack pulled hard dips under 3.30 V a cell for a
 -- second or two at a time, too short for a switch that waits for 5 s in a row. So the seconds a cell spends under
 -- SAG_CELL while drawing LOAD amps or more add up, fading by SAG_FADE (a dip 20 s ago counts a tenth), and past
@@ -1764,8 +1766,8 @@ local function buzz(times, length)
     end
 end
 --- What runs whether the screen shows or not: a new pack starts the checks again; once its voltage settles, the charge
--- it starts with (100% from 4.10 V a cell) and the not-full warning; the % left said at each 10% below that (5%
--- last, then empty); the low-cell alarm, and three buzzes every 15 s while the motor runs on a pack
+-- it starts with (100% from 4.10 V a cell) and the not-full warning; the % left said at each 10% below that (50%
+-- with two buzzes, 5% last, then empty); the low-cell alarm, and three buzzes every 15 s while the motor runs on a pack
 -- under LOW_FUEL % (a call said over the rotor is easy to miss, a buzz in the hands is not).
 local function follow(widget)
     local volts = getValue("VFAS")
@@ -1807,6 +1809,9 @@ local function follow(widget)
     if step < widget.said and left < widget.said then
         widget.said = step
         playFile((SOUNDS .. (step == 0 and "BatNo" or ("Bat" .. tostring(step)) .. "L")) .. ".wav")
+        if step == HALF then
+            buzz(2, 15)
+        end
     end
     local running = getValue("sa") == 1024 and getValue("sf") == -1024
     if running and left < LOW_FUEL and now - widget.lowAt >= ALARM_EVERY then

@@ -123,6 +123,8 @@ const TELE_LIGHT = 5;
 /** Under this a cell is not full when plugged in (mAhRe's level), and the % left that lights LOW BATT. */
 const FULL_CELL = 4.0;
 const LOW_FUEL = 25;
+/** The % left said with two buzzes: half the pack is gone. */
+const HALF = 50;
 /**
  * The low-cell alarm, in place of the model's (L15, now off): a 3S pack pulled hard dips under 3.30 V a cell for a
  * second or two at a time, too short for a switch that waits for 5 s in a row. So the seconds a cell spends under
@@ -259,8 +261,8 @@ function buzz(times: number, length: number): void {
 
 /**
  * What runs whether the screen shows or not: a new pack starts the checks again; once its voltage settles, the charge
- * it starts with (100% from 4.10 V a cell) and the not-full warning; the % left said at each 10% below that (5%
- * last, then empty); the low-cell alarm, and three buzzes every 15 s while the motor runs on a pack
+ * it starts with (100% from 4.10 V a cell) and the not-full warning; the % left said at each 10% below that (50%
+ * with two buzzes, 5% last, then empty); the low-cell alarm, and three buzzes every 15 s while the motor runs on a pack
  * under LOW_FUEL % (a call said over the rotor is easy to miss, a buzz in the hands is not).
  */
 function follow(widget: Widget): void {
@@ -303,6 +305,8 @@ function follow(widget: Widget): void {
   if (step < widget.said && left < widget.said) {
     widget.said = step;
     playFile(`${SOUNDS}${step === 0 ? 'BatNo' : `Bat${step}L`}.wav`);
+    // Half the pack gone: a buzz in the hands too, as the call is easy to miss over the rotor.
+    if (step === HALF) buzz(2, 15);
   }
   const running = getValue('sa') === 1024 && getValue('sf') === -1024;
   if (running && left < LOW_FUEL && now - widget.lowAt >= ALARM_EVERY) {
@@ -739,9 +743,25 @@ function objects(widget: Widget): LvglObject[] {
   const list: LvglObject[] = [
     // The panel's fixed parts, grey, or dark red while live (armed, throttle on: the motor can spin), on full rates.
     {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/Cockpit/panel.png'},
-    {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/Cockpit/panel-live.png', visible: () => view.live && !view.practice},
+    {
+      type: 'image',
+      x: 0,
+      y: 0,
+      w: 480,
+      h: 227,
+      file: '/WIDGETS/Cockpit/panel-live.png',
+      visible: () => view.live && !view.practice,
+    },
     // Dark blue on practice rates (SG up), live or not: the whole screen says which rates fly.
-    {type: 'image', x: 0, y: 0, w: 480, h: 227, file: '/WIDGETS/Cockpit/panel-practice.png', visible: () => view.practice},
+    {
+      type: 'image',
+      x: 0,
+      y: 0,
+      w: 480,
+      h: 227,
+      file: '/WIDGETS/Cockpit/panel-practice.png',
+      visible: () => view.practice,
+    },
   ];
 
   // The warning lights: their boxes are in the panel picture, dark; a lit light fills its own.
