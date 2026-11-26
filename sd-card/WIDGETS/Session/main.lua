@@ -1,7 +1,7 @@
 local ____exports = {}
 local name = "Session"
 --- Today at the field: the packs flown and the time in the air. A pack counts when a new one powers the receiver (not
--- when telemetry comes back after a dropout), the air time while it draws over 2 A. Kept in the model's global
+-- when telemetry comes back after a dropout, even one before take-off), the air time while it draws over 2 A. Kept in the model's global
 -- variables 1 to 3 so a power cycle keeps them (mAhRe reads GV6 and GV7); a new day starts at zero.
 local options = {}
 local DRIVEN_AMPS = 2
@@ -14,11 +14,15 @@ local SETTLE = 300
 --- A new pack: its voltage back after none with the mAh count at 0. The model resets the count only when telemetry
 -- stops while disarmed (SA), so a dropout in flight is not a new pack.
 local NEW_PACK_MAH = 5
+--- And gone at least this long (ticks of 10 ms): a pack swap takes longer. A dropout before take-off has no mAh to tell
+-- it apart (26 Nov 2026: 6 s gone in hold counted a second pack).
+local SWAP = 1500
 local function create(zone)
     return {
         zone = zone,
         powered = false,
         poweredSince = 0,
+        lostSince = -1,
         lastTime = getTime()
     }
 end
@@ -61,7 +65,11 @@ local function draw(widget, width, height)
     widget.lastTime = now
     local powered = getValue("VFAS") > 0.5
     if powered and not widget.powered then
-        widget.poweredSince = getValue("mAh") < NEW_PACK_MAH and now or -1
+        local swapped = widget.lostSince < 0 or now - widget.lostSince >= SWAP
+        widget.poweredSince = swapped and getValue("mAh") < NEW_PACK_MAH and now or -1
+    end
+    if not powered and widget.powered then
+        widget.lostSince = now
     end
     if powered and widget.poweredSince >= 0 and now - widget.poweredSince >= SETTLE then
         model.setGlobalVariable(

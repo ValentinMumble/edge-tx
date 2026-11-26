@@ -5,3 +5,28 @@ K110S, before flying
 =SA safe, SF on hold
 =SE on the idle up to take off in
 =Tilt it: the swash fights back
+
+CALIBRATION FLIGHT, its first
+The sim guesses its numbers from
+the M2 EVO's. This measures them.
+SB down starts a mark, SB up ends
+it. One move a mark, SB up after
+each. Gone wrong: SB down-up twice.
+A full pack, SG down.
+
+Tail-in, hover at about 3 m
+1 IU1, SB down, hover 10 s,
+  hands still, SB up
+2 IU2, wait 3 s, step 1 again
+3 SB down, rudder fully right and
+  held, 3 turns counted, let go,
+  SB up
+4 Step 3 with left rudder
+5 No speed, 5 m or higher, IU2
+6 SB down, full back stick, one
+  flip, level, SB up. Three times.
+7 Step 6 with full right aileron
+8 Last minute, IU1: step 1
+9 Land, type its resting volts.
+  Tell Claude if a count was
+  not 3 turns.

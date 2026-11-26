@@ -2,12 +2,12 @@ const name = 'Session';
 
 /**
  * Today at the field: the packs flown and the time in the air. A pack counts when a new one powers the receiver (not
- * when telemetry comes back after a dropout), the air time while it draws over 2 A. Kept in the model's global
+ * when telemetry comes back after a dropout, even one before take-off), the air time while it draws over 2 A. Kept in the model's global
  * variables 1 to 3 so a power cycle keeps them (mAhRe reads GV6 and GV7); a new day starts at zero.
  */
 const options: any[] = [];
 
-type Widget = {zone: Zone; powered: boolean; poweredSince: number; lastTime: number};
+type Widget = {zone: Zone; powered: boolean; poweredSince: number; lostSince: number; lastTime: number};
 
 const DRIVEN_AMPS = 2;
 /** The global variables it keeps its count in: the day, the packs, the air time in tens of seconds. */
@@ -21,9 +21,14 @@ const SETTLE = 300;
  * stops while disarmed (SA), so a dropout in flight is not a new pack.
  */
 const NEW_PACK_MAH = 5;
+/**
+ * And gone at least this long (ticks of 10 ms): a pack swap takes longer. A dropout before take-off has no mAh to tell
+ * it apart (26 Nov 2026: 6 s gone in hold counted a second pack).
+ */
+const SWAP = 1500;
 
 function create(zone: Zone): Widget {
-  return {zone, powered: false, poweredSince: 0, lastTime: getTime()};
+  return {zone, powered: false, poweredSince: 0, lostSince: -1, lastTime: getTime()};
 }
 
 function update(): void {}
@@ -46,8 +51,13 @@ function draw(widget: Widget, width: number, height: number): void {
   widget.lastTime = now;
 
   const powered = getValue('VFAS') > 0.5;
-  if (powered && !widget.powered) widget.poweredSince = getValue('mAh') < NEW_PACK_MAH ? now : -1;
-  // Counted once settled; a pack powered when the radio starts counts as well.
+  // A pack powered when the widget starts (lostSince -1) counts as well.
+  if (powered && !widget.powered) {
+    const swapped = widget.lostSince < 0 || now - widget.lostSince >= SWAP;
+    widget.poweredSince = swapped && getValue('mAh') < NEW_PACK_MAH ? now : -1;
+  }
+  if (!powered && widget.powered) widget.lostSince = now;
+  // Counted once settled.
   if (powered && widget.poweredSince >= 0 && now - widget.poweredSince >= SETTLE) {
     model.setGlobalVariable(PACKS, 0, model.getGlobalVariable(PACKS, 0) + 1);
     widget.poweredSince = -1;

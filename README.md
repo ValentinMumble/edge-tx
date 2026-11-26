@@ -69,7 +69,8 @@ out of git (`backups/`, `update-2.12.5/`).
   checks (pack not full, cells apart) start again on each new pack instead of on a reset switch.
 
 Pack, FlyTimer, Power, Session and mAhRe start again on a new pack: its voltage back with the mAh count at 0. The
-models reset that count only when telemetry stops while disarmed, so a telemetry dropout in flight is not a new pack.
+models reset that count only when telemetry stops while disarmed, so a telemetry dropout in flight is not a new pack;
+Session also wants it gone 15 s, so a dropout before take-off is not counted either.
 
 **The K110S** (`model21.yml`, Futaba S-FHSS, no telemetry), switched as the M2 EVO: SA down arms, SF holds, SC down
 is 6G (self-level, else 3D), SE picks the idle up: IU1 (up) Low RPM (a steady 55%, 60 at the stick's ends; soft pitch,
@@ -103,7 +104,7 @@ when the card has none (`k110s_model.py`), its IU1 made Low RPM and SB freed (`k
 of motor on (`k110s_log.py`), its one cockpit screen (`k110s_screen.py`) and its picture cut out as the M2 EVO's
 (`k110s_picture.py`), the M2 EVO's failsafe cutting the motor on a lost link while the rest holds
 (`m2evo_failsafe.py`), each model's pre-flight checklist as its notes, no longer shown when it loads (`sd-card/MODELS/M2_EVO.txt`
-and `K110S.txt`, `checklists.py` then `checklists_off.py`; the M2 EVO's also holds the sim's calibration flight plan, for now), the inactivity alarm after 10 minutes untouched (`inactivity_alarm.py`), and practice
+and `K110S.txt`, `checklists.py` then `checklists_off.py`; each also holds its sim calibration flight plan, for now), the inactivity alarm after 10 minutes untouched (`inactivity_alarm.py`), and practice
 rates on SG up (moved from SD, `practice_on_sg.py`, then to SG up, `practice_sg_up.py`, easier to flip back to land; SG wanted down at start-up, `sg_warning.py`; "low rates" said on arming with SG up, `practice_arm_warning.py`) for soft landings on both models: cyclic 55 %, rudder 65 % (`practice_lower.py`, from 70 and 80), a gentler pitch curve CPP keeping the hover
 pitch where it is (-3° to +8°, 25 % gentler since 25 Nov 2026, `practice_pitch_gentler.py`; Low RPM keeping its own), "low rates" said, the whole cockpit dark blue, a blue frame and PRACTICE with its rate (the Prac lines' weight) on the cockpits
 (`practice_rates.py`), and the K110S's Low RPM pitch hovering at mid stick, 30 % gentler (`k110s_low_pitch.py`). Then it

@@ -7,21 +7,27 @@ M2 EVO, before flying
 =SA safe, SF on hold
 =Tilt it: the swash fights back
 
-CALIBRATION FLIGHT, the missing steps
-SB down starts a mark, SB up ends it.
-Gone wrong: SB down-up twice, redo it.
+CALIBRATION FLIGHT, the tail
+25 Nov: the rudder never stayed at
+full stick, so redo it like this.
+SB down starts a mark, SB up ends
+it. One move a mark, SB up after
+each. Gone wrong: SB down-up twice.
 A full 700 or 750 mAh pack.
-Before: S1 mid, SG SC SB up.
+Before: S1 mid, SC SB up, SG down
+(normal rates, not practice).
 
-PACK 3: tail-in, hover at about 7 m
-1 IU3, wait 3 s
-2 SB down, hover 10 s, keep the
-  height still, SB up
-3 IU2, wait 3 s
-4 SB down, full right rudder,
-  two turns, tail stopped, SB up
-5 Step 4 with left rudder
-6 No speed, 7 m or higher
-7 SB down, back flip, half stick,
-  level again, SB up. Three times.
-8 Land
+Tail-in, hover at about 7 m, IU2
+1 SB down, hover 10 s, hands
+  still, SB up
+2 SB down, rudder fully right and
+  held, 3 turns counted, let go,
+  SB up
+3 Step 2 with left rudder
+4 No speed, 7 m or higher
+5 SB down, back flip at half
+  stick, level, SB up. Three
+  times, each its own mark.
+6 Last minute of the pack: step 1
+7 Land. Tell Claude if a count
+  was not 3 turns.
