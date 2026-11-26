@@ -652,15 +652,15 @@ points:
    4:
       val: 20
    5:
-      val: 50
+      val: 40
    6:
-      val: 40
+      val: 30
    7:
-      val: 40
+      val: 30
    8:
-      val: 40
+      val: 30
    9:
-      val: 50
+      val: 40
    10:
       val: 90
    11:
@@ -692,15 +692,15 @@ points:
    24:
       val: 64
    25:
-      val: -70
+      val: -52
    26:
-      val: -20
+      val: -14
    27:
-      val: 10
+      val: 17
    28:
       val: 40
    29:
-      val: 70
+      val: 60
    30:
       val: -90
    31:

@@ -38,7 +38,7 @@ out of git (`backups/`, `update-2.12.5/`).
   spin, LEVEL lights blue, RESCUE and TELE white on dark red, a green dot in TELE's box while telemetry comes in. Built from EdgeTX's LVGL objects, so the radio redraws
   only what changes, and the screen keeps up at 20 frames a second (EdgeTX's most).
 - **K110Cockpit:** the K110S's whole screen, laid out as the Cockpit so nothing moves when switching models: the
-  same lights (LEVEL in 6G; RESCUE while SH is held; TELE stays dark; LOW BATT under 30 s left on the Pack timer; "battery 50 %" and two buzzes past half of it), quadrant
+  same lights (LEVEL in 6G; RESCUE while SH is held; TELE stays dark; LOW BATT under 30 s left on the Pack timer; "battery 50 %" and two buzzes at 3:30 flown, when its resting volts say a pack is half used), quadrant
   (detents LOW, IU2, IU3 at their curves' mid stick throttle) and collective, the Pack timer as the fuel gauge (the time
   left, how fast it counts now, the XK pack the 6-position buttons pick under it), the data plate (1S), the throttle curves in the pitch curve's box
   (Low RPM, IU2, IU3, the one on SE lit green with a dot at the stick) and that idle up's pitch curve over them in blue
@@ -74,7 +74,7 @@ Session also wants it gone 15 s, so a dropout before take-off is not counted eit
 
 **The K110S** (`model21.yml`, Futaba S-FHSS, no telemetry), switched as the M2 EVO: SA down arms, SF holds, SC down
 is 6G (self-level, else 3D), SE picks the idle up: IU1 (up) Low RPM (a steady 55%, 60 at the stick's ends; soft pitch,
-CPL, -80% to +48%, hovering at about +12% stick), IU2 70% (pitch CP2, ±70%), IU3 90% (pitch CP3, ±90%), each throttle a gentle V and every idle up
+CPL, -80% to +48%, hovering at about +12% stick), IU2 65% (70 at the ends; pitch CP2, -52% to +60%, gentle around a hover at IU1's stick, so switching does not sink it, `k110s_iu2_softer.py`), IU3 90% (pitch CP3, ±90%), each throttle a gentle V and every idle up
 hovering at about +25% stick (`k110s_low_speed.py`, `k110s_low_pitch.py`, `k110s_low_inverted.py`, `k110s_low_hover.py`,
 `k110s_low_softer.py`, `k110s_low_centre.py`, `k110s_iu2_power.py`, `k110s_iu2_lower.py`, `k110s_low_lower.py`, `k110s_idle_pitch.py`). SB does nothing. SH held is a rescue, built
 as the M2 EVO's: 6G, the pitch flat, then +40% after 0.1 s (`k110s_rescue.py`, `k110s_rescue_softer.py`). Its failsafe: No pulses (`k110s_failsafe.py`). Its Pack timer counts down 4:00 of

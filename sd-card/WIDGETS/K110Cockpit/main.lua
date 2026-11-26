@@ -1589,8 +1589,11 @@ local options = {{
 MODES = {{word = "LOW", curve = "Low", fallback = 55, pitch = "CPL"}, {word = "IU2", curve = "IU2", fallback = 70, pitch = "CP2"}, {word = "IU3", curve = "IU3", fallback = 90, pitch = "CP3"}}
 PACKS = {"XK 1", "XK 2", "XK 3"}
 PACK_MAH = 450
---- mAhRe's battery calls, as the Cockpit says them on the M2 EVO: "battery 50 %" once the Pack timer is past half.
+--- mAhRe's battery calls, as the Cockpit says them on the M2 EVO: "battery 50 %" at HALF_FLOWN.
 local HALF_SOUND = "/WIDGETS/mAhRe/sounds/Bat50L.wav"
+--- Seconds flown (on the Pack timer) when a pack is half used: its resting volts after landing, 8 packs on 24 to 26 Nov
+-- 2026, used 10.6 to 15.3 % a minute of flying, half by about 3:20 flown hard and 4:30 gently.
+local HALF_FLOWN = 210
 LOW_TIME = 30
 rgb = function(color) return lcd.RGB(color) end
 INK = rgb(15330543)
@@ -1692,13 +1695,13 @@ local function create(zone, options)
     update(widget, options)
     return widget
 end
---- What runs whether the screen shows or not: once the Pack timer is past half its time, "battery 50 %" and two
+--- What runs whether the screen shows or not: once the Pack timer has counted HALF_FLOWN, "battery 50 %" and two
 -- buzzes, as on the Cockpit; a reset timer (disarmed: a new pack) says it again.
 local function follow(widget)
     local pack = model.getTimer(0)
     local start = (pack and pack.start or 0) > 0 and (pack and pack.start) or 240
     local left = pack and pack.value or start
-    if left > start / 2 then
+    if start - left < HALF_FLOWN then
         widget.halfSaid = false
     elseif not widget.halfSaid then
         widget.halfSaid = true

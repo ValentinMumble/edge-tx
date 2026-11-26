@@ -109,8 +109,13 @@ const MODES: Mode[] = [
 /** The packs by 6-position button, as Flightdown has them for the K110S: the three XK 1S 450 mAh on 1, 2 and 3. */
 const PACKS = ['XK 1', 'XK 2', 'XK 3'];
 const PACK_MAH = 450;
-/** mAhRe's battery calls, as the Cockpit says them on the M2 EVO: "battery 50 %" once the Pack timer is past half. */
+/** mAhRe's battery calls, as the Cockpit says them on the M2 EVO: "battery 50 %" at HALF_FLOWN. */
 const HALF_SOUND = '/WIDGETS/mAhRe/sounds/Bat50L.wav';
+/**
+ * Seconds flown (on the Pack timer) when a pack is half used: its resting volts after landing, 8 packs on 24 to 26 Nov
+ * 2026, used 10.6 to 15.3 % a minute of flying, half by about 3:20 flown hard and 4:30 gently.
+ */
+const HALF_FLOWN = 210;
 /** Under this many seconds left on the Pack timer, LOW BATT lights (it has no telemetry to tell). */
 const LOW_TIME = 30;
 
@@ -1085,14 +1090,14 @@ function practiceRate() {
 }
 
 /**
- * What runs whether the screen shows or not: once the Pack timer is past half its time, "battery 50 %" and two
+ * What runs whether the screen shows or not: once the Pack timer has counted HALF_FLOWN, "battery 50 %" and two
  * buzzes, as on the Cockpit; a reset timer (disarmed: a new pack) says it again.
  */
 function follow(widget: Widget): void {
   const pack = model.getTimer(0);
   const start = (pack?.start ?? 0) > 0 ? (pack?.start as number) : 240;
   const left = pack?.value ?? start;
-  if (left > start / 2) {
+  if (start - left < HALF_FLOWN) {
     widget.halfSaid = false;
   } else if (!widget.halfSaid) {
     widget.halfSaid = true;
